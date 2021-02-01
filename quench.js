@@ -32,28 +32,30 @@ class Quench {
     constructor(mocha, chai) {
         this.mocha = mocha;
         this.chai = chai;
-
         this.mocha._cleanReferencesAfterRun = false;
-
-        this.fixtures = [];
-
+        this.fixtures = new Map();
         this.app = new QuenchResults(this);
     }
 
-    registerTestFixture(name, fn) {
-        this.fixtures.push({ name, fn });
+    registerTestFixture(name, fn, { displayName=null }={}) {
+        if (this.fixtures.has(name)) {
+            ui.notifications.warn(`QUENCH: Test fixture "${name}" already exists. Overwriting...`);
+        }
+        this.fixtures.set(name, { displayName: displayName ?? name, fn });
         this.app.render(false);
     }
 
     async runSelectedFixtures(fixtures) {
+        // Cleanup
         this.mocha.suite.dispose();
+        this.app.clear();
+
         this.mocha.setup({
             ui: "bdd",
             reporter: "quench",
         });
 
-        this.app.clear();
-
+        // Prepare context methods to be provided to test fixtures
         const { after, afterEach, before, beforeEach, describe, it, utils } = this.mocha.Mocha;
         const { assert } = this.chai;
         const context = {
@@ -61,8 +63,9 @@ class Quench {
             assert,
         }
 
-        for (let suite of fixtures) {
-            await suite.fn(context);
+        // Register suites and tests for selected fixtures
+        for (let fixture of fixtures) {
+            await fixture.fn(context);
         }
 
         return this.mocha.run();

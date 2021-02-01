@@ -2,7 +2,7 @@
     <div id="mocha-suites">
         <ul>
             {{#each fixtures}}
-                <li><input name="{{@index}}" type="checkbox" /> <label for="{{@index}}">{{this.name}}</label></li>
+                <li><input name="{{this.name}}" type="checkbox" /> <label for="{{this.name}}">{{this.displayName}}</label></li>
             {{/each}}
         </ul>
     </div>

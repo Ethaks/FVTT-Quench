@@ -14,7 +14,13 @@ export default class QuenchResults extends Application {
 
     getData() {
         return {
-            fixtures: this.quench.fixtures
+            fixtures: Array.from(this.quench.fixtures.entries()).map(entry => {
+                const [ key, value ] = entry;
+                return {
+                    name: key,
+                    displayName: value.displayName,
+                }
+            }),
         }
     }
 
