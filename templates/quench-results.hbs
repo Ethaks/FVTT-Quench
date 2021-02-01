@@ -1,0 +1,12 @@
+<div>
+    <div id="mocha-suites">
+        <ul>
+            {{#each fixtures}}
+                <li><input name="{{@index}}" type="checkbox" /> <label for="{{@index}}">{{this.name}}</label></li>
+            {{/each}}
+        </ul>
+    </div>
+    <hr />
+    <div id="mocha"></div>
+    <button id="mocha-run">Run</button>
+</div>
