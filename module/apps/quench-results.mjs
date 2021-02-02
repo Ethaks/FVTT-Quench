@@ -6,6 +6,7 @@ export default class QuenchResults extends Application {
 
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
+            title: "QUENCH",
             id: "quench-results",
             width: 450,
             height: 600,

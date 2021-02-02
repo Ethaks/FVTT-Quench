@@ -46,9 +46,9 @@
 }
 
 #quench-results li > .expandable > .error-message {
-    margin-left: .4rem;
+    margin: .4em;
     background-color: #99000033;
-    padding: 1px 10px;
+    padding: 10px;
     border-radius: 4px;
     border: 1px #99000088 solid;
     font-family: monospace;
