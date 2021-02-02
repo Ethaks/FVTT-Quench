@@ -1,6 +1,7 @@
 {
   "QUENCH": {
     "Title": "QUENCH",
+    "Run": "Run",
     "StatsSummary": "Ran {quantity} tests in {duration}ms.",
     "StatsResults": "{passes}/{tests} tests passing."
   }

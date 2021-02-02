@@ -12,6 +12,7 @@
     background-color: #00000033;
     border-radius: 4px;
     margin: 2px 0;
+    font-weight: bold;
 }
 
 #sidebar .quench-button {
@@ -23,6 +24,7 @@
 #quench-results #quench-run {
     flex: 0;
     width: auto;
+    font-weight: bold;
 }
 
 #quench-results li.suite-group input[type="checkbox"] {

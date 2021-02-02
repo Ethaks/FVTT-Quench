@@ -227,7 +227,6 @@ export default class QuenchResults extends Application {
 
         const $container = this.element.find("#quench-results-stats");
         $container.append($stats);
-        $container.slideToggle(100);
-
+        $container.show();
     }
 }
