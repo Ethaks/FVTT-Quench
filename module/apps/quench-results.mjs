@@ -7,8 +7,9 @@ export default class QuenchResults extends Application {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             id: "quench-results",
-            width: 600,
+            width: 450,
             height: 600,
+            resizable: true,
             template: "/modules/quench/templates/quench-results.hbs",
         });
     }
@@ -94,28 +95,45 @@ export default class QuenchResults extends Application {
     }
 
     _findOrMakeChildList($parentListEl) {
-        let $childList = $parentListEl.find(`> ul.runnable-list`);
+        const $expandable = $parentListEl.find(`> div.expandable`);
+        let $childList = $expandable.find(`> ul.runnable-list`);
         if (!$childList.length) {
             $childList = $(`<ul class="runnable-list">`);
-            $parentListEl.append($childList);
+            $expandable.append($childList);
         }
 
-        return $childList
+        return $childList;
     }
 
     _makePendingLineItem(title, id, isTest) {
         const type = isTest ? "test" : "suite";
-        const typeIcon = isTest ? "fa-flask" : "fa-folder"
+        const typeIcon = isTest ? "fa-flask" : "fa-folder";
+        const expanderIcon = isTest ? "fa-caret-right" : "fa-caret-down";
         const $li = $(`
             <li class="${type}" data-${type}-id="${id}">
                 <span class="summary">
-                    <i class="expander fas fa-caret-down"></i>
+                    <i class="expander fas ${expanderIcon}" data-expand-target="${id}"></i></button>
                     <i class="status-icon"></i>
                     <i class="type-icon fas ${typeIcon}"></i>
                     <span class="runnable-title">${title}</span>
                 </span>
+                <div class="expandable" data-expand-id="${id}"></div>
             </li>
         `);
+
+        const $expander = $li.find("> .summary > .expander");
+        const $expandable = $li.find("> .expandable");
+        if (isTest) $expandable.hide();
+
+        $expander.click(() => {
+            $expander.removeClass("fa-caret-down");
+            $expander.removeClass("fa-caret-right");
+            const expanded = $expandable.is(":visible");
+            const newIcon = expanded ? "fa-caret-right" : "fa-caret-down";
+            $expander.addClass(newIcon);
+            $expandable.slideToggle(50);
+        });
+
         this._updateLineItemStatus($li, QuenchResults.STATE.PENDING);
         return $li;
     }
@@ -181,7 +199,7 @@ export default class QuenchResults extends Application {
     handleTestFail(test, err) {
         console.log("Test end (fail)", arguments);
         const $testLi = this.element.find(`li.test[data-test-id=${test.id}]`);
-        $testLi.find("> .summary").append(`<span class="error-message">${err.message}</span>`);
+        $testLi.find("> .expandable").append(`<div class="error-message">${err.message}</div>`);
         this._updateLineItemStatus($testLi, QuenchResults._getTestState(test));
     }
 

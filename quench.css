@@ -1,6 +1,8 @@
 #quench-results #quench-suite-groups {
-    flex: 1;
+    flex: 1 0 0;
     font-size: .9rem;
+    overflow: auto;
+    white-space: nowrap;
 }
 
 #quench-results #quench-run {
@@ -14,8 +16,16 @@
 
 #quench-results ul {
     list-style-type: none;
+    margin: .15em;
     padding-left: .75em;
-    margin: .25em 0;
+}
+
+#quench-results li.suite-group > .expandable > ul.runnable-list {
+    margin-left: 11px;
+}
+
+#quench-results ul.runnable-list {
+    border-left: 1.5px #00000033 dotted;
 }
 
 #quench-results #quench-suite-groups > ul {
@@ -27,12 +37,15 @@
     font-weight: bold;
 }
 
-#quench-results li > .summary > .error-message,
-#quench-results li > .summary > .status-icon {
+#quench-results li > .summary > .status-icon:not(".fa-sync") {
     font-weight: normal;
 }
 
-#quench-results li > .summary > .error-message {
+#quench-results li > .expandable {
+    white-space: normal;
+}
+
+#quench-results li > .expandable > .error-message {
     margin-left: .4rem;
     background-color: #99000033;
     padding: 1px 10px;
@@ -40,12 +53,16 @@
     border: 1px #99000088 solid;
     font-family: monospace;
     font-size: .7rem;
-    vertical-align: middle;
 }
 
 #quench-results .type-icon {
     width: 15px;
     max-width: 15px;
+}
+
+#quench-results .expander {
+    width: 10px;
+    cursor: pointer;
 }
 
 #quench-results .summary > i.status-icon.fa-times-circle {
