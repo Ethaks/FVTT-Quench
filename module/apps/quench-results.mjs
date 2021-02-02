@@ -93,11 +93,10 @@ export default class QuenchResults extends Application {
         return allSuitesSucceed ? QuenchResults.STATE.SUCCESS : QuenchResults.STATE.FAILURE;
     }
 
-    _findOrMakeChildList($parentListEl, isTest) {
-        const style = isTest ? "test-list" : "suite-list";
-        let $childList = $parentListEl.find(`ul.${style}`);
+    _findOrMakeChildList($parentListEl) {
+        let $childList = $parentListEl.find(`> ul.runnable-list`);
         if (!$childList.length) {
-            $childList = $(`<ul class="${style}">`);
+            $childList = $(`<ul class="runnable-list">`);
             $parentListEl.append($childList);
         }
 
@@ -106,13 +105,23 @@ export default class QuenchResults extends Application {
 
     _makePendingLineItem(title, id, isTest) {
         const type = isTest ? "test" : "suite";
-        const $li = $(`<li class="${type}" data-${type}-id="${id}"><i class="status-icon"></i>${title}</li>`);
+        const typeIcon = isTest ? "fa-flask" : "fa-folder"
+        const $li = $(`
+            <li class="${type}" data-${type}-id="${id}">
+                <span class="summary">
+                    <i class="expander fas fa-caret-down"></i>
+                    <i class="status-icon"></i>
+                    <i class="type-icon fas ${typeIcon}"></i>
+                    <span class="runnable-title">${title}</span>
+                </span>
+            </li>
+        `);
         this._updateLineItemStatus($li, QuenchResults.STATE.PENDING);
         return $li;
     }
 
     _updateLineItemStatus($listEl, state) {
-        const $icon = $listEl.find("i.status-icon");
+        const $icon = $listEl.find("> .summary > i.status-icon");
         let icon = "fa-sync";
         let style = "fas";
         switch (state) {
@@ -126,7 +135,7 @@ export default class QuenchResults extends Application {
                 break;
         }
         $icon.removeClass();
-        $icon.addClass(`status-icon far ${icon}`);
+        $icon.addClass(`status-icon ${style} ${icon}`);
     }
 
     /*--------------------------------*/
@@ -138,8 +147,14 @@ export default class QuenchResults extends Application {
         const suiteGroupKey = suite._quench_parentGroup;
         if (!suiteGroupKey) return;
 
+        const parentId = suite.parent.id;
+
         const $groupLi = this.element.find(`li.suite-group[data-suite-group=${suiteGroupKey}`);
-        let $childSuiteList = this._findOrMakeChildList($groupLi, false);
+        let $parentLi = $groupLi.find(`li.suite[data-suite-id=${parentId}]`);
+
+        if (!$parentLi.length) $parentLi = $groupLi;
+
+        let $childSuiteList = this._findOrMakeChildList($parentLi);
         $childSuiteList.append(this._makePendingLineItem(suite.title, suite.id, false));
     }
 
@@ -153,7 +168,7 @@ export default class QuenchResults extends Application {
         console.log("Test begin", arguments);
         const parentId = test.parent.id;
         const $parentLi = this.element.find(`li.suite[data-suite-id=${parentId}]`);
-        const $childTestList = this._findOrMakeChildList($parentLi, true);
+        const $childTestList = this._findOrMakeChildList($parentLi);
         $childTestList.append(this._makePendingLineItem(test.title, test.id, true));
     }
 
@@ -166,6 +181,7 @@ export default class QuenchResults extends Application {
     handleTestFail(test, err) {
         console.log("Test end (fail)", arguments);
         const $testLi = this.element.find(`li.test[data-test-id=${test.id}]`);
+        $testLi.find("> .summary").append(`<span class="error-message">${err.message}</span>`);
         this._updateLineItemStatus($testLi, QuenchResults._getTestState(test));
     }
 
