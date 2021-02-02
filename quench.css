@@ -5,6 +5,21 @@
     white-space: nowrap;
 }
 
+#quench-results .suite-group > label {
+    width: 100%;
+    display: block;
+    border: 1px #00000055 solid;
+    background-color: #00000033;
+    border-radius: 4px;
+    margin: 2px 0;
+}
+
+#sidebar .quench-button {
+    flex: 0;
+    margin: 5px;
+    width: auto;
+}
+
 #quench-results #quench-run {
     flex: 0;
 }
@@ -53,6 +68,7 @@
     border: 1px #99000088 solid;
     font-family: monospace;
     font-size: .7rem;
+    user-select: text;
 }
 
 #quench-results .type-icon {
