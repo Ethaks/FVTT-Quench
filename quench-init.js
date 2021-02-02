@@ -1,6 +1,9 @@
 import QuenchReporter from "./module/quench-reporter.mjs";
 import Quench from "./module/quench.mjs";
 
+/**
+ * Sets up Quench and its dependencies
+ */
 async function quenchInit() {
     // Cache the current state of globalThis and overwrite it with a blank object temporarily to make sure mocha doesn't absorb Foundry globals
     const oldGlobal = globalThis;
@@ -14,7 +17,12 @@ async function quenchInit() {
         location: oldGlobal.location,
         document: oldGlobal.document,
     };
-    await import("https://unpkg.com/mocha/mocha.js");
+    try {
+        await import("https://unpkg.com/mocha/mocha.js");
+    } catch (e) {
+        console.error("Quench failed to import mocha.js", e);
+        return;
+    }
 
     // Cache the mocha and chai globals added by the above imports, then restore the previous state of globalThis
     const mocha = globalThis.mocha;
@@ -29,4 +37,18 @@ async function quenchInit() {
     Hooks.callAll("quenchReady", this);
 }
 quenchInit();
+
+/**
+ * Inject QUENCH button in sidebar
+ */
+Hooks.on("renderSidebar", function(sidebar, html, options) {
+    console.log("Rendering sidebar!", arguments);
+    const $quenchButton = $(`<button class="quench-button"><b>QUENCH</b></button>`);
+
+    $quenchButton.click(function onClick() {
+        quench.app.render(true);
+    });
+
+    html.append($quenchButton);
+});
 

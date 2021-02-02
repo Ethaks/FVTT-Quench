@@ -6,8 +6,7 @@
   "author": "Cole Schultz (cole#9640)",
   "esmodules": [
     "https://unpkg.com/chai/chai.js",
-    "./quench-init.js",
-    "./quench-button.js"
+    "./quench-init.js"
   ],
   "styles": [
     "quench.css"
