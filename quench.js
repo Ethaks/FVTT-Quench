@@ -26,6 +26,7 @@ async function quenchInit() {
     mocha.Mocha.reporters.Quench = mocha.Mocha.reporters.quench = QuenchReporter;
 
     globalThis.quench = new Quench(mocha, chai);
+    Hooks.callAll("quenchReady", this);
 }
 quenchInit();
 
