@@ -5,3 +5,12 @@
 #quench-results #quench-run {
     flex: 0;
 }
+
+#quench-results i.status-icon.fa-times-circle {
+    color: #990000;
+}
+
+#quench-results i.status-icon.fa-check-circle {
+    color: #009900;
+}
+

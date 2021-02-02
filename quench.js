@@ -43,7 +43,7 @@ class Quench {
             ui.notifications.warn(`QUENCH: Suite group "${name}" already exists. Overwriting...`);
         }
         this.suiteGroups.set(name, { displayName: displayName ?? name, fn });
-        this.app.render(false);
+        this.app.clear();
     }
 
     async runSelectedSuiteGroups(groupKeys) {
@@ -51,7 +51,7 @@ class Quench {
         const Mocha = this.mocha.Mocha;
         Mocha.suite = this.mocha.suite =  new Mocha.Suite("__root", new Mocha.Context(), true);
 
-        this.app.clear();
+        await this.app.clear();
 
         // Initialize mocha with a quench reporter
         this.mocha.setup({
