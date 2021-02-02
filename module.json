@@ -4,6 +4,13 @@
   "description": "Harden your Foundry module or system code with end-to-end UI tests directly within Foundry. Powered by Mocha ",
   "version": "0.1.0",
   "author": "Cole Schultz (cole#9640)",
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
   "esmodules": [
     "https://unpkg.com/chai/chai.js",
     "./quench-init.js"

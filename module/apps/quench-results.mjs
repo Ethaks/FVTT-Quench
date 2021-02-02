@@ -6,7 +6,7 @@ export default class QuenchResults extends Application {
 
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
-            title: "QUENCH",
+            title: "QUENCH.Title",
             id: "quench-results",
             width: 450,
             height: 600,
@@ -212,8 +212,22 @@ export default class QuenchResults extends Application {
         this.element.find("#quench-run").prop("disabled", true);
     }
 
-    handleRunEnd() {
+    handleRunEnd(stats) {
         console.log("Run end", arguments);
         this.element.find("#quench-run").prop("disabled", false);
+
+        const style = stats.failures ? "stats-fail" : "stats-pass";
+
+        const $stats = $(`
+            <div class="stats">
+                <div>${game.i18n.format("QUENCH.StatsSummary", { quantity: stats.tests, duration: stats.duration })}</div>
+                <div class="${style}">${game.i18n.format("QUENCH.StatsResults", stats)}</div>
+            </div>
+        `);
+
+        const $container = this.element.find("#quench-results-stats");
+        $container.append($stats);
+        $container.slideToggle(100);
+
     }
 }

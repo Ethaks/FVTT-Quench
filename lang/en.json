@@ -1,0 +1,7 @@
+{
+  "QUENCH": {
+    "Title": "QUENCH",
+    "StatsSummary": "Ran {quantity} tests in {duration}ms.",
+    "StatsResults": "{passes}/{tests} tests passing."
+  }
+}

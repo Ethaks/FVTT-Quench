@@ -18,6 +18,8 @@ export default class QuenchReporter {
             .on(EVENT_TEST_BEGIN, app.handleTestBegin.bind(app))
             .on(EVENT_TEST_PASS, app.handleTestPass.bind(app))
             .on(EVENT_TEST_FAIL, app.handleTestFail.bind(app))
-            .once(EVENT_RUN_END, app.handleRunEnd.bind(app));
+            .once(EVENT_RUN_END, () => {
+                app.handleRunEnd(runner.stats);
+            });
     }
 }
