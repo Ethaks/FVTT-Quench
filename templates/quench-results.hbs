@@ -1,12 +1,12 @@
-<div>
-    <div id="mocha-suites">
-        <ul>
-            {{#each fixtures}}
-                <li><input name="{{this.name}}" type="checkbox" /> <label for="{{this.name}}">{{this.displayName}}</label></li>
+<div class="flexcol">
+    <div id="quench-suite-groups">
+        <ul id="quench-suite-groups-list">
+            {{#each suiteGroups}}
+                <li class="suite-group" data-suite-group="{{this.name}}">
+                    <input name="{{this.name}}" type="checkbox" /><label for="{{this.name}}">{{this.displayName}}</label>
+                </li>
             {{/each}}
         </ul>
     </div>
-    <hr />
-    <div id="mocha"></div>
-    <button id="mocha-run">Run</button>
+    <button id="quench-run">Run</button>
 </div>

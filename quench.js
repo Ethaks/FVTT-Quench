@@ -22,6 +22,7 @@ async function quenchInit() {
     delete oldGlobal.chai;
     globalThis = oldGlobal;
 
+    // Add the custom QuenchReporter to the Mocha class so that it can be used
     mocha.Mocha.reporters.Quench = mocha.Mocha.reporters.quench = QuenchReporter;
 
     globalThis.quench = new Quench(mocha, chai);
@@ -33,23 +34,26 @@ class Quench {
         this.mocha = mocha;
         this.chai = chai;
         this.mocha._cleanReferencesAfterRun = false;
-        this.fixtures = new Map();
+        this.suiteGroups = new Map();
         this.app = new QuenchResults(this);
     }
 
-    registerTestFixture(name, fn, { displayName=null }={}) {
-        if (this.fixtures.has(name)) {
-            ui.notifications.warn(`QUENCH: Test fixture "${name}" already exists. Overwriting...`);
+    registerSuiteGroup(name, fn, { displayName=null }={}) {
+        if (this.suiteGroups.has(name)) {
+            ui.notifications.warn(`QUENCH: Suite group "${name}" already exists. Overwriting...`);
         }
-        this.fixtures.set(name, { displayName: displayName ?? name, fn });
+        this.suiteGroups.set(name, { displayName: displayName ?? name, fn });
         this.app.render(false);
     }
 
-    async runSelectedFixtures(fixtures) {
-        // Cleanup
-        this.mocha.suite.dispose();
+    async runSelectedSuiteGroups(groupKeys) {
+        // Cleanup - create a new root suite and clear the state of the results application
+        const Mocha = this.mocha.Mocha;
+        Mocha.suite = this.mocha.suite =  new Mocha.Suite("__root", new Mocha.Context(), true);
+
         this.app.clear();
 
+        // Initialize mocha with a quench reporter
         this.mocha.setup({
             ui: "bdd",
             reporter: "quench",
@@ -58,14 +62,23 @@ class Quench {
         // Prepare context methods to be provided to test fixtures
         const { after, afterEach, before, beforeEach, describe, it, utils } = this.mocha.Mocha;
         const { assert } = this.chai;
+
         const context = {
-            after, afterEach, before, beforeEach, describe, it, utils,
+            after, afterEach, before, beforeEach, it, utils,
             assert,
         }
 
         // Register suites and tests for selected fixtures
-        for (let fixture of fixtures) {
-            await fixture.fn(context);
+        for (let key of groupKeys) {
+            // Override `describe` to add a property to the resulting suite indicating which quench suite group the suite belongs to.
+            context.describe = function quenchDescribe(...args) {
+                const suite = describe(...args);
+                suite._quench_parentGroup = key;
+                return suite;
+            };
+
+            // Call the suite registration function
+            await this.suiteGroups.get(key).fn(context);
         }
 
         return this.mocha.run();

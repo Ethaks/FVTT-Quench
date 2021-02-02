@@ -1,0 +1,7 @@
+#quench-results #quench-suite-groups {
+    flex: 1;
+}
+
+#quench-results #quench-run {
+    flex: 0;
+}
