@@ -32,7 +32,9 @@ export default class QuenchResults extends Application {
 
         const self = this;
         $html.find("#quench-run").click(async function (event) {
-            const enabledGroups = self._getCheckedGroups();
+            const enabledGroups = self._getCheckedGroups().reduce((acc, next) => {
+                return next.enabled ? [...acc, next.key] : acc;
+            }, []);
             await self.quench.runSelectedSuiteGroups(enabledGroups);
         });
     }
@@ -48,10 +50,12 @@ export default class QuenchResults extends Application {
             this._state = Application.RENDER_STATES.ERROR;
         }
 
-        const blah = this.element.find("#quench-suite-groups-list li").filter((i, el) => {
-            return checked.includes(el.dataset.suiteGroup);
+        this.element.find("#quench-suite-groups-list li.suite-group").each(function () {
+            const groupChecked = checked.find(sg => sg.key === this.dataset.suiteGroup);
+            if (groupChecked !== undefined) {
+                $(this).find("> label > input[type=checkbox]").prop("checked", groupChecked.enabled);
+            }
         });
-        blah.each((i, el) => $(el).find("input[type=checkbox]").prop("checked", true));
     }
 
     _getCheckedGroups() {
@@ -59,10 +63,9 @@ export default class QuenchResults extends Application {
         return $groupEls
             .map((i, el) => {
                 const enabled = $(el).find("input[type=checkbox]").prop("checked");
-                return enabled ? el.dataset.suiteGroup : null;
+                return { key: el.dataset.suiteGroup, enabled };
             })
-            .get()
-            .filter(sg => !!sg);
+            .get();
     }
 
     static STATE = {
