@@ -52,3 +52,17 @@ Hooks.on("renderSidebar", function(sidebar, html, options) {
     html.append($quenchButton);
 });
 
+/**
+ * Register settings
+ */
+Hooks.on("setup", () => {
+    game.settings.register("quench", "logTestDetails", {
+        name: "QUENCH.LogTestDetailsLabel",
+        hint: "QUENCH.LogTestDetailsHint",
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: false
+    });
+});
+

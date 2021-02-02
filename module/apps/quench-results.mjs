@@ -2,6 +2,8 @@ export default class QuenchResults extends Application {
     constructor(quench, options) {
         super(options);
         this.quench = quench;
+
+        this._indent = 0;
     }
 
     static get defaultOptions() {
@@ -9,7 +11,9 @@ export default class QuenchResults extends Application {
             title: "QUENCH.Title",
             id: "quench-results",
             width: 450,
-            height: 600,
+            height: window.innerHeight - 30,
+            top: 10,
+            left: window.innerWidth - 450 - 300 - 20,
             resizable: true,
             template: "/modules/quench/templates/quench-results.hbs",
         });
@@ -160,12 +164,24 @@ export default class QuenchResults extends Application {
         $icon.addClass(`status-icon ${style} ${icon}`);
     }
 
+    static _shouldLogTestDetails() {
+        return game.settings.get("quench", "logTestDetails");
+    }
+
+    _indentString() {
+        return new Array(this._indent).join("\t");
+    }
+
     /*--------------------------------*/
     /* Handle incoming test reporting */
     /*--------------------------------*/
 
     handleSuiteBegin(suite) {
-        console.log("Suite begin", arguments);
+        if (QuenchResults._shouldLogTestDetails()) {
+            this._indent++;
+            console.log(`${this._indentString()}Begin testing suite: ${suite.title}`);
+            console.log(`${this._indentString()}\t`, suite);
+        }
         const suiteGroupKey = suite._quench_parentGroup;
         if (!suiteGroupKey) return;
 
@@ -181,13 +197,15 @@ export default class QuenchResults extends Application {
     }
 
     handleSuiteEnd(suite) {
-        console.log("Suite end", arguments);
+        if (QuenchResults._shouldLogTestDetails()) this._indent--;
+
         const $suiteLi = this.element.find(`li.suite[data-suite-id=${suite.id}]`);
         this._updateLineItemStatus($suiteLi, QuenchResults._getSuiteState(suite));
     }
 
     handleTestBegin(test) {
-        console.log("Test begin", arguments);
+        if (QuenchResults._shouldLogTestDetails()) this._indent++;
+
         const parentId = test.parent.id;
         const $parentLi = this.element.find(`li.suite[data-suite-id=${parentId}]`);
         const $childTestList = this._findOrMakeChildList($parentLi);
@@ -195,25 +213,38 @@ export default class QuenchResults extends Application {
     }
 
     handleTestPass(test) {
-        console.log("Test end (pass)", arguments);
+        if (QuenchResults._shouldLogTestDetails()) {
+            console.log(`${this._indentString()}Test Complete: ${test.title} (PASS)`);
+            console.log(`${this._indentString()}\t`, test);
+            this._indent--;
+        }
+
         const $testLi = this.element.find(`li.test[data-test-id=${test.id}]`);
         this._updateLineItemStatus($testLi, QuenchResults._getTestState(test));
     }
 
     handleTestFail(test, err) {
-        console.log("Test end (fail)", arguments);
+        if (QuenchResults._shouldLogTestDetails()) {
+            console.log(`${this._indentString()}Test Complete: ${test.title} (FAIL)`);
+            console.log(`${this._indentString()}\t`, test);
+            console.log(`${this._indentString()}\t`, err);
+            this._indent--;
+        }
+
         const $testLi = this.element.find(`li.test[data-test-id=${test.id}]`);
         $testLi.find("> .expandable").append(`<div class="error-message">${err.message}</div>`);
         this._updateLineItemStatus($testLi, QuenchResults._getTestState(test));
     }
 
     handleRunBegin() {
-        console.log("Run start", arguments);
         this.element.find("#quench-run").prop("disabled", true);
     }
 
     handleRunEnd(stats) {
-        console.log("Run end", arguments);
+        if (QuenchResults._shouldLogTestDetails()) {
+            console.log("All tests complete.", stats);
+        }
+
         this.element.find("#quench-run").prop("disabled", false);
 
         const style = stats.failures ? "stats-fail" : "stats-pass";
