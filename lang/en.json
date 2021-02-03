@@ -3,6 +3,10 @@
     "Title": "QUENCH",
     "Run": "Run",
     "StatsSummary": "Ran {quantity} tests in {duration}ms.",
-    "StatsResults": "{passes}/{tests} tests passing."
+    "StatsResults": "{passes}/{tests} tests passing.",
+    "LogTestDetailsLabel": "Detailed Test Output",
+    "LogTestDetailsHint": "Print detailed test results in the console",
+    "ExampleTestsLabel": "Show Included Example Tests",
+    "ExampleTestsHint": "Show the included sample tests in the QUENCH window"
   }
 }

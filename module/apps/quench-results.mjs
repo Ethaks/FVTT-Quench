@@ -184,8 +184,8 @@ export default class QuenchResults extends Application {
 
         const parentId = suite.parent.id;
 
-        const $groupLi = this.element.find(`li.suite-group[data-suite-group=${suiteGroupKey}`);
-        let $parentLi = $groupLi.find(`li.suite[data-suite-id=${parentId}]`);
+        const $groupLi = this.element.find(`li.suite-group[data-suite-group="${suiteGroupKey}"]`);
+        let $parentLi = $groupLi.find(`li.suite[data-suite-id="${parentId}"]`);
 
         if (!$parentLi.length) $parentLi = $groupLi;
 
@@ -199,13 +199,13 @@ export default class QuenchResults extends Application {
             if (suite.parent.root) console.groupEnd();
         }
 
-        const $suiteLi = this.element.find(`li.suite[data-suite-id=${suite.id}]`);
+        const $suiteLi = this.element.find(`li.suite[data-suite-id="${suite.id}"]`);
         this._updateLineItemStatus($suiteLi, QuenchResults._getSuiteState(suite));
     }
 
     handleTestBegin(test) {
         const parentId = test.parent.id;
-        const $parentLi = this.element.find(`li.suite[data-suite-id=${parentId}]`);
+        const $parentLi = this.element.find(`li.suite[data-suite-id="${parentId}"]`);
         const $childTestList = this._findOrMakeChildList($parentLi);
         $childTestList.append(this._makePendingLineItem(test.title, test.id, true));
     }
@@ -215,7 +215,7 @@ export default class QuenchResults extends Application {
             console.log(`%c(PASS) Test Complete: ${test.title}`, "color: #33AA33", { test });
         }
 
-        const $testLi = this.element.find(`li.test[data-test-id=${test.id}]`);
+        const $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
         this._updateLineItemStatus($testLi, QuenchResults._getTestState(test));
     }
 
@@ -226,7 +226,7 @@ export default class QuenchResults extends Application {
             console.groupEnd();
         }
 
-        const $testLi = this.element.find(`li.test[data-test-id=${test.id}]`);
+        const $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
         $testLi.find("> .expandable").append(`<div class="error-message">${err.message}</div>`);
         this._updateLineItemStatus($testLi, QuenchResults._getTestState(test));
     }

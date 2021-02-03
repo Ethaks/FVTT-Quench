@@ -1,10 +1,16 @@
 import QuenchReporter from "./module/quench-reporter.mjs";
 import Quench from "./module/quench.mjs";
+import { quenchUtils } from "./module/utils/quench-utils.mjs";
+import {
+    registerBasicFailingSuiteGroup,
+    registerBasicPassingSuiteGroup,
+    registerNestedSuiteGroup,
+} from "./quench-tests/nonsense-tests.mjs";
 
 /**
  * Sets up Quench and its dependencies
  */
-async function quenchInit() {
+Hooks.on("init", async function quenchInit() {
     // Cache the current state of globalThis and overwrite it with a blank object temporarily to make sure mocha doesn't absorb Foundry globals
     const oldGlobal = globalThis;
     globalThis = {
@@ -33,10 +39,12 @@ async function quenchInit() {
     // Add the custom QuenchReporter to the Mocha class so that it can be used
     mocha.Mocha.reporters.Quench = mocha.Mocha.reporters.quench = QuenchReporter;
 
-    globalThis.quench = new Quench(mocha, chai);
-    Hooks.callAll("quenchReady", this);
-}
-quenchInit();
+    const quench = new Quench(mocha, chai);
+    quench.utils = quenchUtils;
+    globalThis.quench = quench;
+
+    Hooks.callAll("quenchReady", quench);
+});
 
 /**
  * Inject QUENCH button in sidebar
@@ -57,12 +65,33 @@ Hooks.on("renderSidebar", function(sidebar, html, options) {
  */
 Hooks.on("setup", () => {
     game.settings.register("quench", "logTestDetails", {
-        name: "QUENCH.LogTestDetailsLabel",
-        hint: "QUENCH.LogTestDetailsHint",
+        name: game.i18n.localize("QUENCH.LogTestDetailsLabel"),
+        hint: game.i18n.localize("QUENCH.LogTestDetailsHint"),
         scope: "client",
         config: true,
         type: Boolean,
-        default: false
+        default: false,
     });
+
+    game.settings.register("quench", "exampleTests", {
+        name: game.i18n.localize("QUENCH.ExampleTestsLabel"),
+        hint: game.i18n.localize("QUENCH.ExampleTestsHint"),
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: false,
+        onChange: () => location.reload(),
+    });
+});
+
+/**
+ * Register example tests
+ */
+Hooks.on("quenchReady", (quench) => {
+    if (game.settings.get("quench", "exampleTests")) {
+        registerBasicPassingSuiteGroup(quench);
+        registerBasicFailingSuiteGroup(quench);
+        registerNestedSuiteGroup(quench);
+    }
 });
 
