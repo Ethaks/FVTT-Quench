@@ -1,3 +1,6 @@
+/**
+ * Given a mocha Runner, reports test results to the singleton instance of {@link QuenchResults}
+ */
 export default class QuenchReporter {
     constructor(runner) {
         const app = quench.app;
