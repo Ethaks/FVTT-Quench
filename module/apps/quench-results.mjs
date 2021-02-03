@@ -3,10 +3,7 @@ export default class QuenchResults extends Application {
         super(options);
         this.quench = quench;
 
-        this._indent = 0;
-        this._indentChar = " ";
         this._logPrefix = "QUENCH | ";
-        this._blankPrefix = " ".repeat(this._logPrefix.length);
     }
 
     static get defaultOptions() {
@@ -171,30 +168,16 @@ export default class QuenchResults extends Application {
         return game.settings.get("quench", "logTestDetails");
     }
 
-    _indentString() {
-        return this._indentChar.repeat(this._indent);
-    }
-
-    _logTestDetails(label, data, err) {
-        const indent = this._indentString();
-        const message = `${this._logPrefix}${indent}${label}`;
-        if (!data) console.log(message);
-        else console.log(message, data);
-
-        if (err) {
-            const trace = err.stack.replace(/\n/g, `\n${this._blankPrefix}${indent}${this._indentChar}`);
-            console.error(`${this._logPrefix}${indent}`, trace);
-        }
-    }
-
     /*--------------------------------*/
     /* Handle incoming test reporting */
     /*--------------------------------*/
 
     handleSuiteBegin(suite) {
-        if (QuenchResults._shouldLogTestDetails()) {
-            this._indent++;
-            this._logTestDetails(`Begin testing suite: ${suite.title}`, { suite });
+        if (QuenchResults._shouldLogTestDetails() && !suite.root) {
+            if (suite.parent.root) {
+                console.group(this.quench.suiteGroups.get(suite._quench_parentGroup).displayName);
+            }
+            console.group(`Begin testing suite: ${suite.title}`, { suite });
         }
         const suiteGroupKey = suite._quench_parentGroup;
         if (!suiteGroupKey) return;
@@ -211,15 +194,16 @@ export default class QuenchResults extends Application {
     }
 
     handleSuiteEnd(suite) {
-        if (QuenchResults._shouldLogTestDetails()) this._indent--;
+        if (QuenchResults._shouldLogTestDetails() && !suite.root) {
+            console.groupEnd();
+            if (suite.parent.root) console.groupEnd();
+        }
 
         const $suiteLi = this.element.find(`li.suite[data-suite-id=${suite.id}]`);
         this._updateLineItemStatus($suiteLi, QuenchResults._getSuiteState(suite));
     }
 
     handleTestBegin(test) {
-        if (QuenchResults._shouldLogTestDetails()) this._indent++;
-
         const parentId = test.parent.id;
         const $parentLi = this.element.find(`li.suite[data-suite-id=${parentId}]`);
         const $childTestList = this._findOrMakeChildList($parentLi);
@@ -228,8 +212,7 @@ export default class QuenchResults extends Application {
 
     handleTestPass(test) {
         if (QuenchResults._shouldLogTestDetails()) {
-            this._logTestDetails(`Test Complete: ${test.title} (PASS)`, { test });
-            this._indent--;
+            console.log(`%c(PASS) Test Complete: ${test.title}`, "color: #33AA33", { test });
         }
 
         const $testLi = this.element.find(`li.test[data-test-id=${test.id}]`);
@@ -238,8 +221,9 @@ export default class QuenchResults extends Application {
 
     handleTestFail(test, err) {
         if (QuenchResults._shouldLogTestDetails()) {
-            this._logTestDetails(`Test Complete: ${test.title} (FAIL)`, { test, err }, err);
-            this._indent--;
+            console.groupCollapsed(`%c(FAIL) Test Complete: ${test.title}`, "color: #FF4444", { test, err });
+            console.error(err.stack);
+            console.groupEnd();
         }
 
         const $testLi = this.element.find(`li.test[data-test-id=${test.id}]`);
@@ -249,7 +233,7 @@ export default class QuenchResults extends Application {
 
     handleRunBegin() {
         if (QuenchResults._shouldLogTestDetails()) {
-            this._logTestDetails("Beginning test run");
+            console.group(`${this._logPrefix}DETAILED TEST RESULTS`);
         }
 
         this.element.find("#quench-run").prop("disabled", true);
@@ -257,7 +241,8 @@ export default class QuenchResults extends Application {
 
     handleRunEnd(stats) {
         if (QuenchResults._shouldLogTestDetails()) {
-            this._logTestDetails("All tests complete", { stats })
+            console.groupEnd();
+            console.log(`${this._logPrefix}TEST RUN COMPLETE`, { stats });
         }
 
         this.element.find("#quench-run").prop("disabled", false);
