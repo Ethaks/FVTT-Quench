@@ -21,9 +21,17 @@
     width: auto;
 }
 
-#quench-results #quench-run {
+#quench-results .button-container {
     flex: 0;
-    width: auto;
+    display: flex;
+    flex-direction: row;
+}
+
+#quench-results .button-container button {
+    flex: 1;
+}
+
+#quench-results .button-container button#quench-run {
     font-weight: bold;
 }
 

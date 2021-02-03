@@ -39,7 +39,7 @@ export function registerNestedSuiteGroup(quench) {
 
             describe("level 1 B", function() {
                 it("long running", async function () {
-                    await quench.utils.pause(1500);
+                    await quench.utils.pause(5000);
                     assert.ok(true);
                 });
 

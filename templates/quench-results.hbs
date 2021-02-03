@@ -1,4 +1,8 @@
 <div class="flexcol">
+    <div id="select-buttons" class="button-container" style="display: none">
+        <button id="quench-select-all">{{localize "QUENCH.SelectAll"}}</button>
+        <button id="quench-select-none">{{localize "QUENCH.SelectNone"}}</button>
+    </div>
     <div id="quench-suite-groups">
         <ul id="quench-suite-groups-list">
             {{#each suiteGroups}}
@@ -10,5 +14,8 @@
         </ul>
     </div>
     <div id="quench-results-stats" style="display: none"></div>
-    <button id="quench-run">{{localize "QUENCH.Run"}}</button>
+    <div class="button-container" >
+        <button id="quench-run">{{localize "QUENCH.Run"}}</button>
+        <button style="display: none" id="quench-abort">{{localize "QUENCH.Abort"}}</button>
+    </div>
 </div>

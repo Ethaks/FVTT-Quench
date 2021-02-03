@@ -50,6 +50,14 @@ export default class Quench {
             await this.suiteGroups.get(key).fn(context);
         }
 
-        return this.mocha.run();
+        // Run the tests and hold on to the runner
+        this._currentRunner = this.mocha.run();
+        const EVENT_RUN_END = this._currentRunner.constructor.constants.EVENT_RUN_END;
+        this._currentRunner.once(EVENT_RUN_END, () => this._currentRunner = null);
+        return this._currentRunner;
+    }
+
+    abort() {
+        this._currentRunner.abort();
     }
 }

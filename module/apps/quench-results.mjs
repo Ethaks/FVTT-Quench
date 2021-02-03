@@ -41,6 +41,10 @@ export default class QuenchResults extends Application {
             }, []);
             await self.quench.runSelectedSuiteGroups(enabledGroups);
         });
+
+        $html.find("#quench-abort").click(() => {
+            self.quench.abort();
+        });
     }
 
     async clear() {
@@ -236,7 +240,11 @@ export default class QuenchResults extends Application {
             console.group(`${this._logPrefix}DETAILED TEST RESULTS`);
         }
 
+        // Enable/Hide buttons as necessary
+        this.element.find("#quench-select-all").prop("disabled", true);
+        this.element.find("#quench-select-none").prop("disabled", true);
         this.element.find("#quench-run").prop("disabled", true);
+        this.element.find("#quench-abort").show();
     }
 
     handleRunEnd(stats) {
@@ -245,19 +253,22 @@ export default class QuenchResults extends Application {
             console.log(`${this._logPrefix}TEST RUN COMPLETE`, { stats });
         }
 
-        this.element.find("#quench-run").prop("disabled", false);
-
+        // Add summary
         const style = stats.failures ? "stats-fail" : "stats-pass";
-
         const $stats = $(`
             <div class="stats">
                 <div>${game.i18n.format("QUENCH.StatsSummary", { quantity: stats.tests, duration: stats.duration })}</div>
                 <div class="${style}">${game.i18n.format("QUENCH.StatsResults", stats)}</div>
             </div>
         `);
-
         const $container = this.element.find("#quench-results-stats");
         $container.append($stats);
         $container.show();
+
+        // Enable/Hide buttons as necessary
+        this.element.find("#quench-select-all").prop("disabled", false);
+        this.element.find("#quench-select-none").prop("disabled", false);
+        this.element.find("#quench-run").prop("disabled", false);
+        this.element.find("#quench-abort").hide();
     }
 }
