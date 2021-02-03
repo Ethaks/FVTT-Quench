@@ -38,9 +38,9 @@ export function registerNestedSuiteGroup(quench) {
             });
 
             describe("level 1 B", function() {
-                it("long running", async function () {
-                    this.timeout(6000);
-                    await quench.utils.pause(5000);
+                it("times out", async function () {
+                    this.timeout(200);
+                    await quench.utils.pause(300);
                     assert.ok(true);
                 });
 
