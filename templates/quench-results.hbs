@@ -1,5 +1,5 @@
 <div class="flexcol">
-    <div id="select-buttons" class="button-container" style="display: none">
+    <div id="select-buttons" class="button-container" {{#unless anySuiteGroups}}style="display: none"{{/unless}}>
         <button id="quench-select-all">{{localize "QUENCH.SelectAll"}}</button>
         <button id="quench-select-none">{{localize "QUENCH.SelectNone"}}</button>
     </div>

@@ -21,6 +21,7 @@ export default class QuenchResults extends Application {
 
     getData() {
         return {
+            anySuiteGroups: this.quench.suiteGroups.size > 0,
             suiteGroups: Array.from(this.quench.suiteGroups.entries()).map(entry => {
                 const [key, value] = entry;
                 return {
@@ -34,20 +35,33 @@ export default class QuenchResults extends Application {
     activateListeners($html) {
         super.activateListeners($html);
 
-        const self = this;
-        $html.find("#quench-run").click(async function (event) {
-            const enabledGroups = self._getCheckedGroups().reduce((acc, next) => {
-                return next.enabled ? [...acc, next.key] : acc;
-            }, []);
-            await self.quench.runSelectedSuiteGroups(enabledGroups);
+        // Select All Button
+        $html.find("#quench-select-all").click(() => {
+            this.element.find(`#quench-suite-groups-list .suite-group input[type="checkbox"]`).prop("checked", true);
         });
 
+        // Select None Button
+        $html.find("#quench-select-none").click(() => {
+            this.element.find(`#quench-suite-groups-list .suite-group input[type="checkbox"]`).prop("checked", false);
+        });
+
+        // Run Button
+        $html.find("#quench-run").click(async () => {
+            const enabledGroups = this._getCheckedGroups().reduce((acc, next) => {
+                return next.enabled ? [...acc, next.key] : acc;
+            }, []);
+            await this.quench.runSelectedSuiteGroups(enabledGroups);
+        });
+
+        // Abort Button
         $html.find("#quench-abort").click(() => {
-            self.quench.abort();
+            this.quench.abort();
         });
     }
 
     async clear() {
+        if (this._state !== Application.RENDER_STATES.RENDERED) return;
+
         const checked = this._getCheckedGroups();
 
         try {

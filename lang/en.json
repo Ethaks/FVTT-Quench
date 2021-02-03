@@ -2,6 +2,9 @@
   "QUENCH": {
     "Title": "QUENCH",
     "Run": "Run",
+    "Abort": "Abort",
+    "SelectAll": "Select All",
+    "SelectNone": "Select None",
     "StatsSummary": "Ran {quantity} tests in {duration}ms.",
     "StatsResults": "{passes}/{tests} tests passing.",
     "LogTestDetailsLabel": "Detailed Test Output",
