@@ -175,14 +175,15 @@ export default class QuenchResults extends Application {
         return this._indentChar.repeat(this._indent);
     }
 
-    _logTestDetails(label, ...args) {
+    _logTestDetails(label, data, err) {
         const indent = this._indentString();
-        console.log(`${this._logPrefix}${indent}${label}`);
-        for (let arg of args) {
-            if (typeof arg === "string" || arg instanceof String) {
-                arg = arg.replace(/\n/g, `\n${this._blankPrefix}${indent}`);
-            }
-            console.log(`${this._logPrefix}${this._indentChar}${indent}`, arg);
+        const message = `${this._logPrefix}${indent}${label}`;
+        if (!data) console.log(message);
+        else console.log(message, data);
+
+        if (err) {
+            const trace = err.stack.replace(/\n/g, `\n${this._blankPrefix}${indent}${this._indentChar}`);
+            console.error(`${this._logPrefix}${indent}`, trace);
         }
     }
 
@@ -193,7 +194,7 @@ export default class QuenchResults extends Application {
     handleSuiteBegin(suite) {
         if (QuenchResults._shouldLogTestDetails()) {
             this._indent++;
-            this._logTestDetails(`Begin testing suite: ${suite.title}`, suite);
+            this._logTestDetails(`Begin testing suite: ${suite.title}`, { suite });
         }
         const suiteGroupKey = suite._quench_parentGroup;
         if (!suiteGroupKey) return;
@@ -227,7 +228,7 @@ export default class QuenchResults extends Application {
 
     handleTestPass(test) {
         if (QuenchResults._shouldLogTestDetails()) {
-            this._logTestDetails(`Test Complete: ${test.title} (PASS)`, test);
+            this._logTestDetails(`Test Complete: ${test.title} (PASS)`, { test });
             this._indent--;
         }
 
@@ -237,7 +238,7 @@ export default class QuenchResults extends Application {
 
     handleTestFail(test, err) {
         if (QuenchResults._shouldLogTestDetails()) {
-            this._logTestDetails(`Test Complete: ${test.title} (FAIL)`, test, err, err.stack);
+            this._logTestDetails(`Test Complete: ${test.title} (FAIL)`, { test, err }, err);
             this._indent--;
         }
 
@@ -256,7 +257,7 @@ export default class QuenchResults extends Application {
 
     handleRunEnd(stats) {
         if (QuenchResults._shouldLogTestDetails()) {
-            this._logTestDetails("All tests complete", stats)
+            this._logTestDetails("All tests complete", { stats })
         }
 
         this.element.find("#quench-run").prop("disabled", false);
