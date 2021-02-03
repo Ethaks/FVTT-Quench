@@ -1,3 +1,6 @@
+/**
+ * The visual UI for representing Quench suite groups and the tests results thereof.
+ */
 export default class QuenchResults extends Application {
     constructor(quench, options) {
         super(options);
@@ -6,6 +9,7 @@ export default class QuenchResults extends Application {
         this._logPrefix = "QUENCH | ";
     }
 
+    /** @override */
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: "QUENCH.Title",
@@ -19,6 +23,7 @@ export default class QuenchResults extends Application {
         });
     }
 
+    /** @override */
     getData() {
         return {
             anySuiteGroups: this.quench.suiteGroups.size > 0,
@@ -32,6 +37,7 @@ export default class QuenchResults extends Application {
         };
     }
 
+    /** @override */
     activateListeners($html) {
         super.activateListeners($html);
 
@@ -59,6 +65,9 @@ export default class QuenchResults extends Application {
         });
     }
 
+    /**
+     * Clears the currently visible test results while maintaining currently selected suite groups
+     */
     async clear() {
         if (this._state !== Application.RENDER_STATES.RENDERED) return;
 
@@ -80,6 +89,11 @@ export default class QuenchResults extends Application {
         });
     }
 
+    /**
+     * Determines which suite group elements are checked in the UI
+     * @returns {{key: string, enabled: boolean}[]} - An array of objects indicating whether each suite group (defined by the group's key) is enabled or not.
+     * @private
+     */
     _getCheckedGroups() {
         const $groupEls = this.element.find("#quench-suite-groups-list li");
         return $groupEls
@@ -90,12 +104,22 @@ export default class QuenchResults extends Application {
             .get();
     }
 
+    /**
+     * Represents the state of a test or suite
+     * @enum {string}
+     */
     static STATE = {
         PENDING: "pending",
         SUCCESS: "success",
         FAILURE: "failure",
     }
 
+    /**
+     * Gets the STATE of a Test instance
+     * @param {Test} test - the mocha Test instance to determine the state of
+     * @returns {QuenchResults.STATE} - the state of the test
+     * @private
+     */
     static _getTestState(test) {
         if (test.state === undefined || test.pending) {
             return QuenchResults.STATE.PENDING;
@@ -106,6 +130,12 @@ export default class QuenchResults extends Application {
         }
     }
 
+    /**
+     * Gets the STATE of a Suite instance, based on the STATE of its contained suites and tests
+     * @param {Suite} suite - the mocha Suite instance to determine the state of
+     * @returns {QuenchResults.STATE} - the state of the suite
+     * @private
+     */
     static _getSuiteState(suite) {
         if (suite.pending) return QuenchResults.STATE.PENDING;
 
@@ -120,6 +150,12 @@ export default class QuenchResults extends Application {
         return allSuitesSucceed ? QuenchResults.STATE.SUCCESS : QuenchResults.STATE.FAILURE;
     }
 
+    /**
+     * Finds or creates an unordered list to contain items for each child runnable (test or suite) of the given parent
+     * @param {jQuery} $parentListEl - The <li> of the parent suite group or suite
+     * @returns {jquery} - The <ul> into which child runnables can be inserted.
+     * @private
+     */
     _findOrMakeChildList($parentListEl) {
         const $expandable = $parentListEl.find(`> div.expandable`);
         let $childList = $expandable.find(`> ul.runnable-list`);
@@ -131,6 +167,14 @@ export default class QuenchResults extends Application {
         return $childList;
     }
 
+    /**
+     * Creates a new <li> to represent the runnable given by the provided details
+     * @param {string} title - The runnable title to show in the UI.
+     * @param {string} id - The mocha id of the runnable.
+     * @param {boolean} isTest - Whether this runnable is a test (or a suite, if false)
+     * @returns {jQuery} - The <li> element representing this runnable.
+     * @private
+     */
     _makePendingLineItem(title, id, isTest) {
         const type = isTest ? "test" : "suite";
         const typeIcon = isTest ? "fa-flask" : "fa-folder";
@@ -164,6 +208,12 @@ export default class QuenchResults extends Application {
         return $li;
     }
 
+    /**
+     * Updates the given existing <li> representing a runnable based on the given state
+     * @param {jQuery} $listEl - The list element representing the runnable
+     * @param {QuenchResults.STATE} state - the state of the runnable
+     * @private
+     */
     _updateLineItemStatus($listEl, state) {
         const $icon = $listEl.find("> .summary > i.status-icon");
         let icon = "fa-sync";
@@ -182,6 +232,11 @@ export default class QuenchResults extends Application {
         $icon.addClass(`status-icon ${style} ${icon}`);
     }
 
+    /**
+     * Determines whether the setting to show detailed log results is enabled
+     * @returns {boolean}
+     * @private
+     */
     static _shouldLogTestDetails() {
         return game.settings.get("quench", "logTestDetails");
     }
@@ -190,6 +245,10 @@ export default class QuenchResults extends Application {
     /* Handle incoming test reporting */
     /*--------------------------------*/
 
+    /**
+     * Called by {@link QuenchReporter} when a mocha suite begins running
+     * @param {Suite} suite
+     */
     handleSuiteBegin(suite) {
         if (QuenchResults._shouldLogTestDetails() && !suite.root) {
             if (suite.parent.root) {
@@ -211,6 +270,10 @@ export default class QuenchResults extends Application {
         $childSuiteList.append(this._makePendingLineItem(suite.title, suite.id, false));
     }
 
+    /**
+     * Called by {@link QuenchReporter} when a mocha suite finishes running
+     * @param {Suite} suite
+     */
     handleSuiteEnd(suite) {
         if (QuenchResults._shouldLogTestDetails() && !suite.root) {
             console.groupEnd();
@@ -221,6 +284,10 @@ export default class QuenchResults extends Application {
         this._updateLineItemStatus($suiteLi, QuenchResults._getSuiteState(suite));
     }
 
+    /**
+     * Called by {@link QuenchReporter} when a mocha test begins running
+     * @param {Test} test
+     */
     handleTestBegin(test) {
         const parentId = test.parent.id;
         const $parentLi = this.element.find(`li.suite[data-suite-id="${parentId}"]`);
@@ -228,6 +295,10 @@ export default class QuenchResults extends Application {
         $childTestList.append(this._makePendingLineItem(test.title, test.id, true));
     }
 
+    /**
+     * Called by {@link QuenchReporter} when a mocha test finishes running and passes
+     * @param {Test} test
+     */
     handleTestPass(test) {
         if (QuenchResults._shouldLogTestDetails()) {
             console.log(`%c(PASS) Test Complete: ${test.title}`, "color: #33AA33", { test });
@@ -237,6 +308,10 @@ export default class QuenchResults extends Application {
         this._updateLineItemStatus($testLi, QuenchResults._getTestState(test));
     }
 
+    /**
+     * Called by {@link QuenchReporter} when a mocha test finishes running and fails
+     * @param {Test} test
+     */
     handleTestFail(test, err) {
         if (QuenchResults._shouldLogTestDetails()) {
             console.groupCollapsed(`%c(FAIL) Test Complete: ${test.title}`, "color: #FF4444", { test, err });
@@ -249,6 +324,9 @@ export default class QuenchResults extends Application {
         this._updateLineItemStatus($testLi, QuenchResults._getTestState(test));
     }
 
+    /**
+     * Called by {@link QuenchReporter} when mocha begins a test run
+     */
     handleRunBegin() {
         if (QuenchResults._shouldLogTestDetails()) {
             console.group(`${this._logPrefix}DETAILED TEST RESULTS`);
@@ -261,6 +339,10 @@ export default class QuenchResults extends Application {
         this.element.find("#quench-abort").show();
     }
 
+    /**
+     * Called by {@link QuenchReporter} when mocha completes a test run
+     * @param {object} stats - Run statistics
+     */
     handleRunEnd(stats) {
         if (QuenchResults._shouldLogTestDetails()) {
             console.groupEnd();
