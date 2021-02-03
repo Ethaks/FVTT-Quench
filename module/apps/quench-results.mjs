@@ -195,7 +195,7 @@ export default class QuenchResults extends Application {
             if (suite.parent.root) {
                 console.group(this.quench.suiteGroups.get(suite._quench_parentGroup).displayName);
             }
-            console.group(`Begin testing suite: ${suite.title}`, { suite });
+            console.group(`Suite: ${suite.title}`, { suite });
         }
         const suiteGroupKey = suite._quench_parentGroup;
         if (!suiteGroupKey) return;

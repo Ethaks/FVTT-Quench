@@ -42,7 +42,7 @@
 
 #quench-results ul {
     list-style-type: none;
-    margin: .15em;
+    margin: 0 5px;
     padding-left: .75em;
 }
 
@@ -85,10 +85,12 @@
 #quench-results .type-icon {
     width: 15px;
     max-width: 15px;
+    text-align: center;
 }
 
 #quench-results .expander {
-    width: 10px;
+    width: 12px;
+    text-align: center;
     cursor: pointer;
 }
 
