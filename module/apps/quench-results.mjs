@@ -109,6 +109,7 @@ export default class QuenchResults extends Application {
      * @enum {string}
      */
     static STATE = {
+        IN_PROGRESS: "progress",
         PENDING: "pending",
         SUCCESS: "success",
         FAILURE: "failure",
@@ -121,8 +122,10 @@ export default class QuenchResults extends Application {
      * @private
      */
     static _getTestState(test) {
-        if (test.state === undefined || test.pending) {
+        if (test.pending) {
             return QuenchResults.STATE.PENDING;
+        } else if (test.state === undefined) {
+            return QuenchResults.STATE.IN_PROGRESS;
         } else if (test.state === "passed") {
             return QuenchResults.STATE.SUCCESS;
         } else {
@@ -141,12 +144,12 @@ export default class QuenchResults extends Application {
 
         // Check child tests
         const testStates = suite.tests.map(QuenchResults._getTestState);
-        const allTestSucceed = testStates.every(t => t === QuenchResults.STATE.SUCCESS);
+        const allTestSucceed = testStates.every(t => t !== QuenchResults.STATE.FAILURE);
         if (!allTestSucceed) return QuenchResults.STATE.FAILURE;
 
         // Check child suites
         const suiteStates = suite.suites.map(QuenchResults._getSuiteState);
-        const allSuitesSucceed = suiteStates.every(t => t === QuenchResults.STATE.SUCCESS);
+        const allSuitesSucceed = suiteStates.every(t => t !== QuenchResults.STATE.FAILURE);
         return allSuitesSucceed ? QuenchResults.STATE.SUCCESS : QuenchResults.STATE.FAILURE;
     }
 
@@ -175,7 +178,7 @@ export default class QuenchResults extends Application {
      * @returns {jQuery} - The <li> element representing this runnable.
      * @private
      */
-    _makePendingLineItem(title, id, isTest) {
+    _makeRunnableLineItem(title, id, isTest) {
         const type = isTest ? "test" : "suite";
         const typeIcon = isTest ? "fa-flask" : "fa-folder";
         const expanderIcon = isTest ? "fa-caret-right" : "fa-caret-down";
@@ -204,7 +207,7 @@ export default class QuenchResults extends Application {
             $expandable.slideToggle(50);
         });
 
-        this._updateLineItemStatus($li, QuenchResults.STATE.PENDING);
+        this._updateLineItemStatus($li, QuenchResults.STATE.IN_PROGRESS);
         return $li;
     }
 
@@ -219,13 +222,14 @@ export default class QuenchResults extends Application {
         let icon = "fa-sync";
         let style = "fas";
         switch (state) {
+            case QuenchResults.STATE.PENDING:
+                icon = "fa-minus-circle";
+                break;
             case QuenchResults.STATE.SUCCESS:
                 icon = "fa-check-circle";
-                style = "far";
                 break;
             case QuenchResults.STATE.FAILURE:
                 icon = "fa-times-circle";
-                style = "far";
                 break;
         }
         $icon.removeClass();
@@ -273,7 +277,7 @@ export default class QuenchResults extends Application {
 
         // Add a li for this suite group
         let $childSuiteList = this._findOrMakeChildList($parentLi);
-        $childSuiteList.append(this._makePendingLineItem(suite.title, suite.id, false));
+        $childSuiteList.append(this._makeRunnableLineItem(suite.title, suite.id, false));
     }
 
     /**
@@ -305,36 +309,60 @@ export default class QuenchResults extends Application {
         if (!$parentLi.length) $parentLi = $groupLi;
 
         const $childTestList = this._findOrMakeChildList($parentLi);
-        $childTestList.append(this._makePendingLineItem(test.title, test.id, true));
+        $childTestList.append(this._makeRunnableLineItem(test.title, test.id, true));
     }
 
     /**
-     * Called by {@link QuenchReporter} when a mocha test finishes running and passes
+     * Called by {@link QuenchReporter} when a mocha test finishes running
      * @param {Test} test
      */
-    handleTestPass(test) {
+    handleTestEnd(test) {
+        const state = QuenchResults._getTestState(test);
+        if (state === QuenchResults.STATE.FAILURE) return;
+
         if (QuenchResults._shouldLogTestDetails()) {
-            console.log(`%c(PASS) Test Complete: ${test.title}`, "color: #33AA33", { test });
+            let stateString, stateColor;
+            switch (state) {
+                case QuenchResults.STATE.PENDING:
+                    stateString = "PENDING";
+                    stateColor = CONSOLE_COLORS.pending;
+                    break;
+                case QuenchResults.STATE.SUCCESS:
+                    stateString = "PASS";
+                    stateColor = CONSOLE_COLORS.pass;
+                    break;
+                default:
+                    stateString = "UNKNOWN";
+                    stateColor = "initial";
+            }
+            console.log(`%c(${stateString}) Test Complete: ${test.title}`, `color: ${stateColor}`, { test });
         }
 
-        const $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
-        this._updateLineItemStatus($testLi, QuenchResults._getTestState(test));
+        let $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
+
+        if (!$testLi.length) {
+            this.handleTestBegin(test);
+            $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
+        }
+
+        this._updateLineItemStatus($testLi, state);
     }
 
     /**
      * Called by {@link QuenchReporter} when a mocha test finishes running and fails
      * @param {Test} test
+     * @param {Error} err
      */
     handleTestFail(test, err) {
         if (QuenchResults._shouldLogTestDetails()) {
-            console.groupCollapsed(`%c(FAIL) Test Complete: ${test.title}`, "color: #FF4444", { test, err });
+            console.groupCollapsed(`%c(FAIL) Test Complete: ${test.title}`, `color: ${CONSOLE_COLORS.fail}`, { test, err });
             console.error(err.stack);
             console.groupEnd();
         }
 
         const $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
         $testLi.find("> .expandable").append(`<div class="error-message">${err.message}</div>`);
-        this._updateLineItemStatus($testLi, QuenchResults._getTestState(test));
+        this._updateLineItemStatus($testLi, QuenchResults.STATE.FAILURE);
     }
 
     /**
@@ -380,4 +408,11 @@ export default class QuenchResults extends Application {
         this.element.find("#quench-run").prop("disabled", false);
         this.element.find("#quench-abort").hide();
     }
+}
+
+// Colors used for different test results in the console
+const CONSOLE_COLORS = {
+    fail: "#FF4444",
+    pass: "#55AA55",
+    pending: "#AA55AA",
 }

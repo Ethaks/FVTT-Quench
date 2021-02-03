@@ -125,6 +125,10 @@
     color: #009900;
 }
 
+#quench-results .summary > i.status-icon.fa-minus-circle {
+    color: #AA22AA;
+}
+
 #quench-results .summary > i.status-icon.fa-sync {
     color: #AA8800;
 }
