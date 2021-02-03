@@ -78,7 +78,7 @@ export default class Quench {
         const { after, afterEach, before, beforeEach, describe, it, utils } = Mocha;
         const { assert } = this.chai;
         const context = {
-            after, afterEach, before, beforeEach, it, utils,
+            after, afterEach, before, beforeEach, utils,
             assert,
         };
 
@@ -91,8 +91,19 @@ export default class Quench {
                 return suite;
             };
 
-            // Call the group registration function
-            await this._suiteGroups.get(key).fn(context);
+            // Override `it` to add a property to the resulting test indicating which quench suite group the test belongs to.
+            context.it = function quenchIt(...args) {
+                const test = it (...args);
+                test._quench_parentGroup = key;
+                return test;
+            }
+
+            // Create a wrapper suite to contain this suite group
+            const suiteGroupRoot = context.describe(`${key}_root`, async () => {
+                // Call the group registration function
+                await this._suiteGroups.get(key).fn(context);
+            });
+            suiteGroupRoot._quench_suiteGroupRoot = true;
         }
 
         // Run the tests and hold on to the runner

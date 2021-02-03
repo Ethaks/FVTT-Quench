@@ -26,8 +26,8 @@ export default class QuenchResults extends Application {
     /** @override */
     getData() {
         return {
-            anySuiteGroups: this.quench.suiteGroups.size > 0,
-            suiteGroups: Array.from(this.quench.suiteGroups.entries()).map(entry => {
+            anySuiteGroups: this.quench._suiteGroups.size > 0,
+            suiteGroups: Array.from(this.quench._suiteGroups.entries()).map(entry => {
                 const [key, value] = entry;
                 return {
                     name: key,
@@ -250,22 +250,28 @@ export default class QuenchResults extends Application {
      * @param {Suite} suite
      */
     handleSuiteBegin(suite) {
-        if (QuenchResults._shouldLogTestDetails() && !suite.root) {
-            if (suite.parent.root) {
-                console.group(this.quench.suiteGroups.get(suite._quench_parentGroup).displayName);
-            }
-            console.group(`Suite: ${suite.title}`, { suite });
-        }
         const suiteGroupKey = suite._quench_parentGroup;
-        if (!suiteGroupKey) return;
+        const isSuiteGroupRoot = suite._quench_suiteGroupRoot;
 
+        // Show detailed results in console if applicable
+        if (QuenchResults._shouldLogTestDetails() && !suite.root) {
+            if (isSuiteGroupRoot) {
+                console.group(this.quench._suiteGroups.get(suiteGroupKey).displayName);
+            } else {
+                console.group(`Suite: ${suite.title}`, { suite });
+            }
+        }
+
+        // If this suite is the root of a suite group or does not belong to a suite group, don't show in the UI.
+        if (!suiteGroupKey || isSuiteGroupRoot) return;
+
+        // Get the li to add this suite group to
         const parentId = suite.parent.id;
-
         const $groupLi = this.element.find(`li.suite-group[data-suite-group="${suiteGroupKey}"]`);
         let $parentLi = $groupLi.find(`li.suite[data-suite-id="${parentId}"]`);
-
         if (!$parentLi.length) $parentLi = $groupLi;
 
+        // Add a li for this suite group
         let $childSuiteList = this._findOrMakeChildList($parentLi);
         $childSuiteList.append(this._makePendingLineItem(suite.title, suite.id, false));
     }
@@ -277,8 +283,10 @@ export default class QuenchResults extends Application {
     handleSuiteEnd(suite) {
         if (QuenchResults._shouldLogTestDetails() && !suite.root) {
             console.groupEnd();
-            if (suite.parent.root) console.groupEnd();
         }
+
+        const isSuiteGroupRoot = suite._quench_suiteGroupRoot;
+        if (isSuiteGroupRoot) return;
 
         const $suiteLi = this.element.find(`li.suite[data-suite-id="${suite.id}"]`);
         this._updateLineItemStatus($suiteLi, QuenchResults._getSuiteState(suite));
@@ -289,8 +297,13 @@ export default class QuenchResults extends Application {
      * @param {Test} test
      */
     handleTestBegin(test) {
+        const suiteGroupKey = test._quench_parentGroup;
         const parentId = test.parent.id;
-        const $parentLi = this.element.find(`li.suite[data-suite-id="${parentId}"]`);
+
+        const $groupLi = this.element.find(`li.suite-group[data-suite-group="${suiteGroupKey}"]`);
+        let $parentLi = $groupLi.find(`li.suite[data-suite-id="${parentId}"]`);
+        if (!$parentLi.length) $parentLi = $groupLi;
+
         const $childTestList = this._findOrMakeChildList($parentLi);
         $childTestList.append(this._makePendingLineItem(test.title, test.id, true));
     }

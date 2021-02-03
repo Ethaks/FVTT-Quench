@@ -4,7 +4,7 @@ import { quenchUtils } from "./module/utils/quench-utils.mjs";
 import {
     registerBasicFailingSuiteGroup,
     registerBasicPassingSuiteGroup,
-    registerNestedSuiteGroup,
+    registerNestedSuiteGroup, registerOtherSuiteGroup,
 } from "./quench-tests/nonsense-tests.mjs";
 
 /**
@@ -63,7 +63,7 @@ Hooks.on("renderSidebar", function(sidebar, html, options) {
 /**
  * Register settings
  */
-Hooks.on("setup", () => {
+Hooks.on("init", () => {
     game.settings.register("quench", "logTestDetails", {
         name: game.i18n.localize("QUENCH.LogTestDetailsLabel"),
         hint: game.i18n.localize("QUENCH.LogTestDetailsHint"),
@@ -92,6 +92,7 @@ Hooks.on("quenchReady", (quench) => {
         registerBasicPassingSuiteGroup(quench);
         registerBasicFailingSuiteGroup(quench);
         registerNestedSuiteGroup(quench);
+        registerOtherSuiteGroup(quench);
     }
 });
 

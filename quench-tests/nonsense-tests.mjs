@@ -39,6 +39,7 @@ export function registerNestedSuiteGroup(quench) {
 
             describe("level 1 B", function() {
                 it("long running", async function () {
+                    this.timeout(6000);
                     await quench.utils.pause(5000);
                     assert.ok(true);
                 });
@@ -55,4 +56,20 @@ export function registerNestedSuiteGroup(quench) {
             });
         });
     }, { displayName: "QUENCH: Nested Suites" });
+}
+
+export function registerOtherSuiteGroup(quench) {
+    quench.registerSuiteGroup("quench.examples.other", (context) => {
+        const { describe, it, assert } = context;
+
+        it("suite-less test", function() {});
+        it("pending test");
+
+        describe("suite alpha", function() {
+            it("test alpha", function () {});
+        });
+        describe("suite beta", function() {
+            it("test beta", function () {});
+        });
+    }, { displayName: "QUENCH: Other" });
 }
