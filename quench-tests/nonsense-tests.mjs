@@ -70,6 +70,7 @@ export function registerOtherSuiteGroup(quench) {
         });
         describe("suite beta", function() {
             it("test beta", function () {});
+            it("a nested pending test");
         });
     }, { displayName: "QUENCH: Other" });
 }
