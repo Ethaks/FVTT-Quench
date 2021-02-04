@@ -113,5 +113,5 @@ export default class QuenchReporter {
 const CONSOLE_COLORS = {
     fail: "#FF4444",
     pass: "#55AA55",
-    pending: "#AA55AA",
+    pending: "#8844FF",
 }
