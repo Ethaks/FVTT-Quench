@@ -21,4 +21,59 @@ async function clearWorld() {
     }
 }
 
-export const quenchUtils = { pause, clearWorld };
+/**
+ * Represents the state of a test or suite
+ * @enum {string}
+ */
+const RUNNABLE_STATE = {
+    IN_PROGRESS: "progress",
+    PENDING: "pending",
+    SUCCESS: "success",
+    FAILURE: "failure",
+}
+
+/**
+ * Gets the STATE of a Test instance
+ * @param {Test} test - the mocha Test instance to determine the state of
+ * @returns {RUNNABLE_STATE} - the state of the test
+ */
+function getTestState(test) {
+    if (test.pending) {
+        return RUNNABLE_STATE.PENDING;
+    } else if (test.state === undefined) {
+        return RUNNABLE_STATE.IN_PROGRESS;
+    } else if (test.state === "passed") {
+        return RUNNABLE_STATE.SUCCESS;
+    } else {
+        return RUNNABLE_STATE.FAILURE
+    }
+}
+
+/**
+ * Gets the STATE of a Suite instance, based on the STATE of its contained suites and tests
+ * @param {Suite} suite - the mocha Suite instance to determine the state of
+ * @returns {RUNNABLE_STATE} - the state of the suite
+ */
+function getSuiteState(suite) {
+    if (suite.pending) return RUNNABLE_STATE.PENDING;
+
+    // Check child tests
+    const testStates = suite.tests.map(getTestState);
+    const allTestSucceed = testStates.every(t => t !== RUNNABLE_STATE.FAILURE);
+    if (!allTestSucceed) return RUNNABLE_STATE.FAILURE;
+
+    // Check child suites
+    const suiteStates = suite.suites.map(getSuiteState);
+    const allSuitesSucceed = suiteStates.every(t => t !== RUNNABLE_STATE.FAILURE);
+    return allSuitesSucceed ? RUNNABLE_STATE.SUCCESS : RUNNABLE_STATE.FAILURE;
+}
+
+export const quenchUtils = {
+    pause,
+    clearWorld,
+    _internal: {
+        RUNNABLE_STATE,
+        getTestState,
+        getSuiteState,
+    },
+};

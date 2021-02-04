@@ -1,3 +1,7 @@
+import { quenchUtils } from "../utils/quench-utils.mjs";
+
+const { RUNNABLE_STATE, getTestState, getSuiteState } = quenchUtils._internal;
+
 /**
  * The visual UI for representing Quench suite groups and the tests results thereof.
  */
@@ -5,8 +9,6 @@ export default class QuenchResults extends Application {
     constructor(quench, options) {
         super(options);
         this.quench = quench;
-
-        this._logPrefix = "QUENCH | ";
     }
 
     /** @override */
@@ -104,54 +106,6 @@ export default class QuenchResults extends Application {
             .get();
     }
 
-    /**
-     * Represents the state of a test or suite
-     * @enum {string}
-     */
-    static STATE = {
-        IN_PROGRESS: "progress",
-        PENDING: "pending",
-        SUCCESS: "success",
-        FAILURE: "failure",
-    }
-
-    /**
-     * Gets the STATE of a Test instance
-     * @param {Test} test - the mocha Test instance to determine the state of
-     * @returns {QuenchResults.STATE} - the state of the test
-     * @private
-     */
-    static _getTestState(test) {
-        if (test.pending) {
-            return QuenchResults.STATE.PENDING;
-        } else if (test.state === undefined) {
-            return QuenchResults.STATE.IN_PROGRESS;
-        } else if (test.state === "passed") {
-            return QuenchResults.STATE.SUCCESS;
-        } else {
-            return QuenchResults.STATE.FAILURE
-        }
-    }
-
-    /**
-     * Gets the STATE of a Suite instance, based on the STATE of its contained suites and tests
-     * @param {Suite} suite - the mocha Suite instance to determine the state of
-     * @returns {QuenchResults.STATE} - the state of the suite
-     * @private
-     */
-    static _getSuiteState(suite) {
-        if (suite.pending) return QuenchResults.STATE.PENDING;
-
-        // Check child tests
-        const testStates = suite.tests.map(QuenchResults._getTestState);
-        const allTestSucceed = testStates.every(t => t !== QuenchResults.STATE.FAILURE);
-        if (!allTestSucceed) return QuenchResults.STATE.FAILURE;
-
-        // Check child suites
-        const suiteStates = suite.suites.map(QuenchResults._getSuiteState);
-        const allSuitesSucceed = suiteStates.every(t => t !== QuenchResults.STATE.FAILURE);
-        return allSuitesSucceed ? QuenchResults.STATE.SUCCESS : QuenchResults.STATE.FAILURE;
-    }
 
     /**
      * Finds or creates an unordered list to contain items for each child runnable (test or suite) of the given parent
@@ -207,14 +161,14 @@ export default class QuenchResults extends Application {
             $expandable.slideToggle(50);
         });
 
-        this._updateLineItemStatus($li, QuenchResults.STATE.IN_PROGRESS);
+        this._updateLineItemStatus($li, RUNNABLE_STATE.IN_PROGRESS);
         return $li;
     }
 
     /**
      * Updates the given existing <li> representing a runnable based on the given state
      * @param {jQuery} $listEl - The list element representing the runnable
-     * @param {QuenchResults.STATE} state - the state of the runnable
+     * @param {RUNNABLE_STATE} state - the state of the runnable
      * @private
      */
     _updateLineItemStatus($listEl, state) {
@@ -222,13 +176,13 @@ export default class QuenchResults extends Application {
         let icon = "fa-sync";
         let style = "fas";
         switch (state) {
-            case QuenchResults.STATE.PENDING:
+            case RUNNABLE_STATE.PENDING:
                 icon = "fa-minus-circle";
                 break;
-            case QuenchResults.STATE.SUCCESS:
+            case RUNNABLE_STATE.SUCCESS:
                 icon = "fa-check-circle";
                 break;
-            case QuenchResults.STATE.FAILURE:
+            case RUNNABLE_STATE.FAILURE:
                 icon = "fa-times-circle";
                 break;
         }
@@ -236,14 +190,6 @@ export default class QuenchResults extends Application {
         $icon.addClass(`status-icon ${style} ${icon}`);
     }
 
-    /**
-     * Determines whether the setting to show detailed log results is enabled
-     * @returns {boolean}
-     * @private
-     */
-    static _shouldLogTestDetails() {
-        return game.settings.get("quench", "logTestDetails");
-    }
 
     /*--------------------------------*/
     /* Handle incoming test reporting */
@@ -256,15 +202,6 @@ export default class QuenchResults extends Application {
     handleSuiteBegin(suite) {
         const suiteGroupKey = suite._quench_parentGroup;
         const isSuiteGroupRoot = suite._quench_suiteGroupRoot;
-
-        // Show detailed results in console if applicable
-        if (QuenchResults._shouldLogTestDetails() && !suite.root) {
-            if (isSuiteGroupRoot) {
-                console.group(this.quench._suiteGroups.get(suiteGroupKey).displayName);
-            } else {
-                console.group(`Suite: ${suite.title}`, { suite });
-            }
-        }
 
         // If this suite is the root of a suite group or does not belong to a suite group, don't show in the UI.
         if (!suiteGroupKey || isSuiteGroupRoot) return;
@@ -285,15 +222,11 @@ export default class QuenchResults extends Application {
      * @param {Suite} suite
      */
     handleSuiteEnd(suite) {
-        if (QuenchResults._shouldLogTestDetails() && !suite.root) {
-            console.groupEnd();
-        }
-
         const isSuiteGroupRoot = suite._quench_suiteGroupRoot;
         if (isSuiteGroupRoot) return;
 
         const $suiteLi = this.element.find(`li.suite[data-suite-id="${suite.id}"]`);
-        this._updateLineItemStatus($suiteLi, QuenchResults._getSuiteState(suite));
+        this._updateLineItemStatus($suiteLi, getSuiteState(suite));
     }
 
     /**
@@ -317,34 +250,16 @@ export default class QuenchResults extends Application {
      * @param {Test} test
      */
     handleTestEnd(test) {
-        const state = QuenchResults._getTestState(test);
-        if (state === QuenchResults.STATE.FAILURE) return;
-
-        if (QuenchResults._shouldLogTestDetails()) {
-            let stateString, stateColor;
-            switch (state) {
-                case QuenchResults.STATE.PENDING:
-                    stateString = "PENDING";
-                    stateColor = CONSOLE_COLORS.pending;
-                    break;
-                case QuenchResults.STATE.SUCCESS:
-                    stateString = "PASS";
-                    stateColor = CONSOLE_COLORS.pass;
-                    break;
-                default:
-                    stateString = "UNKNOWN";
-                    stateColor = "initial";
-            }
-            console.log(`%c(${stateString}) Test Complete: ${test.title}`, `color: ${stateColor}`, { test });
-        }
-
         let $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
 
+        // If there is not already a list item for this test, create a new one. This is necessary because `handleTestBegin` is not called
+        // automatically for "pending" tests
         if (!$testLi.length) {
             this.handleTestBegin(test);
             $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
         }
 
+        const state = getTestState(test);
         this._updateLineItemStatus($testLi, state);
     }
 
@@ -354,25 +269,15 @@ export default class QuenchResults extends Application {
      * @param {Error} err
      */
     handleTestFail(test, err) {
-        if (QuenchResults._shouldLogTestDetails()) {
-            console.groupCollapsed(`%c(FAIL) Test Complete: ${test.title}`, `color: ${CONSOLE_COLORS.fail}`, { test, err });
-            console.error(err.stack);
-            console.groupEnd();
-        }
-
         const $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
         $testLi.find("> .expandable").append(`<div class="error-message">${err.message}</div>`);
-        this._updateLineItemStatus($testLi, QuenchResults.STATE.FAILURE);
+        this._updateLineItemStatus($testLi, RUNNABLE_STATE.FAILURE);
     }
 
     /**
      * Called by {@link QuenchReporter} when mocha begins a test run
      */
     handleRunBegin() {
-        if (QuenchResults._shouldLogTestDetails()) {
-            console.group(`${this._logPrefix}DETAILED TEST RESULTS`);
-        }
-
         // Enable/Hide buttons as necessary
         this.element.find("#quench-select-all").prop("disabled", true);
         this.element.find("#quench-select-none").prop("disabled", true);
@@ -385,11 +290,6 @@ export default class QuenchResults extends Application {
      * @param {object} stats - Run statistics
      */
     handleRunEnd(stats) {
-        if (QuenchResults._shouldLogTestDetails()) {
-            console.groupEnd();
-            console.log(`${this._logPrefix}TEST RUN COMPLETE`, { stats });
-        }
-
         // Add summary
         const style = stats.failures ? "stats-fail" : "stats-pass";
         const $stats = $(`
@@ -408,11 +308,4 @@ export default class QuenchResults extends Application {
         this.element.find("#quench-run").prop("disabled", false);
         this.element.find("#quench-abort").hide();
     }
-}
-
-// Colors used for different test results in the console
-const CONSOLE_COLORS = {
-    fail: "#FF4444",
-    pass: "#55AA55",
-    pending: "#AA55AA",
 }
