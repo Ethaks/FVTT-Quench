@@ -12,7 +12,6 @@
     }
   ],
   "esmodules": [
-    "https://unpkg.com/chai/chai.js",
     "./quench-init.js"
   ],
   "styles": [

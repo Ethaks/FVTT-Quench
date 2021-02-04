@@ -23,17 +23,14 @@ Hooks.on("init", async function quenchInit() {
         location: oldGlobal.location,
         document: oldGlobal.document,
     };
-    try {
-        await import("https://unpkg.com/mocha/mocha.js");
-    } catch (e) {
-        console.error("Quench failed to import mocha.js", e);
-        return;
-    }
+
+    // Import dependencies
+    await import("./lib/mocha@8.2.1/mocha.js");
+    await import("./lib/chai@4.2.0/chai.js");
 
     // Cache the mocha and chai globals added by the above imports, then restore the previous state of globalThis
     const mocha = globalThis.mocha;
-    const chai = oldGlobal.chai;
-    delete oldGlobal.chai;
+    const chai = oldGlobal.chai;       // Somehow importing chai above results in chai being added to the old globalThis. It's probably some weirdness with async/await
     globalThis = oldGlobal;
 
     // Add the custom QuenchReporter to the Mocha class so that it can be used
