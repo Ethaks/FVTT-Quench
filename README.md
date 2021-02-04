@@ -35,6 +35,7 @@ You can register a Quench test batch to be executed with Quench by calling `quen
   - Chai - `assert`.
 - `options` -
   - `displayName` - the name for this batch that will be shown in the ui and in the detailed test results.
+    This is optional, quench will fall back to the batch key if omitted.
 
 Example:
 ```js
@@ -50,6 +51,14 @@ Hooks.on("quenchReady", quench => {
     }, { displayName: "QUENCH: Basic Passing Test" });
 });
 ```
+
+### Conventions
+
+By convention, batch keys should begin with the package short name, followed by a period and then a simple identifier for the batch.
+Batch display names should begin with the package name in caps, followed by a colon, and a short description of the tests included in the batch.
+
+Key: `<package>.batch.identifier`  
+Display name: `<PACKAGE>: A description of the batch's contents`
 
 ## License
 
