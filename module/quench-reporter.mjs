@@ -36,10 +36,10 @@ export default class QuenchReporter {
 
                 // Log detailed results in console
                 if (QuenchReporter._shouldLogTestDetails() && !suite.root) {
-                    const suiteGroupKey = suite._quench_parentGroup;
-                    const isSuiteGroupRoot = suite._quench_suiteGroupRoot;
-                    if (isSuiteGroupRoot) {
-                        console.group(quench._suiteGroups.get(suiteGroupKey).displayName);
+                    const batchKey = suite._quench_parentBatch;
+                    const isBatchRoot = suite._quench_batchRoot;
+                    if (isBatchRoot) {
+                        console.group(quench._testBatches.get(batchKey).displayName);
                     } else {
                         console.group(`Suite: ${suite.title}`, { suite });
                     }

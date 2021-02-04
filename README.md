@@ -10,7 +10,7 @@ You can register test suites with quench and view them in the test runner, then 
 
 The primary public API is the `Quench` class.
 A global instance of `Quench` is available as a global called `quench`.
-This class includes references to both the mocha and chai globals, as well as some methods to add new test suite groups and run the tests.
+This class includes references to both the mocha and chai globals, as well as some methods to add new test batches and run the tests.
 
 Quench uses "test batches" as another layer of organization above the built-in mocha suites and tests.
 Test batches are at the top layer of the hierarchy, can contain suites and/or tests, and can be enabled or disabled through the Quench UI.
@@ -27,7 +27,7 @@ Quench provides a `"quenchReady"` hook, which indicates when Quench is ready for
 You can register a Quench test batch to be executed with Quench by calling `quench.registerBatch`.
 `registerBatch` takes the following arguments:
 
-- `key` - a unique group key that identifies this test batch.
+- `key` - a unique batch key that identifies this test batch.
   If multiple test batches are registered with the same key, the latest registration will overwrite previous registrations.
 - `registrationFunction` - this function will be executed to register the suites and tests within this batch.
   It takes a `context` argument, which contains the following Mocha and Chai functions necessary for defining a suite of tests:

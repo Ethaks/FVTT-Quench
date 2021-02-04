@@ -3,7 +3,7 @@ import { quenchUtils } from "../utils/quench-utils.mjs";
 const { RUNNABLE_STATE, getTestState, getSuiteState } = quenchUtils._internal;
 
 /**
- * The visual UI for representing Quench suite groups and the tests results thereof.
+ * The visual UI for representing Quench test batches and the tests results thereof.
  */
 export default class QuenchResults extends Application {
     constructor(quench, options) {
@@ -28,8 +28,8 @@ export default class QuenchResults extends Application {
     /** @override */
     getData() {
         return {
-            anySuiteGroups: this.quench._suiteGroups.size > 0,
-            suiteGroups: Array.from(this.quench._suiteGroups.entries()).map(entry => {
+            anyBatches: this.quench._testBatches.size > 0,
+            batches: Array.from(this.quench._testBatches.entries()).map(entry => {
                 const [key, value] = entry;
                 return {
                     name: key,
@@ -45,20 +45,20 @@ export default class QuenchResults extends Application {
 
         // Select All Button
         $html.find("#quench-select-all").click(() => {
-            this.element.find(`#quench-suite-groups-list .suite-group input[type="checkbox"]`).prop("checked", true);
+            this.element.find(`#quench-batches-list .test-batch input[type="checkbox"]`).prop("checked", true);
         });
 
         // Select None Button
         $html.find("#quench-select-none").click(() => {
-            this.element.find(`#quench-suite-groups-list .suite-group input[type="checkbox"]`).prop("checked", false);
+            this.element.find(`#quench-batches-list .test-batch input[type="checkbox"]`).prop("checked", false);
         });
 
         // Run Button
         $html.find("#quench-run").click(async () => {
-            const enabledGroups = this._getCheckedGroups().reduce((acc, next) => {
+            const enabledBatches = this._getCheckedBatches().reduce((acc, next) => {
                 return next.enabled ? [...acc, next.key] : acc;
             }, []);
-            await this.quench.runSelectedSuiteGroups(enabledGroups);
+            await this.quench.runSelectedBatches(enabledBatches);
         });
 
         // Abort Button
@@ -68,12 +68,12 @@ export default class QuenchResults extends Application {
     }
 
     /**
-     * Clears the currently visible test results while maintaining currently selected suite groups
+     * Clears the currently visible test results while maintaining currently selected test batches
      */
     async clear() {
         if (this._state !== Application.RENDER_STATES.RENDERED) return;
 
-        const checked = this._getCheckedGroups();
+        const checked = this._getCheckedBatches();
 
         try {
             await this._render(false);
@@ -83,25 +83,25 @@ export default class QuenchResults extends Application {
             this._state = Application.RENDER_STATES.ERROR;
         }
 
-        this.element.find("#quench-suite-groups-list li.suite-group").each(function () {
-            const groupChecked = checked.find(sg => sg.key === this.dataset.suiteGroup);
-            if (groupChecked !== undefined) {
-                $(this).find("> label > input[type=checkbox]").prop("checked", groupChecked.enabled);
+        this.element.find("#quench-batches-list li.test-batch").each(function () {
+            const batchChecked = checked.find(batch => batch.key === this.dataset.batch);
+            if (batchChecked !== undefined) {
+                $(this).find("> label > input[type=checkbox]").prop("checked", batchChecked.enabled);
             }
         });
     }
 
     /**
-     * Determines which suite group elements are checked in the UI
-     * @returns {{key: string, enabled: boolean}[]} - An array of objects indicating whether each suite group (defined by the group's key) is enabled or not.
+     * Determines which test batch elements are checked in the UI
+     * @returns {{key: string, enabled: boolean}[]} - An array of objects indicating whether each test batch (defined by the batch's key) is enabled or not.
      * @private
      */
-    _getCheckedGroups() {
-        const $groupEls = this.element.find("#quench-suite-groups-list li");
-        return $groupEls
+    _getCheckedBatches() {
+        const $batchEls = this.element.find("#quench-batches-list li");
+        return $batchEls
             .map((i, el) => {
                 const enabled = $(el).find("input[type=checkbox]").prop("checked");
-                return { key: el.dataset.suiteGroup, enabled };
+                return { key: el.dataset.batch, enabled };
             })
             .get();
     }
@@ -109,7 +109,7 @@ export default class QuenchResults extends Application {
 
     /**
      * Finds or creates an unordered list to contain items for each child runnable (test or suite) of the given parent
-     * @param {jQuery} $parentListEl - The <li> of the parent suite group or suite
+     * @param {jQuery} $parentListEl - The <li> of the parent test batch or suite
      * @returns {jquery} - The <ul> into which child runnables can be inserted.
      * @private
      */
@@ -200,19 +200,19 @@ export default class QuenchResults extends Application {
      * @param {Suite} suite
      */
     handleSuiteBegin(suite) {
-        const suiteGroupKey = suite._quench_parentGroup;
-        const isSuiteGroupRoot = suite._quench_suiteGroupRoot;
+        const batchkey = suite._quench_parentBatch;
+        const isBatchRoot = suite._quench_batchRoot;
 
-        // If this suite is the root of a suite group or does not belong to a suite group, don't show in the UI.
-        if (!suiteGroupKey || isSuiteGroupRoot) return;
+        // If this suite is the root of a test batch or does not belong to a test batch, don't show in the UI.
+        if (!batchkey || isBatchRoot) return;
 
-        // Get the li to add this suite group to
+        // Get the li to add this test batch to
         const parentId = suite.parent.id;
-        const $groupLi = this.element.find(`li.suite-group[data-suite-group="${suiteGroupKey}"]`);
-        let $parentLi = $groupLi.find(`li.suite[data-suite-id="${parentId}"]`);
-        if (!$parentLi.length) $parentLi = $groupLi;
+        const $batchLi = this.element.find(`li.test-batch[data-batch="${batchkey}"]`);
+        let $parentLi = $batchLi.find(`li.suite[data-suite-id="${parentId}"]`);
+        if (!$parentLi.length) $parentLi = $batchLi;
 
-        // Add a li for this suite group
+        // Add a li for this test batch
         let $childSuiteList = this._findOrMakeChildList($parentLi);
         $childSuiteList.append(this._makeRunnableLineItem(suite.title, suite.id, false));
     }
@@ -222,8 +222,8 @@ export default class QuenchResults extends Application {
      * @param {Suite} suite
      */
     handleSuiteEnd(suite) {
-        const isSuiteGroupRoot = suite._quench_suiteGroupRoot;
-        if (isSuiteGroupRoot) return;
+        const isBatchRoot = suite._quench_batchRoot;
+        if (isBatchRoot) return;
 
         const $suiteLi = this.element.find(`li.suite[data-suite-id="${suite.id}"]`);
         this._updateLineItemStatus($suiteLi, getSuiteState(suite));
@@ -234,12 +234,12 @@ export default class QuenchResults extends Application {
      * @param {Test} test
      */
     handleTestBegin(test) {
-        const suiteGroupKey = test._quench_parentGroup;
+        const batchKey = test._quench_parentBatch;
         const parentId = test.parent.id;
 
-        const $groupLi = this.element.find(`li.suite-group[data-suite-group="${suiteGroupKey}"]`);
-        let $parentLi = $groupLi.find(`li.suite[data-suite-id="${parentId}"]`);
-        if (!$parentLi.length) $parentLi = $groupLi;
+        const $batchLi = this.element.find(`li.test-batch[data-batch="${batchKey}"]`);
+        let $parentLi = $batchLi.find(`li.suite[data-suite-id="${parentId}"]`);
+        if (!$parentLi.length) $parentLi = $batchLi;
 
         const $childTestList = this._findOrMakeChildList($parentLi);
         $childTestList.append(this._makeRunnableLineItem(test.title, test.id, true));

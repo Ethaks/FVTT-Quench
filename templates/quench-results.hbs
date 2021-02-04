@@ -1,12 +1,12 @@
 <div class="flexcol">
-    <div id="select-buttons" class="button-container" {{#unless anySuiteGroups}}style="display: none"{{/unless}}>
+    <div id="select-buttons" class="button-container" {{#unless anyBatches}}style="display: none"{{/unless}}>
         <button id="quench-select-all">{{localize "QUENCH.SelectAll"}}</button>
         <button id="quench-select-none">{{localize "QUENCH.SelectNone"}}</button>
     </div>
-    <div id="quench-suite-groups">
-        <ul id="quench-suite-groups-list">
-            {{#each suiteGroups}}
-                <li class="suite-group" data-suite-group="{{this.name}}">
+    <div id="quench-batches">
+        <ul id="quench-batches-list">
+            {{#each batches}}
+                <li class="test-batch" data-batch="{{this.name}}">
                     <label><input type="checkbox" checked />{{this.displayName}}</label>
                     <div class="expandable expanded"></div>
                 </li>

@@ -1,5 +1,5 @@
-export function registerBasicPassingSuiteGroup(quench) {
-    quench.registerSuiteGroup("quench.examples.basic-pass", (context) => {
+export function registerBasicPassingTestBatch(quench) {
+    quench.registerBatch("quench.examples.basic-pass", (context) => {
         const { describe, it, assert } = context;
 
         describe("Passing Suite", function() {
@@ -10,8 +10,8 @@ export function registerBasicPassingSuiteGroup(quench) {
     }, { displayName: "QUENCH: Basic Passing Test" });
 }
 
-export function registerBasicFailingSuiteGroup(quench) {
-    quench.registerSuiteGroup("quench.examples.basic-fail", (context) => {
+export function registerBasicFailingTestBatch(quench) {
+    quench.registerBatch("quench.examples.basic-fail", (context) => {
         const { describe, it, assert } = context;
 
         describe("Failing Suite", function() {
@@ -22,8 +22,8 @@ export function registerBasicFailingSuiteGroup(quench) {
     }, { displayName: "QUENCH: Basic Failing Test" });
 }
 
-export function registerNestedSuiteGroup(quench) {
-    quench.registerSuiteGroup("quench.examples.nested", (context) => {
+export function registerNestedTestBatch(quench) {
+    quench.registerBatch("quench.examples.nested", (context) => {
         const { describe, it, assert } = context;
 
         describe("level 0", function() {
@@ -58,8 +58,8 @@ export function registerNestedSuiteGroup(quench) {
     }, { displayName: "QUENCH: Nested Suites" });
 }
 
-export function registerOtherSuiteGroup(quench) {
-    quench.registerSuiteGroup("quench.examples.other", (context) => {
+export function registerOtherTestBatch(quench) {
+    quench.registerBatch("quench.examples.other", (context) => {
         const { describe, it, assert } = context;
 
         it("suite-less test", function() {});

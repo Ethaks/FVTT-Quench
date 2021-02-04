@@ -2,9 +2,10 @@ import QuenchReporter from "./module/quench-reporter.mjs";
 import Quench from "./module/quench.mjs";
 import { quenchUtils } from "./module/utils/quench-utils.mjs";
 import {
-    registerBasicFailingSuiteGroup,
-    registerBasicPassingSuiteGroup,
-    registerNestedSuiteGroup, registerOtherSuiteGroup,
+    registerBasicFailingTestBatch,
+    registerBasicPassingTestBatch,
+    registerNestedTestBatch,
+    registerOtherTestBatch,
 } from "./quench-tests/nonsense-tests.mjs";
 
 /**
@@ -86,10 +87,10 @@ Hooks.on("init", () => {
  */
 Hooks.on("quenchReady", (quench) => {
     if (game.settings.get("quench", "exampleTests")) {
-        registerBasicPassingSuiteGroup(quench);
-        registerBasicFailingSuiteGroup(quench);
-        registerNestedSuiteGroup(quench);
-        registerOtherSuiteGroup(quench);
+        registerBasicPassingTestBatch(quench);
+        registerBasicFailingTestBatch(quench);
+        registerNestedTestBatch(quench);
+        registerOtherTestBatch(quench);
     }
 });
 
