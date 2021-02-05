@@ -55,6 +55,17 @@ export default class Quench {
     }
 
     /**
+     * Runs all test batches.
+     *
+     * The contents of the test batches are registered with mocha when this function is executed.
+     *
+     * @returns {Promise<Runner>} - Returns the mocha Runner object for this test run.
+     */
+    async runAllBatches() {
+        return this.runSelectedBatches(this._testBatches.keys());
+    }
+
+    /**
      * Runs the test batches defined by the keys in `batchKeys`.
      *
      * The contents of the test batches are registered with mocha when this function is executed.
