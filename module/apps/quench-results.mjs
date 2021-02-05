@@ -13,13 +13,17 @@ export default class QuenchResults extends Application {
 
     /** @override */
     static get defaultOptions() {
+        const width = 550;
+        const sidebarWidth = 300;
+        const margin= 10;
+
         return mergeObject(super.defaultOptions, {
             title: "QUENCH.Title",
             id: "quench-results",
-            width: 450,
-            height: window.innerHeight - 30,
-            top: 10,
-            left: window.innerWidth - 450 - 300 - 20,
+            width,
+            height: window.innerHeight - (margin * 3),
+            top: margin,
+            left: window.innerWidth - width - sidebarWidth - (margin * 2),
             resizable: true,
             template: "/modules/quench/templates/quench-results.hbs",
         });
