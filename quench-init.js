@@ -80,17 +80,53 @@ Hooks.on("init", () => {
         default: false,
         onChange: () => location.reload(),
     });
+
+    game.settings.register("quench", "collapseSuccessful", {
+        name: game.i18n.localize("QUENCH.CollapseSuccessfulLabel"),
+        hint: game.i18n.localize("QUENCH.CollapseSuccessfulHint"),
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: false,
+    });
+
+    game.settings.register("quench", "autoShowQuenchWindow", {
+        name: game.i18n.localize("QUENCH.AutoShowQuenchWindowLabel"),
+        hint: game.i18n.localize("QUENCH.AutoShowQuenchWindowHint"),
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: false,
+    });
+
+    game.settings.register("quench", "autoRun", {
+        name: game.i18n.localize("QUENCH.AutoRunLabel"),
+        hint: game.i18n.localize("QUENCH.AutoRunHint"),
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: false,
+    });
 });
 
+
 /**
- * Register example tests
+ * Show quench window on load if enabled and register example tests if enabled
  */
-Hooks.on("quenchReady", (quench) => {
+Hooks.on("quenchReady", async (quench) => {
     if (game.settings.get("quench", "exampleTests")) {
         registerBasicPassingTestBatch(quench);
         registerBasicFailingTestBatch(quench);
         registerNestedTestBatch(quench);
         registerOtherTestBatch(quench);
+    }
+
+    let shouldRender = game.settings.get("quench", "autoShowQuenchWindow");
+    if (shouldRender) quench.app.render(true);
+
+    if (game.settings.get("quench", "autoRun")) {
+        if (shouldRender) await quenchUtils.pause(500);
+        quench.runAllBatches();
     }
 });
 

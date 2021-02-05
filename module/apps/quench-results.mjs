@@ -165,7 +165,7 @@ export default class QuenchResults extends Application {
             $expandable.slideToggle(50);
         });
 
-        this._updateLineItemStatus($li, RUNNABLE_STATE.IN_PROGRESS);
+        this._updateLineItemStatus($li, RUNNABLE_STATE.IN_PROGRESS, isTest);
         return $li;
     }
 
@@ -175,7 +175,7 @@ export default class QuenchResults extends Application {
      * @param {RUNNABLE_STATE} state - the state of the runnable
      * @private
      */
-    _updateLineItemStatus($listEl, state) {
+    _updateLineItemStatus($listEl, state, isTest) {
         const $icon = $listEl.find("> .summary > i.status-icon");
         let icon = "fa-sync";
         let style = "fas";
@@ -192,6 +192,11 @@ export default class QuenchResults extends Application {
         }
         $icon.removeClass();
         $icon.addClass(`status-icon ${style} ${icon}`);
+
+        if (game.settings.get("quench", "collapseSuccessful") && state === RUNNABLE_STATE.SUCCESS && !isTest) {
+            $listEl.find("> .summary > .expander").removeClass("fa-caret-down").addClass("fa-caret-right");
+            $listEl.find("> .expandable").hide();
+        }
     }
 
 

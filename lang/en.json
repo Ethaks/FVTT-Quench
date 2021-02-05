@@ -10,6 +10,12 @@
     "LogTestDetailsLabel": "Detailed Test Output",
     "LogTestDetailsHint": "Print detailed test results in the console",
     "ExampleTestsLabel": "Show Included Example Tests",
-    "ExampleTestsHint": "Show the included sample tests in the QUENCH window"
+    "ExampleTestsHint": "Show the included sample tests in the QUENCH window",
+    "AutoShowQuenchWindowLabel": "Show Quench Dialog on Startup",
+    "AutoShowQuenchWindowHint": "Will automatically render the Quench window when the game is loaded or refreshed",
+    "AutoRunLabel": "Run on Startup",
+    "AutoRunHint": "Will automatically run all Quench test batches when the game is loaded or refreshed",
+    "CollapseSuccessfulLabel": "Collapse Passing Suites",
+    "CollapseSuccessfulHint": "When enabled, suites for which all children suites and tests are passing will be collapsed by default"
   }
 }
