@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.3.0] 2021-05-27
+
+### ADDED
+
+- Include `chai.expect` and `chai.should` to the testing context, so they can be used as an alternative to `chai.assert`. (thanks @cramt for the addition)
+
 ## [0.2.0] 2021-02-05
 
 ### ADDED
