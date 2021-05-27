@@ -87,10 +87,10 @@ export default class Quench {
 
         // Prepare context methods to be provided to test fixtures
         const { after, afterEach, before, beforeEach, describe, it, utils } = Mocha;
-        const { assert } = this.chai;
+        const { assert, expect, should } = this.chai;
         const context = {
             after, afterEach, before, beforeEach, utils,
-            assert,
+            assert, expect, should
         };
 
         // Register suites and tests for provided batches
