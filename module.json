@@ -2,7 +2,7 @@
   "name": "quench",
   "title": "Quench",
   "description": "Harden your Foundry module or system code with end-to-end UI tests directly within Foundry. Powered by Mocha ",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": "Cole Schultz (cole#9640)",
   "languages": [
     {
@@ -18,11 +18,11 @@
     "quench.css"
   ],
   "minimumCoreVersion": "0.7.9",
-  "compatibleCoreVersion": "0.7.9",
+  "compatibleCoreVersion": "0.8.9",
 	"url": "https://github.com/schultzcole/FVTT-Quench",
 	"manifest": "https://raw.githubusercontent.com/schultzcole/FVTT-Quench/master/module.json",
-	"download": "https://github.com/schultzcole/FVTT-Quench/archive/0.3.0.zip",
-	"license": "https://github.com/schultzcole/FVTT-Quench/blob/0.3.0/LICENSE",
-	"readme": "https://github.com/schultzcole/FVTT-Quench/blob/0.3.0/README.md",
-	"changelog": "https://github.com/schultzcole/FVTT-Quench/blob/0.3.0/CHANGELOG.md"
+	"download": "https://github.com/schultzcole/FVTT-Quench/archive/0.4.0.zip",
+	"license": "https://github.com/schultzcole/FVTT-Quench/blob/0.4.0/LICENSE",
+	"readme": "https://github.com/schultzcole/FVTT-Quench/blob/0.4.0/README.md",
+	"changelog": "https://github.com/schultzcole/FVTT-Quench/blob/0.4.0/CHANGELOG.md"
 }

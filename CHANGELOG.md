@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## [0.4.0] 2021-09-05
+
+### ADDED
+
+- Now works with Foundry 0.8.x. 
+- Bumped mocha to 9.1.1 and chai to 4.3.4.
+
+### INTERNALS
+- Merged the two init hooks into one.
+- Cleaned out globalThis juggling, which wasn't working.
+- Had to slightly tweak mocha itself to keep window.ui from clobbering mocha.ui.
+
 ## [0.3.0] 2021-05-27
 
 ### ADDED
