@@ -1,4 +1,5 @@
 import QuenchResults from "./apps/quench-results.mjs";
+import QuenchReporter from "./quench-reporter.mjs"
 
 /**
  * The `Quench` class is the "hub" of the Quench module. It contains the primary public API for Quench, as well as references to the global
@@ -75,14 +76,13 @@ export default class Quench {
      */
     async runSelectedBatches(batchKeys) {
         // Cleanup - create a new root suite and clear the state of the results application
-        const Mocha = this.mocha.Mocha;
-        Mocha.suite = this.mocha.suite = new Mocha.Suite("__root", new Mocha.Context(), true);
+        mocha.suite = new Mocha.Suite("__root", new Mocha.Context(), true);
         await this.app.clear();
 
         // Initialize mocha with a quench reporter
-        this.mocha.setup({
+        mocha.setup({
             ui: "bdd",
-            reporter: "quench",
+            reporter: QuenchReporter,
         });
 
         // Prepare context methods to be provided to test fixtures

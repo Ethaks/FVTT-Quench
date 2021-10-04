@@ -1,7 +1,6 @@
-import QuenchReporter from "./module/quench-reporter.mjs";
 import Quench from "./module/quench.mjs";
 import { quenchUtils } from "./module/utils/quench-utils.mjs";
-import "./lib/mocha@9.1.1/mocha.js";
+import "./lib/mocha@9.1.2/mocha.js";
 import "./lib/chai@4.3.4/chai.js";
 
 import {
@@ -16,9 +15,6 @@ import {
  */
 Hooks.on("init", async function quenchInit() {
     
-    // Add the custom QuenchReporter to the Mocha class so that it can be used
-    mocha.Mocha.reporters.Quench = mocha.Mocha.reporters.quench = QuenchReporter;
-
     const quench = new Quench(mocha, chai);
     quench.utils = quenchUtils;
     globalThis.quench = quench;

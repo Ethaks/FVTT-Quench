@@ -1,9 +1,17 @@
 {
   "name": "quench",
   "title": "Quench",
-  "description": "Harden your Foundry module or system code with end-to-end UI tests directly within Foundry. Powered by Mocha ",
+  "description": "Harden your Foundry module or system code with end-to-end UI tests directly within Foundry. Powered by Mocha.",
   "version": "0.4.0",
-  "author": "Cole Schultz (cole#9640)",
+  "author": "Ethaks",
+  "authors": [
+      {
+      "name": "Ethaks",
+      "discord": "Ethaks#2903",
+      "ko-fi": "ethaks",
+      "url": "https://gitlab.com/Ethaks"
+      }
+    ],
   "languages": [
     {
       "lang": "en",

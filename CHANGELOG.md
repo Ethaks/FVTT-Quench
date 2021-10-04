@@ -4,8 +4,8 @@
 
 ### ADDED
 
-- Now works with Foundry 0.8.x. 
-- Bumped mocha to 9.1.1 and chai to 4.3.4.
+- Now works with Foundry 0.8.x.
+- Bumped mocha to 9.1.2 and chai to 4.3.4.
 
 ### INTERNALS
 - Merged the two init hooks into one.
