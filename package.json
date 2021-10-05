@@ -6,6 +6,16 @@
   "directories": {
     "lib": "lib"
   },
+  "contributors": [
+    {
+      "name": "Cole Schultz",
+      "discord": "cole#9640"
+    },
+    {
+      "name": "Ethaks",
+      "discord": "Ethaks#2903"
+    }
+  ],
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.mjs .",
