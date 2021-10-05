@@ -3,7 +3,9 @@
  * @param {number} millis - duration to pause for in milliseconds
  * @returns {Promise}
  */
-async function pause(millis) { return new Promise(resolve => setTimeout(resolve, millis)); }
+async function pause(millis) {
+  return new Promise((resolve) => setTimeout(resolve, millis));
+}
 
 /**
  * Resets the world to a blank state with no entities.
@@ -12,13 +14,16 @@ async function pause(millis) { return new Promise(resolve => setTimeout(resolve,
  * @returns {Promise<void>}
  */
 async function clearWorld() {
-    const exclude = [User].map(e => e.config.baseEntity.name);
-    for (let collection of Object.values(game)) {
-        if (!(collection instanceof EntityCollection) || exclude.includes(collection.entity)) continue;
-        if (!collection.size) continue;
+  const exclude = [User].map((e) => e.config.name);
+  for (let collection of Object.values(game)) {
+    if (!(collection instanceof DocumentCollection) || exclude.includes(collection.documentName))
+      continue;
+    if (!collection.size) continue;
 
-        await CONFIG[collection.entity].entityClass.delete(collection.entities.map(e => e.id));
-    }
+    await CONFIG[collection.documentName].documentClass.delete(
+      collection.entities.map((e) => e.id),
+    );
+  }
 }
 
 /**
@@ -26,11 +31,11 @@ async function clearWorld() {
  * @enum {string}
  */
 const RUNNABLE_STATE = {
-    IN_PROGRESS: "progress",
-    PENDING: "pending",
-    SUCCESS: "success",
-    FAILURE: "failure",
-}
+  IN_PROGRESS: "progress",
+  PENDING: "pending",
+  SUCCESS: "success",
+  FAILURE: "failure",
+};
 
 /**
  * Gets the STATE of a Test instance
@@ -38,15 +43,15 @@ const RUNNABLE_STATE = {
  * @returns {RUNNABLE_STATE} - the state of the test
  */
 function getTestState(test) {
-    if (test.pending) {
-        return RUNNABLE_STATE.PENDING;
-    } else if (test.state === undefined) {
-        return RUNNABLE_STATE.IN_PROGRESS;
-    } else if (test.state === "passed") {
-        return RUNNABLE_STATE.SUCCESS;
-    } else {
-        return RUNNABLE_STATE.FAILURE
-    }
+  if (test.pending) {
+    return RUNNABLE_STATE.PENDING;
+  } else if (test.state === undefined) {
+    return RUNNABLE_STATE.IN_PROGRESS;
+  } else if (test.state === "passed") {
+    return RUNNABLE_STATE.SUCCESS;
+  } else {
+    return RUNNABLE_STATE.FAILURE;
+  }
 }
 
 /**
@@ -55,25 +60,25 @@ function getTestState(test) {
  * @returns {RUNNABLE_STATE} - the state of the suite
  */
 function getSuiteState(suite) {
-    if (suite.pending) return RUNNABLE_STATE.PENDING;
+  if (suite.pending) return RUNNABLE_STATE.PENDING;
 
-    // Check child tests
-    const testStates = suite.tests.map(getTestState);
-    const allTestSucceed = testStates.every(t => t !== RUNNABLE_STATE.FAILURE);
-    if (!allTestSucceed) return RUNNABLE_STATE.FAILURE;
+  // Check child tests
+  const testStates = suite.tests.map(getTestState);
+  const allTestSucceed = testStates.every((t) => t !== RUNNABLE_STATE.FAILURE);
+  if (!allTestSucceed) return RUNNABLE_STATE.FAILURE;
 
-    // Check child suites
-    const suiteStates = suite.suites.map(getSuiteState);
-    const allSuitesSucceed = suiteStates.every(t => t !== RUNNABLE_STATE.FAILURE);
-    return allSuitesSucceed ? RUNNABLE_STATE.SUCCESS : RUNNABLE_STATE.FAILURE;
+  // Check child suites
+  const suiteStates = suite.suites.map(getSuiteState);
+  const allSuitesSucceed = suiteStates.every((t) => t !== RUNNABLE_STATE.FAILURE);
+  return allSuitesSucceed ? RUNNABLE_STATE.SUCCESS : RUNNABLE_STATE.FAILURE;
 }
 
 export const quenchUtils = {
-    pause,
-    clearWorld,
-    _internal: {
-        RUNNABLE_STATE,
-        getTestState,
-        getSuiteState,
-    },
+  pause,
+  clearWorld,
+  _internal: {
+    RUNNABLE_STATE,
+    getTestState,
+    getSuiteState,
+  },
 };

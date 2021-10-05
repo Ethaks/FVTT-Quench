@@ -14,4 +14,25 @@ module.exports = {
     "@typhonjs-fvtt/eslint-config-foundry.js/0.8.0",
     "plugin:prettier/recommended",
   ],
+
+  rules: {
+    "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+  },
+
+  overrides: [
+    {
+      files: ["./*.js"],
+      env: {
+        node: true,
+      },
+    },
+  ],
+
+  globals: {
+    mocha: "readonly",
+    Mocha: "readonly",
+    chai: "readonly",
+    $: "readonly",
+    quench: "readonly",
+  },
 };
