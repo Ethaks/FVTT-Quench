@@ -19,7 +19,7 @@
       "path": "lang/en.json"
     }
   ],
-  "esmodules": ["./quench-init.js"],
+  "esmodules": ["./quench.js"],
   "styles": ["quench.css"],
   "minimumCoreVersion": "0.8.5",
   "compatibleCoreVersion": "0.8.9",
