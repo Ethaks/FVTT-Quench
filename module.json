@@ -5,13 +5,13 @@
   "version": "0.4.0",
   "author": "Ethaks",
   "authors": [
-      {
+    {
       "name": "Ethaks",
       "discord": "Ethaks#2903",
       "ko-fi": "ethaks",
       "url": "https://gitlab.com/Ethaks"
-      }
-    ],
+    }
+  ],
   "languages": [
     {
       "lang": "en",
@@ -19,18 +19,14 @@
       "path": "lang/en.json"
     }
   ],
-  "esmodules": [
-    "./quench-init.js"
-  ],
-  "styles": [
-    "quench.css"
-  ],
+  "esmodules": ["./quench-init.js"],
+  "styles": ["quench.css"],
   "minimumCoreVersion": "0.7.9",
   "compatibleCoreVersion": "0.8.9",
-	"url": "https://github.com/schultzcole/FVTT-Quench",
-	"manifest": "https://raw.githubusercontent.com/schultzcole/FVTT-Quench/master/module.json",
-	"download": "https://github.com/schultzcole/FVTT-Quench/archive/0.4.0.zip",
-	"license": "https://github.com/schultzcole/FVTT-Quench/blob/0.4.0/LICENSE",
-	"readme": "https://github.com/schultzcole/FVTT-Quench/blob/0.4.0/README.md",
-	"changelog": "https://github.com/schultzcole/FVTT-Quench/blob/0.4.0/CHANGELOG.md"
+  "url": "https://github.com/schultzcole/FVTT-Quench",
+  "manifest": "https://raw.githubusercontent.com/schultzcole/FVTT-Quench/master/module.json",
+  "download": "https://github.com/schultzcole/FVTT-Quench/archive/0.4.0.zip",
+  "license": "https://github.com/schultzcole/FVTT-Quench/blob/0.4.0/LICENSE",
+  "readme": "https://github.com/schultzcole/FVTT-Quench/blob/0.4.0/README.md",
+  "changelog": "https://github.com/schultzcole/FVTT-Quench/blob/0.4.0/CHANGELOG.md"
 }

@@ -6,7 +6,11 @@
   "directories": {
     "lib": "lib"
   },
+  "private": true,
   "scripts": {
+    "lint": "eslint --ext .js,.mjs .",
+    "lint:fix": "eslint --ext .js,.mjs --fix .",
+    "format": "prettier --write \"./**/*.(js|mjs|json|css|yml)\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,7 +24,18 @@
   },
   "homepage": "https://github.com/Ethaks/FVTT-Quench#readme",
   "devDependencies": {
+    "@typhonjs-fvtt/eslint-config-foundry.js": "^0.8.0",
     "chai": "^4.3.4",
-    "mocha": "^9.1.2"
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "husky": "^7.0.2",
+    "lint-staged": "^11.2.0",
+    "mocha": "^9.1.2",
+    "prettier": "^2.4.1"
+  },
+  "lint-staged": {
+    "*.(js|mjs)": "eslint --fix",
+    "*.(json|css|yml)": "prettier --write"
   }
 }
