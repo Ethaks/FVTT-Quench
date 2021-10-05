@@ -1,9 +1,7 @@
 import Quench from "./module/quench.mjs";
 import { quenchUtils } from "./module/utils/quench-utils.mjs";
-// import "./lib/mocha@9.1.2/mocha.js";
-// import "./lib/chai@4.3.4/chai.js";
 import "mocha/mocha.js";
-import "chai/chai.js";
+import * as chai from "chai";
 
 import {
   registerBasicFailingTestBatch,
