@@ -34,6 +34,7 @@ async function buildCode() {
     minify: false,
     sourcemap: true,
     outfile: `${distDirectory}/quench.js`,
+    sourceRoot: name,
   });
 }
 
