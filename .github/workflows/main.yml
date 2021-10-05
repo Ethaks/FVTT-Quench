@@ -15,6 +15,26 @@ jobs:
         id: get_version
         uses: battila7/get-version-action@v2
 
+      - name: Install node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.node_version }}
+
+      - name: Cache Node.js modules
+        uses: actions/cache@v2
+        with:
+          path: .npm
+          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-
+            ${{ runner.OS }}-
+
+      - name: Install dependencies
+        run: npm ci --cache .npm --prefer-offline
+
+      - name: Build JS
+        run: npm run build
+
       # Substitute the Manifest and Download URLs in the module.json
       - name: Substitute Manifest and Download Links For Versioned Ones
         id: sub_manifest_link_version
@@ -28,7 +48,7 @@ jobs:
           download: https://github.com/${{github.repository}}/releases/download/${{github.event.release.tag_name}}/module.zip
 
       # Create a zip file with all files required by the module to add to the release
-      - run: zip -r ./module.zip module.json LICENSE lang/ lib/ module/ quench-init.js quench-tests/ quench.css templates/
+      - run: zip -r ./module.zip module.json LICENSE lang/ module/ quench.js quench-tests/ quench.css templates/
 
       # Create a release for this specific version
       - name: Update Release with Files

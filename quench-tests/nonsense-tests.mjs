@@ -83,7 +83,9 @@ export function registerOtherTestBatch(quench) {
         it("test alpha", function () {});
       });
       describe("suite beta", function () {
-        it("test beta", function () {});
+        it("test beta", function () {
+          assert.ok(true);
+        });
         it("a nested pending test");
       });
     },
