@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.4.1] 2021-10-05
+
+### Bug Fixes
+
+- Replace entity references with document ones to match Foundry's Document usage
+
 ## [0.4.0] 2021-10-05
 
 ### ADDED
