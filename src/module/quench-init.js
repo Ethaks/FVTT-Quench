@@ -1,5 +1,5 @@
-import Quench from "./module/quench.mjs";
-import { quenchUtils } from "./module/utils/quench-utils.mjs";
+import Quench from "./quench.mjs";
+import { quenchUtils } from "./utils/quench-utils.mjs";
 import "mocha/mocha.js";
 import * as chai from "chai";
 

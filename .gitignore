@@ -1,5 +1,4 @@
 .idea/
 node_modules/
 .eslintcache
-quench.js
-quench.js.map
+dist/

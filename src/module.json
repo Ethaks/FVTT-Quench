@@ -20,7 +20,7 @@
     }
   ],
   "esmodules": ["./quench.js"],
-  "styles": ["quench.css"],
+  "styles": ["styles/quench.css"],
   "minimumCoreVersion": "0.8.5",
   "compatibleCoreVersion": "0.8.9",
   "allowBugReporter": true,
