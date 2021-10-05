@@ -21,12 +21,13 @@
   ],
   "esmodules": ["./quench-init.js"],
   "styles": ["quench.css"],
-  "minimumCoreVersion": "0.7.9",
+  "minimumCoreVersion": "0.8.5",
   "compatibleCoreVersion": "0.8.9",
-  "url": "https://github.com/schultzcole/FVTT-Quench",
-  "manifest": "https://raw.githubusercontent.com/schultzcole/FVTT-Quench/master/module.json",
-  "download": "https://github.com/schultzcole/FVTT-Quench/archive/0.4.0.zip",
-  "license": "https://github.com/schultzcole/FVTT-Quench/blob/0.4.0/LICENSE",
-  "readme": "https://github.com/schultzcole/FVTT-Quench/blob/0.4.0/README.md",
-  "changelog": "https://github.com/schultzcole/FVTT-Quench/blob/0.4.0/CHANGELOG.md"
+  "allowBugReporter": true,
+  "url": "https://github.com/Ethaks/FVTT-Quench",
+  "manifest": "https://github.com/Ethaks/FVTT-Quench/releases/latest/download/module.json",
+  "download": "https://github.com/Ethaks/FVTT-Quench/releases/download/v0.4.0/module.zip",
+  "license": "https://github.com/Ethaks/FVTT-Quench/blob/master/LICENSE",
+  "readme": "https://github.com/Ethaks/FVTT-Quench#readme",
+  "changelog": "https://github.com/Ethaks/FVTT-Quench/blob/master/CHANGELOG.md"
 }
