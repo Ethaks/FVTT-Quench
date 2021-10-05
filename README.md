@@ -37,7 +37,7 @@ You can register a Quench test batch to be executed with Quench by calling `quen
 - `registrationFunction` - this function will be executed to register the suites and tests within this batch.
   It takes a `context` argument, which contains the following Mocha and Chai functions necessary for defining a suite of tests:
   - Mocha - `describe`, `it`, `after`, `afterEach`, `before`, `beforeEach`, and `utils`.
-  - Chai - `assert`, `expect`, and `should`.
+  - Chai - `assert`, `expect`, and `should`. `should` is also made available by extending `Object.prototype`.
 - `options` -
   - `displayName` - the name for this batch that will be shown in the ui and in the detailed test results.
     This is optional, quench will fall back to the batch key if omitted.

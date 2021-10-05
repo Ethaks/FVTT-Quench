@@ -28,7 +28,7 @@ export default class Quench {
    *
    * The registration function is passed a `context` argument, which contains the mocha and chai methods necessary for defining a test.
    * - Mocha - `describe`, `it`, `after`, `afterEach`, `before`, `beforeEach`, and `utils`.
-   * - Chai - `assert`, `expect`, `should`
+   * - Chai - `assert`, `expect`, and `should`; the last one is also made available by extending `Object.prototype`.
    *
    * @example
    * quench.registerBatch("quench.examples.basic-pass", (context) => {
@@ -88,6 +88,9 @@ export default class Quench {
     // Prepare context methods to be provided to test fixtures
     const { after, afterEach, before, beforeEach, describe, it, utils } = Mocha;
     const { assert, expect, should } = this.chai;
+    // Run should to patch object prototype for suites not needing helper functions
+    should();
+
     const context = {
       after,
       afterEach,

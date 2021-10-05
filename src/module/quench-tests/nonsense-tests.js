@@ -2,11 +2,17 @@ export function registerBasicPassingTestBatch(quench) {
   quench.registerBatch(
     "quench.examples.basic-pass",
     (context) => {
-      const { describe, it, assert } = context;
-
+      const { describe, it, assert, expect } = context;
       describe("Passing Suite", function () {
         it("Passing Test", function () {
           assert.ok(true);
+        });
+        it("Passing Test using expect", () => {
+          expect(2).to.equal(2);
+        });
+        it("Passing Test using should", () => {
+          const foo = { bar: "baz" };
+          foo.should.have.property("bar", "baz");
         });
       });
     },
@@ -23,6 +29,10 @@ export function registerBasicFailingTestBatch(quench) {
       describe("Failing Suite", function () {
         it("Failing Test", function () {
           assert.fail();
+        });
+        it("Failing Test using should", () => {
+          const should = context.should();
+          should.not.equal(1, 1);
         });
       });
     },
