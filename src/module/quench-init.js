@@ -1,5 +1,5 @@
-import Quench from "./quench.mjs";
-import { quenchUtils } from "./utils/quench-utils.mjs";
+import Quench from "./quench.js";
+import { quenchUtils } from "./utils/quench-utils.js";
 import "mocha/mocha.js";
 import * as chai from "chai";
 
@@ -8,7 +8,7 @@ import {
   registerBasicPassingTestBatch,
   registerNestedTestBatch,
   registerOtherTestBatch,
-} from "./quench-tests/nonsense-tests.mjs";
+} from "./quench-tests/nonsense-tests.js";
 
 /**
  * Sets up Quench and its dependencies

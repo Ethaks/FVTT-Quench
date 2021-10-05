@@ -1,5 +1,5 @@
-import QuenchResults from "./apps/quench-results.mjs";
-import QuenchReporter from "./quench-reporter.mjs";
+import QuenchResults from "./apps/quench-results.js";
+import QuenchReporter from "./quench-reporter.js";
 
 /**
  * The `Quench` class is the "hub" of the Quench module. It contains the primary public API for Quench, as well as references to the global

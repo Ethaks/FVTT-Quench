@@ -1,4 +1,4 @@
-import { quenchUtils } from "./utils/quench-utils.mjs";
+import { quenchUtils } from "./utils/quench-utils.js";
 
 const { RUNNABLE_STATE, getTestState } = quenchUtils._internal;
 

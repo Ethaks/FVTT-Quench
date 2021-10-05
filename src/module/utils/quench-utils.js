@@ -14,14 +14,14 @@ async function pause(millis) {
  * @returns {Promise<void>}
  */
 async function clearWorld() {
-  const exclude = [User].map((e) => e.config.name);
+  const exclude = [User].map((e) => e.metadata.name);
   for (let collection of Object.values(game)) {
     if (!(collection instanceof DocumentCollection) || exclude.includes(collection.documentName))
       continue;
     if (!collection.size) continue;
 
-    await CONFIG[collection.documentName].documentClass.delete(
-      collection.entities.map((e) => e.id),
+    await CONFIG[collection.documentName].documentClass.deleteDocuments(
+      collection.documents.map((e) => e.id),
     );
   }
 }
