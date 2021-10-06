@@ -103,7 +103,7 @@ export default class Quench {
     };
 
     // Register suites and tests for provided batches
-    for (let key of batchKeys) {
+    for (const key of batchKeys) {
       // Override `describe` to add a property to the resulting suite indicating which quench batch the suite belongs to.
       context.describe = function quenchDescribe(...args) {
         const suite = describe(...args);

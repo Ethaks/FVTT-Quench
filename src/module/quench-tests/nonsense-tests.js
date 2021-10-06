@@ -1,4 +1,18 @@
-export function registerBasicPassingTestBatch(quench) {
+/**
+ * Registers all example tests, which also serves as a quick self-test.
+ *
+ * @param {Quench} quench - the quench instance the tests are registered with
+ */
+export function registerExampleTests(quench) {
+  [
+    registerBasicPassingTestBatch,
+    registerBasicFailingTestBatch,
+    registerNestedTestBatch,
+    registerOtherTestBatch,
+  ].forEach((f) => f(quench));
+}
+
+function registerBasicPassingTestBatch(quench) {
   quench.registerBatch(
     "quench.examples.basic-pass",
     (context) => {
@@ -14,13 +28,17 @@ export function registerBasicPassingTestBatch(quench) {
           const foo = { bar: "baz" };
           foo.should.have.property("bar", "baz");
         });
+        it("Passing Test using should helper", () => {
+          const should = context.should();
+          should.not.equal(1, 2);
+        });
       });
     },
     { displayName: "QUENCH: Basic Passing Test" },
   );
 }
 
-export function registerBasicFailingTestBatch(quench) {
+function registerBasicFailingTestBatch(quench) {
   quench.registerBatch(
     "quench.examples.basic-fail",
     (context) => {
@@ -30,17 +48,13 @@ export function registerBasicFailingTestBatch(quench) {
         it("Failing Test", function () {
           assert.fail();
         });
-        it("Failing Test using should", () => {
-          const should = context.should();
-          should.not.equal(1, 1);
-        });
       });
     },
     { displayName: "QUENCH: Basic Failing Test" },
   );
 }
 
-export function registerNestedTestBatch(quench) {
+function registerNestedTestBatch(quench) {
   quench.registerBatch(
     "quench.examples.nested",
     (context) => {
@@ -80,7 +94,7 @@ export function registerNestedTestBatch(quench) {
   );
 }
 
-export function registerOtherTestBatch(quench) {
+function registerOtherTestBatch(quench) {
   quench.registerBatch(
     "quench.examples.other",
     (context) => {

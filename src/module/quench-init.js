@@ -3,12 +3,7 @@ import { quenchUtils } from "./utils/quench-utils.js";
 import "mocha/mocha.js";
 import * as chai from "chai";
 
-import {
-  registerBasicFailingTestBatch,
-  registerBasicPassingTestBatch,
-  registerNestedTestBatch,
-  registerOtherTestBatch,
-} from "./quench-tests/nonsense-tests.js";
+import { registerExampleTests } from "./quench-tests/nonsense-tests.js";
 
 /**
  * Sets up Quench and its dependencies
@@ -34,7 +29,9 @@ Hooks.on("init", async function quenchInit() {
     config: true,
     type: Boolean,
     default: false,
-    onChange: () => location.reload(),
+    onChange: debounce(() => {
+      location.reload();
+    }, 500),
   });
 
   game.settings.register("quench", "collapseSuccessful", {
@@ -69,9 +66,7 @@ Hooks.on("init", async function quenchInit() {
 /**
  * Inject QUENCH button in sidebar
  */
-Hooks.on("renderSidebar", function (sidebar, html, _options) {
-  console.log("Rendering sidebar!", arguments);
-
+Hooks.on("renderSidebar", function (_sidebar, html, _options) {
   const $quenchButton = $(
     `<button class="quench-button"><b>${game.i18n.localize("QUENCH.Title")}</b></button>`,
   );
@@ -88,13 +83,10 @@ Hooks.on("renderSidebar", function (sidebar, html, _options) {
  */
 Hooks.on("quenchReady", async (quench) => {
   if (game.settings.get("quench", "exampleTests")) {
-    registerBasicPassingTestBatch(quench);
-    registerBasicFailingTestBatch(quench);
-    registerNestedTestBatch(quench);
-    registerOtherTestBatch(quench);
+    registerExampleTests(quench);
   }
 
-  let shouldRender = game.settings.get("quench", "autoShowQuenchWindow");
+  const shouldRender = game.settings.get("quench", "autoShowQuenchWindow");
   if (shouldRender) quench.app.render(true);
 
   if (game.settings.get("quench", "autoRun")) {

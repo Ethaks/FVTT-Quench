@@ -181,7 +181,7 @@ export default class QuenchResults extends Application {
   _updateLineItemStatus($listEl, state, isTest) {
     const $icon = $listEl.find("> .summary > i.status-icon");
     let icon = "fa-sync";
-    let style = "fas";
+    const style = "fas";
     switch (state) {
       case RUNNABLE_STATE.PENDING:
         icon = "fa-minus-circle";
@@ -231,7 +231,7 @@ export default class QuenchResults extends Application {
     if (!$parentLi.length) $parentLi = $batchLi;
 
     // Add a li for this test batch
-    let $childSuiteList = this._findOrMakeChildList($parentLi);
+    const $childSuiteList = this._findOrMakeChildList($parentLi);
     $childSuiteList.append(this._makeRunnableLineItem(suite.title, suite.id, false));
   }
 

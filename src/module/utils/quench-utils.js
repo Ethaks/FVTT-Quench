@@ -15,7 +15,7 @@ async function pause(millis) {
  */
 async function clearWorld() {
   const exclude = [User].map((e) => e.metadata.name);
-  for (let collection of Object.values(game)) {
+  for (const collection of Object.values(game)) {
     if (!(collection instanceof DocumentCollection) || exclude.includes(collection.documentName))
       continue;
     if (!collection.size) continue;
