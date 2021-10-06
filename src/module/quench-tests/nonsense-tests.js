@@ -16,7 +16,7 @@ function registerBasicPassingTestBatch(quench) {
   quench.registerBatch(
     "quench.examples.basic-pass",
     (context) => {
-      const { describe, it, assert, expect } = context;
+      const { describe, it, assert, expect, should } = context;
       describe("Passing Suite", function () {
         it("Passing Test", function () {
           assert.ok(true);
@@ -29,7 +29,6 @@ function registerBasicPassingTestBatch(quench) {
           foo.should.have.property("bar", "baz");
         });
         it("Passing Test using should helper", () => {
-          const should = context.should();
           should.not.equal(1, 2);
         });
       });

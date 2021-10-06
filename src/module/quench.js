@@ -87,9 +87,9 @@ export default class Quench {
 
     // Prepare context methods to be provided to test fixtures
     const { after, afterEach, before, beforeEach, describe, it, utils } = Mocha;
-    const { assert, expect, should } = this.chai;
-    // Run should to patch object prototype for suites not needing helper functions
-    should();
+    const { assert, expect } = this.chai;
+    // Run should to patch object prototype
+    const should = this.chai.should();
 
     const context = {
       after,
