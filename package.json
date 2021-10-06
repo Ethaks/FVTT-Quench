@@ -1,6 +1,6 @@
 {
   "name": "fvtt-quench",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Harden your Foundry module or system code with end-to-end UI tests directly within Foundry. Powered by Mocha.",
   "main": "quench-init.js",
   "directories": {

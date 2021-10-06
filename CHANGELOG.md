@@ -1,10 +1,20 @@
 # CHANGELOG
 
+## [0.4.2] 2021-10-06
+
+### Bug Fixes
+
+- Debounce page reloads when the example tests setting is changed.
+
+### Features
+
+- Pre-run `chai.should` and only pass its resulting helper into the context.
+
 ## [0.4.1] 2021-10-05
 
 ### Bug Fixes
 
-- Replace entity references with document ones to match Foundry's Document usage
+- Replace entity references with document ones to match Foundry's Document usage.
 
 ## [0.4.0] 2021-10-05
 
@@ -14,6 +24,7 @@
 - Bumped mocha to 9.1.2 and chai to 4.3.4.
 
 ### INTERNALS
+
 - Merged the two init hooks into one.
 - Cleaned out globalThis juggling, which wasn't working.
 - Had to slightly tweak mocha itself to keep window.ui from clobbering mocha.ui.
