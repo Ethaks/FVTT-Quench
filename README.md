@@ -11,6 +11,8 @@ Powered by [Mocha](https://mochajs.org/) and also includes [Chai](https://www.ch
 Quench adds a test runner UI as a native Foundry `Application`.
 You can register test suites with quench and view them in the test runner, then run them and view the results.
 
+![Example Tests](docs/example-tests.webp)
+
 ## Usage
 
 The primary public API is the `Quench` class.
