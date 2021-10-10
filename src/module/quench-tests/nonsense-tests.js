@@ -31,6 +31,9 @@ function registerBasicPassingTestBatch(quench) {
         it("Passing Test using should helper", () => {
           should.not.equal(1, 2);
         });
+        it("Passing Test with a snapshot", () => {
+          expect({ foo: "baz" }).to.matchSnapshot(this);
+        });
       });
     },
     { displayName: "QUENCH: Basic Passing Test" },
@@ -57,7 +60,7 @@ function registerNestedTestBatch(quench) {
   quench.registerBatch(
     "quench.examples.nested",
     (context) => {
-      const { describe, it, assert } = context;
+      const { describe, it, assert, expect } = context;
 
       describe("level 0", function () {
         describe("level 1 A", function () {
@@ -80,6 +83,10 @@ function registerNestedTestBatch(quench) {
           describe("level 2 B", function () {
             it("a thing", function () {
               assert.ok(true);
+            });
+
+            it("uses a snapshot in a nested test", function () {
+              expect({ foo: "bar" }).isForced.to.matchSnapshot(this);
             });
           });
 

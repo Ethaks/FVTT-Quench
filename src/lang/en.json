@@ -16,6 +16,13 @@
     "AutoRunLabel": "Run on Startup",
     "AutoRunHint": "Will automatically run all Quench test batches when the game is loaded or refreshed",
     "CollapseSuccessfulLabel": "Collapse Passing Suites",
-    "CollapseSuccessfulHint": "When enabled, suites for which all children suites and tests are passing will be collapsed by default"
+    "CollapseSuccessfulHint": "When enabled, suites for which all children suites and tests are passing will be collapsed by default",
+
+    "WARN": {
+      "BatchAlreadyExists": "QUENCH: Test batch \"{key}\" already exists. Overwriting... "
+    },
+    "ERROR": {
+      "InvalidPackageName": "QUENCH: Test batch \"{key}\" uses invalid package name \"{packageName}\". Batch registration failed!"
+    }
   }
 }

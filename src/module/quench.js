@@ -1,5 +1,7 @@
 import QuenchResults from "./apps/quench-results.js";
 import QuenchReporter from "./quench-reporter.js";
+import { quenchUtils } from "./utils/quench-utils.js";
+import { quenchSnapUtils } from "./snapshot.js";
 
 /**
  * The `Quench` class is the "hub" of the Quench module. It contains the primary public API for Quench, as well as references to the global
@@ -7,15 +9,21 @@ import QuenchReporter from "./quench-reporter.js";
  *
  * @property {Mocha} mocha - the global mocha instance
  * @property {object} chai - the global chai instance
+ * @property {object} utils - Various utility functions
+ * @property {object} snapUtils - Utility functions related to snapshot handling
  * @property {Map<string, object>} _testBatches - a map of registered test batches
  * @property {QuenchResults} app - the singleton instance of `QuenchResults` that this `Quench` instance uses
+ * @property {Object.<string, object>} _snapshotCache - a map storing snapshot objects
  */
 export default class Quench {
   constructor(mocha, chai) {
     this.mocha = mocha;
     this.mocha._cleanReferencesAfterRun = false;
     this.chai = chai;
+    this.utils = quenchUtils;
+    this.snapUtils = quenchSnapUtils;
     this._testBatches = new Map();
+    this._snapshotCache = quenchSnapUtils.fileCache;
     this.app = new QuenchResults(this);
   }
 
@@ -48,8 +56,14 @@ export default class Quench {
    * @param {string|null} [options.displayName] - A user-friendly name to show in the Quench UI and detailed results.
    */
   registerBatch(key, fn, { displayName = null } = {}) {
+    const [packageName] = this.utils._internal.getBatchNameParts(key);
+    if (![...game.modules, game.system].map((p) => p[0]).includes(packageName)) {
+      return ui?.notifications?.error(
+        game?.i18n?.format("QUENCH.ERROR.InvalidPackageName", { key, packageName }),
+      );
+    }
     if (this._testBatches.has(key)) {
-      ui?.notifications?.warn(`QUENCH: Test batch "${key}" already exists. Overwriting...`);
+      ui?.notifications?.warn(game.i18n.format("QUENCH.WARN.BatchAlreadyExists", { key }));
     }
     this._testBatches.set(key, { displayName: displayName ?? key, fn });
     this.app.clear();
@@ -101,6 +115,9 @@ export default class Quench {
       expect,
       should,
     };
+
+    // Fetch all snapshot files for the batches to be run
+    await this.snapUtils.loadAllSnaps(batchKeys);
 
     // Register suites and tests for provided batches
     for (const key of batchKeys) {

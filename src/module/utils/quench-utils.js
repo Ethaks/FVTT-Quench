@@ -20,9 +20,7 @@ async function clearWorld() {
       continue;
     if (!collection.size) continue;
 
-    await CONFIG[collection.documentName].documentClass.deleteDocuments(
-      collection.documents.map((e) => e.id),
-    );
+    await collection.documentClass.deleteDocuments(collection.map((e) => e.id));
   }
 }
 
@@ -73,6 +71,17 @@ function getSuiteState(suite) {
   return allSuitesSucceed ? RUNNABLE_STATE.SUCCESS : RUNNABLE_STATE.FAILURE;
 }
 
+/**
+ * Returns a tuple containing the package name and the batch identifier
+ *
+ * @param {string} batchKey - The batch key
+ * @returns {[string, string]} A tuple of package name and batch identifier
+ */
+function getBatchNameParts(batchKey) {
+  const index = batchKey.indexOf(".");
+  return [batchKey.slice(0, index), batchKey.slice(index + 1)];
+}
+
 export const quenchUtils = {
   pause,
   clearWorld,
@@ -80,5 +89,6 @@ export const quenchUtils = {
     RUNNABLE_STATE,
     getTestState,
     getSuiteState,
+    getBatchNameParts,
   },
 };

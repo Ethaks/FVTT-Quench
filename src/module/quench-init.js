@@ -4,13 +4,14 @@ import "mocha/mocha.js";
 import * as chai from "chai";
 
 import { registerExampleTests } from "./quench-tests/nonsense-tests.js";
+import { enableSnapshots } from "./snapshot.js";
 
 /**
  * Sets up Quench and its dependencies
  */
-Hooks.on("init", async function quenchInit() {
+Hooks.on("init", function quenchInit() {
+  chai.use(enableSnapshots);
   const quench = new Quench(mocha, chai);
-  quench.utils = quenchUtils;
   globalThis.quench = quench;
 
   game.settings.register("quench", "logTestDetails", {
@@ -60,6 +61,9 @@ Hooks.on("init", async function quenchInit() {
     type: Boolean,
     default: false,
   });
+});
+
+Hooks.on("setup", function () {
   Hooks.callAll("quenchReady", quench);
 });
 
@@ -81,7 +85,7 @@ Hooks.on("renderSidebar", function (_sidebar, html, _options) {
 /**
  * Show quench window on load if enabled and register example tests if enabled
  */
-Hooks.on("quenchReady", async (quench) => {
+Hooks.on("ready", async () => {
   if (game.settings.get("quench", "exampleTests")) {
     registerExampleTests(quench);
   }
