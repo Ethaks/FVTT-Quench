@@ -26,6 +26,13 @@ const loadSnap = async (batchKey) => {
   return fileCache[batchKey];
 };
 
+/** Resets the current fileCache by deleting all of its keys */
+const resetCache = () => {
+  for (const key of Object.keys(fileCache)) {
+    delete fileCache[key];
+  }
+};
+
 /**
  * Loads all snaps for a Quench run
  *
@@ -34,21 +41,18 @@ const loadSnap = async (batchKey) => {
  * @returns {Promise<object[]>} A Promise that is resolved when all snapshot files are loaded
  */
 const loadAllSnaps = async (batchKeys) => {
-  const packages = batchKeys.reduce((acc, key) => {
-    const [packageName, identifier] = quenchUtils._internal.getBatchNameParts(key);
-    (acc[packageName] || (acc[packageName] = [])).push({
-      identifier,
-      key,
-      fileName: getFileName(key),
-    });
+  resetCache();
+  const directories = batchKeys.reduce((acc, key) => {
+    const directory = quench._testBatches.get(key).snapshotDir;
+    (acc[directory] || (acc[directory] = [])).push({ key, file: getFileName(key) });
     return acc;
   }, {});
   const loadPromises = [];
-  for (const packageName of Object.keys(packages)) {
+  for (const [directory, directoryData] of Object.entries(directories)) {
     try {
-      const { files } = await FilePicker.browse("data", getSnapDir(packageName));
+      const { files } = await FilePicker.browse("data", directory);
       for (const file of files) {
-        const snapFileData = packages[packageName]?.find((p) => p.fileName === file);
+        const snapFileData = directoryData?.find((d) => d.file === file);
         if (snapFileData) {
           loadPromises.push(loadSnap(snapFileData.key));
         }
@@ -57,7 +61,8 @@ const loadAllSnaps = async (batchKeys) => {
       // TODO: Error handling?
     }
   }
-  return Promise.all(loadPromises);
+  await Promise.all(loadPromises);
+  return fileCache;
 };
 
 /**
@@ -68,23 +73,70 @@ const loadAllSnaps = async (batchKeys) => {
  * @returns {object} A snapshot object
  */
 const readSnap = (batchKey, name) => {
-  if (!fileCache[batchKey] || !(name in fileCache[batchKey])) throw new Error("Snapshot not found");
+  if (!fileCache[batchKey] || !(name in fileCache[batchKey])) throw Error("Snapshot not found");
   return fileCache[batchKey][name];
 };
 
-/** The directory used for snapshots */
-const getSnapDir = (packageName) =>
-  `${game.system.id === packageName ? "systems" : "modules"}/${packageName}/__snapshots__`;
+/**
+ * Returns a batch's snapshot directory, either by using the configured value or the default,
+ * which resolves to "Data/<package type>/<package name>".
+ *
+ * @param {string} batchKey - The batch whose directory is requested
+ * @returns {string} The batch's snapshot directory
+ */
+const getSnapDir = (batchKey) => {
+  return quench._testBatches.get(batchKey).snapshotDir;
+  // const batchData = quench._testBatches.get(batchKey);
+  // if (batchData.snapshotDir) return batchData.snapshotDir;
+  // else throw Error("No snapshot directory found.");
+};
+
+const getDefaultSnapDir = (batchKey) => {
+  const [packageName] = quenchUtils._internal.getBatchNameParts(batchKey);
+  return `__snapshots__/${packageName}`;
+  //return `${game.system.id === packageName ? "systems" : "modules"}/${packageName}/__snapshots__`;
+};
 
 /**
  * Returns the path to a snapshot filename
  *
- * @param {string} name - Name of the snapshot
+ * @param {string} batchKey - The key of a registered test batch
  * @returns {string} The full path to the snapshot file
  */
-const getFileName = (batchKey) => {
-  const [packageName, identifier] = quenchUtils._internal.getBatchNameParts(batchKey);
-  return `${getSnapDir(packageName)}/${identifier}.json`;
+const getFileName = (batchKey) => `${getSnapDir(batchKey)}/${batchKey}.json`;
+
+/**
+ * Ensures that a path exists by walking a full path and creating any missing directories.
+ *
+ * @async
+ * @param {string} fullPath - The full path to be created
+ * @throws {Error} - Any Foundry error not expected to be thrown by the FilePicker
+ * @returns {Promise<void>}
+ */
+const createDirectory = async (fullPath) => {
+  // Split path into single directories to allow checking each of them
+  const dirs = fullPath.split("/");
+  // Paths whose existence was already verified
+  const present = [];
+
+  for (const dir of dirs) {
+    const currentDir = [...present, dir].join("/");
+    try {
+      // Browse directory, getting a response indicates that it exists
+      const resp = await FilePicker.browse("data", currentDir);
+      if (resp) present.push(dir);
+    } catch (error) {
+      if (
+        error ===
+        `Directory ${currentDir} does not exist or is not accessible in this storage location`
+      ) {
+        // This path does not exist yet, so try to create it
+        await FilePicker.createDirectory("data", currentDir);
+        // If creation was successful, push directory to verified ones
+        present.push(dir);
+      } else throw Error(error);
+    }
+  }
 };
 
 /**
@@ -96,20 +148,13 @@ const getFileName = (batchKey) => {
  * @returns {boolean} Whether the upload was successful or not
  */
 const writeSnap = async (batchKey, name, newData) => {
-  const [packageName, identifier] = quenchUtils._internal.getBatchNameParts(batchKey);
-  const snapDir = getSnapDir(packageName);
-  try {
-    await FilePicker.browse("data", snapDir);
-  } catch (error) {
-    if (
-      error === `Directory ${snapDir} does not exist or is not accessible in this storage location`
-    ) {
-      await FilePicker.createDirectory("data", snapDir);
-    } else throw new Error(error);
-  }
+  const snapDir = getSnapDir(batchKey);
+  await createDirectory(snapDir);
+
+  // Get the batch's snapshot data from the cache, or create a new object to store this test in
   const data = fileCache[batchKey] ?? {};
   data[name] = newData;
-  const newFile = new File([JSON.stringify(data)], `${identifier.slugify()}.json`, {
+  const newFile = new File([JSON.stringify(data)], `${batchKey.slugify()}.json`, {
     type: "application/json",
   });
   const response = await FilePicker.upload("data", snapDir, newFile);
@@ -118,16 +163,21 @@ const writeSnap = async (batchKey, name, newData) => {
 
 export function enableSnapshots(chai, utils) {
   utils.addProperty(chai.Assertion.prototype, "isForced", function () {
+    // Set update flag to trigger storage/upload of snapshot data
     utils.flag(this, "updateSnapshot", true);
   });
 
-  // TODO: Deal with async
-  utils.addMethod(chai.Assertion.prototype, "matchSnapshot", function (context) {
-    const actual = utils.flag(this, "object");
-    const isForced = utils.flag(this, "updateSnapshot");
-    context = context.ctx ? context.ctx : context;
-    const quenchBatch = context.test._quench_parentBatch;
-    const fullTitle = context.test.fullTitle().split("_root").slice(1).join("").trim().slugify();
+  chai.assert.matchSnapshot = function (obj) {
+    return new chai.Assertion().to.matchSnapshot(obj);
+  };
+
+  utils.addMethod(chai.Assertion.prototype, "matchSnapshot", function (obj) {
+    const actual = utils.flag(this, "object") ?? obj;
+    const isForced = utils.flag(this, "updateSnapshot") || quench._updateSnapshots;
+    const [, ...titleParts] = quench._currentRunner.currentRunnable.titlePath();
+    const quenchBatch = quench._currentRunner.currentRunnable._quench_parentBatch;
+    // Slugify non-Quench batch test name to make it suitable for file name
+    const fullTitle = titleParts.join("").trim().slugify();
 
     let expected;
     try {
@@ -142,6 +192,7 @@ export function enableSnapshots(chai, utils) {
       expected = actual;
     }
 
+    // TODO: Chech for AssertionError text
     if (actual !== null && typeof actual === "object") {
       chai.assert.deepEqual(actual, expected);
     } else {
@@ -156,4 +207,5 @@ export const quenchSnapUtils = {
   fileCache,
   loadSnap,
   loadAllSnaps,
+  getDefaultSnapDir,
 };

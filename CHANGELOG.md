@@ -2,10 +2,6 @@
 
 ## Unreleased
 
-### Breaking Changes
-
-- Batch registration now enforces that batch names start with the name of a package, and refuses to register non-compliant batches
-
 ### Bug Fixes
 
 - The `clearWorld` utility function did not actually function after getting updated to use Documents
@@ -23,6 +19,8 @@
 - The `quenchReady` hook is now deprecated
     - To remain compatible to old batch registration for now, the `quenchReady` hook is still fired in Foundry's `setup` hook
 - The `quench` global is now guaranteed to get initialised in the `init` hook and can be used afterwards
+- Registering batches with names not starting with a package name is now deprecated
+    - For now, this will trigger an error shown in the UI and naming is not enforced – support will be removed in the future!
 
 ## [0.4.2] 2021-10-06
 

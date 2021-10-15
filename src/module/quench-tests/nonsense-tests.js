@@ -32,11 +32,14 @@ function registerBasicPassingTestBatch(quench) {
           should.not.equal(1, 2);
         });
         it("Passing Test with a snapshot", () => {
-          expect({ foo: "baz" }).to.matchSnapshot(this);
+          expect({ foo: "baz" }).to.matchSnapshot();
+        });
+        it("Passing Test with snapshot and assert", () => {
+          assert.matchSnapshot({ bar: "baz" });
         });
       });
     },
-    { displayName: "QUENCH: Basic Passing Test" },
+    { displayName: "QUENCH: Basic Passing Test", snapshotDir: "some/other/weird/path" },
   );
 }
 
@@ -86,7 +89,7 @@ function registerNestedTestBatch(quench) {
             });
 
             it("uses a snapshot in a nested test", function () {
-              expect({ foo: "bar" }).isForced.to.matchSnapshot(this);
+              expect({ foo: "bar" }).isForced.to.matchSnapshot();
             });
           });
 

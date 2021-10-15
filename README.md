@@ -16,7 +16,7 @@ You can register test suites with quench and view them in the test runner, then 
 ## Usage
 
 The primary public API is the `Quench` class.
-A global instance of `Quench` is available as a global called `quench`.
+A global instance of `Quench` is available as a global called `quench`, guaranteed to be initialized after the core `"init"` hook.
 This class includes references to both the mocha and chai globals, as well as some methods to add new test batches and run the tests.
 
 Quench uses "test batches" as another layer of organization above the built-in mocha suites and tests.
@@ -25,8 +25,10 @@ Enabling or disabling batches allows you to pick and choose only a subset of sui
 
 ### `quenchReady` Hook
 
+_Usage of the `"quenchReady"` hook has been deprecated with Quench 0.5, but the hook is still fired for backwards compatibility for now._
+
 Quench provides a `"quenchReady"` hook, which indicates when Quench is ready for you to start registering batches.
-`"quenchReady"` is guaranteed to occur after the core `"init"` hook, but its ordering relative to the core `"setup"` and `"ready"` hooks is not guaranteed.
+`"quenchReady"` is guaranteed to occur after the core `"init"` hook, as it is fired in Quench's `"setup"` hook.
 `"quenchReady"` receives the current `Quench` instance as an argument.
 
 ### Register a test batch
@@ -39,24 +41,61 @@ You can register a Quench test batch to be executed with Quench by calling `quen
 - `registrationFunction` - this function will be executed to register the suites and tests within this batch.
   It takes a `context` argument, which contains the following Mocha and Chai functions necessary for defining a suite of tests:
   - Mocha - `describe`, `it`, `after`, `afterEach`, `before`, `beforeEach`, and `utils`.
-  - Chai - `assert`, `expect`, and `should`. `should` is also made available by extending `Object.prototype`.
+  - Chai - `assert`, `expect`, and `should`. `should` is also made available by it extending `Object.prototype`.
 - `options` -
   - `displayName` - the name for this batch that will be shown in the ui and in the detailed test results.
-    This is optional, quench will fall back to the batch key if omitted.
+    This is optional, Quench will fall back to the batch key if omitted.
+  - `snapshotDir` - the directory from which snapshots for this batch will be read, and where snapshots will be stored.
+    This is optional, Quench will fall back to `Data/__snapshots__/<package name>/`, with each batch having its own file.
 
 Example:
-```js
-Hooks.on("quenchReady", quench => {
-    quench.registerBatch("quench.examples.basic-pass", (context) => {
-        const { describe, it, assert } = context;
 
-        describe("Passing Suite", function () {
-            it("Passing Test", function () {
-                assert.ok(true);
-            });
+```js
+Hooks.on("quenchReady", (quench) => {
+  quench.registerBatch(
+    "quench.examples.basic-pass",
+    (context) => {
+      const { describe, it, assert } = context;
+
+      describe("Passing Suite", function () {
+        it("Passing Test", function () {
+          assert.ok(true);
         });
-    }, { displayName: "QUENCH: Basic Passing Test" });
+      });
+    },
+    { displayName: "QUENCH: Basic Passing Test" },
+  );
 });
+```
+
+### Snapshots
+
+*Snapshot handling is currently in a beta phase! The current API is not final and subject to change, e.g. when it comes to path management.*
+
+Quench supports snapshot testing, allowing for Chai's `equal`/`deepEqual` comparisons to work with data previously serialised and stored as JSON.
+To compare an object to a snapshot, you can use `matchSnapshot(this)` as assertion.
+A snapshot is updated by either adding `isForced` to the chain, or by force-enabling snapshot updates in the UI.
+
+Example:
+
+```js
+quench.registerBatch(
+  "quench.examples.snapshot-test",
+  (context) => {
+    const { describe, it, expect } = context;
+
+    describe("Snapshot Tests", function () {
+      it("Compares against a snapshot", function () {
+        expect({ foo: "bar" }).to.matchSnapshot(this);
+      });
+
+      it("Updates a snapshot", function () {
+        expect({ foo: "baz" }).isForced.to.matchSnapshot(this);
+      });
+    });
+  },
+  { displayName: "QUENCH: Snapshot Test", snapshotDir: "__snapshots__/quench" },
+);
 ```
 
 ### Conventions

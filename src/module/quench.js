@@ -12,8 +12,8 @@ import { quenchSnapUtils } from "./snapshot.js";
  * @property {object} utils - Various utility functions
  * @property {object} snapUtils - Utility functions related to snapshot handling
  * @property {Map<string, object>} _testBatches - a map of registered test batches
+ * @property {Object.<string, object>} _snapshotCache - the object storing snapshots
  * @property {QuenchResults} app - the singleton instance of `QuenchResults` that this `Quench` instance uses
- * @property {Object.<string, object>} _snapshotCache - a map storing snapshot objects
  */
 export default class Quench {
   constructor(mocha, chai) {
@@ -54,18 +54,23 @@ export default class Quench {
    * @param {function} fn - The function which will be called to register the suites and tests within your test batch.
    * @param {object} options
    * @param {string|null} [options.displayName] - A user-friendly name to show in the Quench UI and detailed results.
+   * @param {string|null} [options.snapshotDir] - The directory in which snapshots for this batch are stored.
    */
-  registerBatch(key, fn, { displayName = null } = {}) {
+  registerBatch(key, fn, { displayName = null, snapshotDir = null } = {}) {
     const [packageName] = this.utils._internal.getBatchNameParts(key);
     if (![...game.modules, game.system].map((p) => p[0]).includes(packageName)) {
-      return ui?.notifications?.error(
+      ui?.notifications?.error(
         game?.i18n?.format("QUENCH.ERROR.InvalidPackageName", { key, packageName }),
       );
     }
     if (this._testBatches.has(key)) {
       ui?.notifications?.warn(game.i18n.format("QUENCH.WARN.BatchAlreadyExists", { key }));
     }
-    this._testBatches.set(key, { displayName: displayName ?? key, fn });
+    this._testBatches.set(key, {
+      displayName: displayName ?? key,
+      fn,
+      snapshotDir: snapshotDir ?? this.snapUtils.getDefaultSnapDir(key),
+    });
     this.app.clear();
   }
 
@@ -88,7 +93,7 @@ export default class Quench {
    * @param {string[]} batchKeys - Array of keys for the test batches to be run.
    * @returns {Promise<Runner>} - Returns the mocha Runner object for this test run.
    */
-  async runSelectedBatches(batchKeys) {
+  async runSelectedBatches(batchKeys, { updateSnapshots = null } = {}) {
     // Cleanup - create a new root suite and clear the state of the results application
     mocha.suite = new Mocha.Suite("__root", new Mocha.Context(), true);
     await this.app.clear();
@@ -118,6 +123,8 @@ export default class Quench {
 
     // Fetch all snapshot files for the batches to be run
     await this.snapUtils.loadAllSnaps(batchKeys);
+    // Explicit flag > flag set before this run > default flag
+    this._updateSnapshots = updateSnapshots ?? this._updateSnapshots ?? false;
 
     // Register suites and tests for provided batches
     for (const key of batchKeys) {
@@ -146,7 +153,10 @@ export default class Quench {
     // Run the tests and hold on to the runner
     this._currentRunner = this.mocha.run();
     const EVENT_RUN_END = this._currentRunner.constructor.constants.EVENT_RUN_END;
-    this._currentRunner.once(EVENT_RUN_END, () => (this._currentRunner = null));
+    this._currentRunner.once(EVENT_RUN_END, () => {
+      this._currentRunner = null;
+      this._updateSnapshots = null;
+    });
     return this._currentRunner;
   }
 
