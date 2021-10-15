@@ -75,6 +75,16 @@ export default class Quench {
   }
 
   /**
+   * Returns a single batch's data.
+   *
+   * @param {string} key - The batch key
+   * @returns {object} Batch data
+   */
+  getBatch(key) {
+    return this._testBatches.get(key);
+  }
+
+  /**
    * Runs all test batches.
    *
    * The contents of the test batches are registered with mocha when this function is executed.
@@ -155,6 +165,7 @@ export default class Quench {
     const EVENT_RUN_END = this._currentRunner.constructor.constants.EVENT_RUN_END;
     this._currentRunner.once(EVENT_RUN_END, () => {
       this._currentRunner = null;
+      this.snapUtils.updateSnapshots();
       this._updateSnapshots = null;
     });
     return this._currentRunner;

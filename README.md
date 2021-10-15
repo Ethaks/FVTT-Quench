@@ -36,16 +36,16 @@ Quench provides a `"quenchReady"` hook, which indicates when Quench is ready for
 You can register a Quench test batch to be executed with Quench by calling `quench.registerBatch`.
 `registerBatch` takes the following arguments:
 
-- `key` - a unique batch key that identifies this test batch.
+- `key` – a unique batch key that identifies this test batch.
   If multiple test batches are registered with the same key, the latest registration will overwrite previous registrations.
-- `registrationFunction` - this function will be executed to register the suites and tests within this batch.
+- `registrationFunction` – this function will be executed to register the suites and tests within this batch.
   It takes a `context` argument, which contains the following Mocha and Chai functions necessary for defining a suite of tests:
-  - Mocha - `describe`, `it`, `after`, `afterEach`, `before`, `beforeEach`, and `utils`.
-  - Chai - `assert`, `expect`, and `should`. `should` is also made available by it extending `Object.prototype`.
+  - Mocha – `describe`, `it`, `after`, `afterEach`, `before`, `beforeEach`, and `utils`.
+  - Chai – `assert`, `expect`, and `should`. `should` is also made available by it extending `Object.prototype`.
 - `options` -
-  - `displayName` - the name for this batch that will be shown in the ui and in the detailed test results.
+  - `displayName` – the name for this batch that will be shown in the ui and in the detailed test results.
     This is optional, Quench will fall back to the batch key if omitted.
-  - `snapshotDir` - the directory from which snapshots for this batch will be read, and where snapshots will be stored.
+  - `snapshotDir` – the directory from which snapshots for this batch will be read, and where snapshots will be stored.
     This is optional, Quench will fall back to `Data/__snapshots__/<package name>/`, with each batch having its own file.
 
 Example:
@@ -70,11 +70,12 @@ Hooks.on("quenchReady", (quench) => {
 
 ### Snapshots
 
-*Snapshot handling is currently in a beta phase! The current API is not final and subject to change, e.g. when it comes to path management.*
+_Snapshot handling is currently in alpha! The current API is not final and subject to change – all input is welcome!._
 
-Quench supports snapshot testing, allowing for Chai's `equal`/`deepEqual` comparisons to work with data previously serialised and stored as JSON.
-To compare an object to a snapshot, you can use `matchSnapshot(this)` as assertion.
-A snapshot is updated by either adding `isForced` to the chain, or by force-enabling snapshot updates in the UI.
+Quench supports snapshot testing, allowing for Chai's comparisons to work with data previously serialised using [pretty-format](https://www.npmjs.com/package/pretty-format) and stored as JSON.
+To compare an object to a snapshot, you can use `matchSnapshot()` as assertion.
+Setting `quench._updateSnapshots = true` will pass all tests and store the actual value as new expected value, updating all snapshots.
+Individual snapshots can be updated by adding `isForced` to the chain.
 
 Example:
 
@@ -82,19 +83,19 @@ Example:
 quench.registerBatch(
   "quench.examples.snapshot-test",
   (context) => {
-    const { describe, it, expect } = context;
+    const { describe, it, assert, expect } = context;
 
     describe("Snapshot Tests", function () {
       it("Compares against a snapshot", function () {
-        expect({ foo: "bar" }).to.matchSnapshot(this);
+        assert.matchSnapshot({ foo: "bar" }); // Using assert
       });
 
       it("Updates a snapshot", function () {
-        expect({ foo: "baz" }).isForced.to.matchSnapshot(this);
+        expect({ foo: "baz" }).isForced.to.matchSnapshot(); // Using expect
       });
     });
   },
-  { displayName: "QUENCH: Snapshot Test", snapshotDir: "__snapshots__/quench" },
+  { displayName: "QUENCH: Snapshot Test", snapshotDir: "__snapshots__/quench-with-a-twist" },
 );
 ```
 

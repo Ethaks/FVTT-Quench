@@ -1,11 +1,41 @@
-import { quenchUtils } from "./utils/quench-utils";
+import { internalUtils } from "./utils/quench-utils";
+import { format as prettyFormat, plugins as formatPlugins } from "pretty-format";
 
 /**
- * The singleton file cache, containing all snapshot objects, ordered first by batch name, then by full test title.
+ * The singleton file cache, containing all snapshot objects, ordered first by batch name, then by full test title
  *
  * @type {Object.<string, Object.<string, object>>}
  */
 const fileCache = {};
+
+/**
+ * A cache array containing batchKeys whose data has to be updated
+ *
+ * @type {string[]}
+ */
+const changedBatches = [];
+
+/** An array of plugins used for the serialization process */
+const serializationPlugins = [
+  formatPlugins.DOMCollection,
+  formatPlugins.DOMElement,
+  formatPlugins.Immutable,
+  formatPlugins.ReactElement,
+  formatPlugins.ReactTestComponent,
+];
+
+/**
+ * Serializes a given data object using the "pretty-format" package.
+ *
+ * @param {*} data - Data to be serialized
+ * @returns {string} Serialized data
+ */
+const serialize = (data) =>
+  prettyFormat(data, {
+    escapeRegex: true,
+    plugins: serializationPlugins,
+    printFunctionName: false,
+  });
 
 /**
  * Fetches a batch's snapshot file and stores it in the fileCache.
@@ -42,19 +72,23 @@ const resetCache = () => {
  */
 const loadAllSnaps = async (batchKeys) => {
   resetCache();
-  const directories = batchKeys.reduce((acc, key) => {
-    const directory = quench._testBatches.get(key).snapshotDir;
-    (acc[directory] || (acc[directory] = [])).push({ key, file: getFileName(key) });
+  // Create object with directories to check as keys to reduce file browse requests
+  const directories = batchKeys.reduce((acc, batchKey) => {
+    const directory = getSnapDir(batchKey);
+    (acc[directory] || (acc[directory] = [])).push({ batchKey, file: getFileName(batchKey) });
     return acc;
   }, {});
+
   const loadPromises = [];
   for (const [directory, directoryData] of Object.entries(directories)) {
     try {
+      // All files in current directory
       const { files } = await FilePicker.browse("data", directory);
       for (const file of files) {
+        // Check whether there's a batch for this file to avoid unnecessary fetches
         const snapFileData = directoryData?.find((d) => d.file === file);
         if (snapFileData) {
-          loadPromises.push(loadSnap(snapFileData.key));
+          loadPromises.push(loadSnap(snapFileData.batchKey));
         }
       }
     } catch (e) {
@@ -70,6 +104,7 @@ const loadAllSnaps = async (batchKeys) => {
  *
  * @param {string} batchKey - A batch key belonging to a quench test batch
  * @param {string} name - The name of a specific snapshot data object belonging to a test
+ * @throws {Error} Throws an error if the requested snapshot cannot be found
  * @returns {object} A snapshot object
  */
 const readSnap = (batchKey, name) => {
@@ -84,17 +119,17 @@ const readSnap = (batchKey, name) => {
  * @param {string} batchKey - The batch whose directory is requested
  * @returns {string} The batch's snapshot directory
  */
-const getSnapDir = (batchKey) => {
-  return quench._testBatches.get(batchKey).snapshotDir;
-  // const batchData = quench._testBatches.get(batchKey);
-  // if (batchData.snapshotDir) return batchData.snapshotDir;
-  // else throw Error("No snapshot directory found.");
-};
+const getSnapDir = (batchKey) => quench.getBatch(batchKey).snapshotDir;
 
+/**
+ * Generates a string for a batch's default directory in which snapshots will be stored.
+ *
+ * @param {string} batchKey - The batchKey from which a path will be generated
+ * @returns {string} The default directory path
+ */
 const getDefaultSnapDir = (batchKey) => {
-  const [packageName] = quenchUtils._internal.getBatchNameParts(batchKey);
+  const [packageName] = internalUtils.getBatchNameParts(batchKey);
   return `__snapshots__/${packageName}`;
-  //return `${game.system.id === packageName ? "systems" : "modules"}/${packageName}/__snapshots__`;
 };
 
 /**
@@ -103,7 +138,7 @@ const getDefaultSnapDir = (batchKey) => {
  * @param {string} batchKey - The key of a registered test batch
  * @returns {string} The full path to the snapshot file
  */
-const getFileName = (batchKey) => `${getSnapDir(batchKey)}/${batchKey}.json`;
+const getFileName = (batchKey) => `${getSnapDir(batchKey)}/${batchKey.slugify()}.json`;
 
 /**
  * Ensures that a path exists by walking a full path and creating any missing directories.
@@ -111,7 +146,6 @@ const getFileName = (batchKey) => `${getSnapDir(batchKey)}/${batchKey}.json`;
  * @async
  * @param {string} fullPath - The full path to be created
  * @throws {Error} - Any Foundry error not expected to be thrown by the FilePicker
- * @returns {Promise<void>}
  */
 const createDirectory = async (fullPath) => {
   // Split path into single directories to allow checking each of them
@@ -140,27 +174,48 @@ const createDirectory = async (fullPath) => {
 };
 
 /**
- * Uploads a snapshot of an object to the snapshots directory on the server.
+ * Stores a specific test's updated snapshot data in the cache and adds the batch to the list
+ * of batches whose data has to be uploaded to the server.
  *
- * @param {string} batchKey - The name of the snapshot
- * @param {string} name - The name of the test
- * @param {object} newData - The snapshot data to be saved
- * @returns {boolean} Whether the upload was successful or not
+ * @param {string} batchKey - The batch's key
+ * @param {string} fullTitle - The test's full title
+ * @param {*} newData - The new snapshot data
  */
-const writeSnap = async (batchKey, name, newData) => {
-  const snapDir = getSnapDir(batchKey);
-  await createDirectory(snapDir);
-
-  // Get the batch's snapshot data from the cache, or create a new object to store this test in
-  const data = fileCache[batchKey] ?? {};
-  data[name] = newData;
-  const newFile = new File([JSON.stringify(data)], `${batchKey.slugify()}.json`, {
-    type: "application/json",
-  });
-  const response = await FilePicker.upload("data", snapDir, newFile);
-  return Boolean(response?.status === "success");
+const queueBatchUpdate = (batchKey, fullTitle, newData) => {
+  changedBatches.push(batchKey);
+  const data = fileCache[batchKey] ?? (fileCache[batchKey] = {});
+  data[fullTitle] = newData;
 };
 
+/**
+ * Updates all snapshots whose data was changed in the last run (i.e. all batches listed in {@see changedBatches})
+ *
+ * @async
+ */
+const updateSnapshots = async () => {
+  const dedupedBatches = Array.from(new Set(changedBatches));
+  const uploadPromises = dedupedBatches.map(async (batchKey) => {
+    const snapDir = getSnapDir(batchKey);
+    await createDirectory(snapDir);
+
+    // Get the batch's snapshot data from the cache, or create a new object to store this test in
+    const data = fileCache[batchKey] ?? {};
+    const newFile = new File([JSON.stringify(data)], `${batchKey.slugify()}.json`, {
+      type: "application/json",
+    });
+    const response = await FilePicker.upload("data", snapDir, newFile);
+    return Boolean(response?.status === "success");
+  });
+  await Promise.all(uploadPromises);
+  changedBatches.length = 0;
+};
+
+/**
+ * Enables snapshot usage by adding `matchSnapshot` assertion to chai
+ *
+ * @param {object} chai - The global chai object
+ * @param {object} utils - Chai utils
+ */
 export function enableSnapshots(chai, utils) {
   utils.addProperty(chai.Assertion.prototype, "isForced", function () {
     // Set update flag to trigger storage/upload of snapshot data
@@ -172,11 +227,11 @@ export function enableSnapshots(chai, utils) {
   };
 
   utils.addMethod(chai.Assertion.prototype, "matchSnapshot", function (obj) {
-    const actual = utils.flag(this, "object") ?? obj;
+    const actual = serialize(utils.flag(this, "object") ?? obj);
     const isForced = utils.flag(this, "updateSnapshot") || quench._updateSnapshots;
     const [, ...titleParts] = quench._currentRunner.currentRunnable.titlePath();
     const quenchBatch = quench._currentRunner.currentRunnable._quench_parentBatch;
-    // Slugify non-Quench batch test name to make it suitable for file name
+    // Slugify non-Quench batch test name (describe and it parts)
     const fullTitle = titleParts.join("").trim().slugify();
 
     let expected;
@@ -188,7 +243,7 @@ export function enableSnapshots(chai, utils) {
       }
     }
     if (isForced) {
-      writeSnap(quenchBatch, fullTitle, actual);
+      queueBatchUpdate(quenchBatch, fullTitle, actual);
       expected = actual;
     }
 
@@ -202,10 +257,10 @@ export function enableSnapshots(chai, utils) {
 }
 
 export const quenchSnapUtils = {
-  readSnap,
-  writeSnap,
   fileCache,
-  loadSnap,
   loadAllSnaps,
   getDefaultSnapDir,
+  updateSnapshots,
+  enableSnapshots,
+  serialize,
 };

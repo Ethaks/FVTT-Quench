@@ -82,13 +82,15 @@ function getBatchNameParts(batchKey) {
   return [batchKey.slice(0, index), batchKey.slice(index + 1)];
 }
 
+export const internalUtils = {
+  RUNNABLE_STATE,
+  getTestState,
+  getSuiteState,
+  getBatchNameParts,
+};
+
 export const quenchUtils = {
   pause,
   clearWorld,
-  _internal: {
-    RUNNABLE_STATE,
-    getTestState,
-    getSuiteState,
-    getBatchNameParts,
-  },
+  _internal: internalUtils,
 };
