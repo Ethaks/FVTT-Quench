@@ -39,7 +39,7 @@ function registerBasicPassingTestBatch(quench) {
         });
       });
     },
-    { displayName: "QUENCH: Basic Passing Test", snapshotDir: "some/other/weird/path" },
+    { displayName: "QUENCH: Basic Passing Test", snapBaseDir: "some/other/weird/path" },
   );
 }
 
@@ -89,7 +89,7 @@ function registerNestedTestBatch(quench) {
             });
 
             it("uses a snapshot in a nested test", function () {
-              expect({ foo: "bar" }).isForced.to.matchSnapshot();
+              expect({ foo: "bar" }).to.matchSnapshot();
             });
           });
 

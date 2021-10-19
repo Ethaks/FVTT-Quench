@@ -4,13 +4,13 @@ import "mocha/mocha.js";
 import * as chai from "chai";
 
 import { registerExampleTests } from "./quench-tests/nonsense-tests.js";
-import { enableSnapshots } from "./snapshot.js";
+import { QuenchSnapshotManager } from "./snapshot.js";
 
 /**
  * Sets up Quench and its dependencies
  */
 Hooks.on("init", function quenchInit() {
-  chai.use(enableSnapshots);
+  chai.use(QuenchSnapshotManager.enableSnapshots);
   const quench = new Quench(mocha, chai);
   globalThis.quench = quench;
 

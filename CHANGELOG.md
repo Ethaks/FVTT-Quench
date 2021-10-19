@@ -9,9 +9,10 @@
 ### Features
 
 - Added snapshot support
-    - The basic assertion function is `matchSnapshot`, which can be used like this: `expect({foo: "bar"}).to.matchSnapshot(this)`
-    - To update a snapshot and store it, `isForced` can be added e.g. before the `to` from the previous example
-    - Snapshots are stored in Foundry's `Data/{package type}/{package name}/__snapshots__` directory
+    - The basic assertion function is `matchSnapshot`, which can be used like this: `expect({foo: "bar"}).to.matchSnapshot()`
+    - Snapshots are stored in Foundry's `Data/__snapshots__/<package name>` directory by default
+    - Each batch gets its own directory, in which each test's snapshot is stored in their own file named by the test's hash
+    - The snapshot directory default can be overwritten by setting a `snapBaseDir` option to the batch registration options
 - `autoRun` tests are now guaranteed to start *after* the `ready` hook is fired
 
 ### API
