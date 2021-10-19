@@ -81,16 +81,14 @@ export class QuenchSnapshotManager {
     const _createDir = async (path) => {
       let dirExists = false;
       try {
-        const resp = await FilePicker.browse("data", path);
+        // Attempt directory creation
+        const resp = await FilePicker.createDirectory("data", path);
         if (resp) dirExists = true;
       } catch (error) {
-        if (
-          error === `Directory ${path} does not exist or is not accessible in this storage location`
-        ) {
-          // This path does not exist yet, so try to create it
-          const resp = await FilePicker.createDirectory("data", path);
-          if (resp) dirExists = true;
-        }
+        // Confirm directory existence with expected EEXIST error, throw unexpected errors
+        if (typeof error === "string" && error.startsWith("EEXIST")) {
+          dirExists = true;
+        } else throw error;
       }
       return dirExists;
     };
