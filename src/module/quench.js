@@ -10,10 +10,9 @@ import { QuenchSnapshotManager } from "./snapshot.js";
  * @property {Mocha} mocha - the global mocha instance
  * @property {object} chai - the global chai instance
  * @property {object} utils - Various utility functions
- * @property {object} snapUtils - Utility functions related to snapshot handling
  * @property {Map<string, object>} _testBatches - a map of registered test batches
- * @property {Object.<string, object>} _snapshotCache - the object storing snapshots
  * @property {QuenchResults} app - the singleton instance of `QuenchResults` that this `Quench` instance uses
+ * @property {QuenchSnapshotManager} snapshots - the `QuenchSnapshotManager` instance used by this `Quench` instance
  */
 export default class Quench {
   constructor(mocha, chai) {

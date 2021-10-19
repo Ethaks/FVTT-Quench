@@ -17,7 +17,7 @@ export class QuenchSnapshotManager {
   /**
    * This instance's file cache, containing all snapshot objects, ordered first by batch name, then by hashed full test titles
    *
-   * @type {Object.<string, Object<string, object>>}
+   * @type {Object.<string, Object<string, string>>}
    */
   fileCache = {};
 
@@ -103,9 +103,11 @@ export class QuenchSnapshotManager {
       for (const dir of dirs) {
         const currentDir = [...present, dir].join("/");
         const dirExists = await _createDir(currentDir);
+        // Either continue with directory creation, or return on error
         if (dirExists) present.push(dir);
         else return false;
       }
+      // Complete path's existence was confirmed
       return true;
     } else {
       return _createDir(fullPath);
@@ -145,7 +147,6 @@ export class QuenchSnapshotManager {
       }
       if (updateSnapshot) {
         quench.snapshots.queueBatchUpdate(quenchBatch, fullTitle, actual);
-        // Add newline otherwise added for clearer formatting when the snapshot is written
         expected = actual;
       }
 
@@ -160,8 +161,7 @@ export class QuenchSnapshotManager {
   }
 
   /**
-   * Returns a batch's snapshot directory, either by using the configured value or the default,
-   * which resolves to "Data/<package type>/<package name>".
+   * Returns a batch's snapshot directory, combining its configured snapBaseDir with its batchKey
    *
    * @param {string} batchKey - The batch whose directory is requested
    * @returns {string} The batch's snapshot directory
@@ -176,7 +176,7 @@ export class QuenchSnapshotManager {
    * @param {string} batchKey - A batch key belonging to a quench test batch
    * @param {string} name - The name of a specific snapshot data object belonging to a test
    * @throws {Error} Throws an error if the requested snapshot cannot be found
-   * @returns {object} A snapshot object
+   * @returns {string} A snapshot string
    */
   readSnap(batchKey, fullTitle) {
     const name = hash(fullTitle);
@@ -195,48 +195,34 @@ export class QuenchSnapshotManager {
   async loadBatchSnaps(batchKeys) {
     this.resetCache();
     const batchPromises = batchKeys.map(async (batchKey) => {
+      const snapDir = this.getSnapDir(batchKey);
       try {
-        const snapDir = this.getSnapDir(batchKey);
         const { files } = await FilePicker.browse("data", snapDir);
+
+        // Fetch all ".snap.txt" files in a batch's snapDir
         const filePromises = files.map(async (file) => {
           const baseName = file.split("/").pop().split(".snap.txt")[0];
           const response = await fetch(file);
           if (response.status === 200) {
             const result = await response.text();
+            // Store snapshot string after making sure the batch has an object in the cache
             (this.fileCache[batchKey] ?? (this.fileCache[batchKey] = {}))[baseName] = result;
             return result;
           } else return false;
         });
         const result = await Promise.all(filePromises);
         return result;
-      } catch (_) {
+      } catch (error) {
         // Every batch without snapshots will throw an error due to a missing directory
-        // TODO: Ignore only expected errors
+        if (
+          error !==
+          `Directory ${snapDir} does not exist or is not accessible in this storage location`
+        )
+          throw error;
       }
     });
     await Promise.all(batchPromises);
     return this.fileCache;
-  }
-
-  /**
-   * Fetches a batch's snapshot file and stores it in the fileCache.
-   *
-   * @async
-   * @param {string} batchKey - A batch key
-   * @returns {Promise<object>} The complete snapshot object containing all test snapshots for that batch
-   */
-  async loadSnap(batchKey) {
-    const filePath = this.getFileName(batchKey);
-    if (this.fileCache[batchKey] === undefined) {
-      const response = await fetch(filePath);
-      if (response.status === 200) {
-        const result = await response.text();
-        const body = `const data = {${result}}; return data;`;
-        const fn = new Function(body);
-        this.fileCache[batchKey] = fn();
-      }
-    }
-    return this.fileCache[batchKey];
   }
 
   /**
@@ -245,7 +231,7 @@ export class QuenchSnapshotManager {
    *
    * @param {string} batchKey - The batch's key
    * @param {string} fullTitle - The test's full title
-   * @param {*} newData - The new snapshot data
+   * @param {string} newData - The new snapshot data
    */
   queueBatchUpdate(batchKey, fullTitle, newData) {
     this.updateQueue.add(batchKey);
@@ -254,23 +240,20 @@ export class QuenchSnapshotManager {
   }
 
   /**
-   * Updates all snapshots whose data was changed in the last run (i.e. all batches listed in {@see changedBatches})
+   * Updates all snapshots whose data was changed in the last run (i.e. all batches listed in {@link QuenchSnapshotManager#updateQueue})
    *
    * @async
    */
   async updateSnapshots() {
     // Get all snapshot directories
     const snapDirs = [...this.updateQueue].map((batchKey) => this.getSnapDir(batchKey));
-    const dirObject = {};
-    // Create an object that mirrors the actually needed directory tree
-    for (const dir of snapDirs) {
-      const dirParts = dir.split("/");
-      let cur = dirObject;
-      for (const part of dirParts) {
-        cur[part] ??= {};
-        cur = cur[part];
+    const dirTree = snapDirs.reduce((acc, dir) => {
+      let cur = acc;
+      for (const part of dir.split("/")) {
+        cur = cur[part] ?? (cur[part] = {});
       }
-    }
+      return acc;
+    }, {});
 
     /**
      * Creates a directory tree mirroring a given object's tree.
@@ -281,14 +264,33 @@ export class QuenchSnapshotManager {
      * @param {string} [prev] - String accumulator for already created directories, needed to get a full path
      */
     const createDirTree = async (obj, prev = "") => {
-      for (const [key, val] of Object.entries(obj)) {
-        const fullPath = `${prev}${key}`;
-        const exists = await this.constructor.createDirectory(fullPath, { recursive: false });
-        if (exists) await createDirTree(val, fullPath + "/");
-      }
+      // Create all dirs of current tree layer, don't need to await individual non-interfering requests
+      const currentLayerDirs = await Promise.all(
+        Object.entries(obj).map(async ([dirKey, valObj]) => {
+          const dirExists = await this.constructor.createDirectory(`${prev}${dirKey}`, {
+            recursive: false,
+          });
+          // Return data necessary for the next level creation workflow
+          return [dirExists, dirKey, valObj];
+        }),
+      );
+      // Only continue in directories that exists
+      const nextLayerPromises = currentLayerDirs
+        .filter(([dirExists]) => dirExists === true)
+        .reduce((promises, [dirExists, prevDir, newDirObj]) => {
+          // Push next layer creation request
+          if (dirExists) promises.push(createDirTree(newDirObj, `${prev}${prevDir}/`));
+          else {
+            console.error(`Could not create directory ${prev}${prevDir}`);
+          }
+          return promises;
+        }, []);
+      // Await so the original function call only resolves when all subsequent ones are done
+      await Promise.all(nextLayerPromises);
     };
 
-    await createDirTree(dirObject);
+    // Ensure that all all snapshot directories are created so that files can be stored
+    await createDirTree(dirTree);
 
     const uploadPromises = Array.from(this.updateQueue).map(async (batchKey) => {
       const snapDir = this.getSnapDir(batchKey);
