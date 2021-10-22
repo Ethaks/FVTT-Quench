@@ -56,7 +56,7 @@ export default class Quench {
    */
   registerBatch(key, fn, { displayName = null, snapBaseDir = null } = {}) {
     const [packageName] = this.utils._internal.getBatchNameParts(key);
-    if (![...game.modules, game.system].map((p) => p[0]).includes(packageName)) {
+    if (![...game.modules, [game.system.id]].map(([pName]) => pName).includes(packageName)) {
       ui?.notifications?.error(
         game?.i18n?.format("QUENCH.ERROR.InvalidPackageName", { key, packageName }),
       );
