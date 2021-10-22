@@ -15,7 +15,7 @@ export class QuenchSnapshotManager {
   }
 
   /**
-   * This instance's file cache, containing all snapshot objects, ordered first by batch name, then by hashed full test titles
+   * This instance's file cache, containing all serialised snapshots, ordered first by batch name, then by hashed full test titles
    *
    * @type {Object.<string, Object<string, string>>}
    */
@@ -283,12 +283,19 @@ export class QuenchSnapshotManager {
           }
           return promises;
         }, []);
-      // Await so the original function call only resolves when all subsequent ones are done
-      await Promise.all(nextLayerPromises);
+      // Return Promise for next layer
+      return Promise.all(nextLayerPromises);
     };
 
     // Ensure that all all snapshot directories are created so that files can be stored
     await createDirTree(dirTree);
+
+    // Temporarily patch `ui.notifications.info` to prevent every single upload generating a notification
+    const _info = ui.notifications.info;
+    ui.notifications.info = function (...args) {
+      if (args[0]?.includes(".snap.txt saved to")) return;
+      else _info.call(this, ...args);
+    };
 
     const uploadPromises = Array.from(this.updateQueue).map(async (batchKey) => {
       const snapDir = this.getSnapDir(batchKey);
@@ -303,6 +310,15 @@ export class QuenchSnapshotManager {
     });
     const resp = await Promise.all(uploadPromises);
     this.updateQueue.clear();
+
+    // Restore original info method and create one notification for the upload
+    ui.notifications.info = _info;
+    ui.notifications.info(
+      game.i18n.format("QUENCH.UploadedSnapshots", {
+        batches: resp.length,
+        files: resp.flat().filter((r) => r.status === "success").length,
+      }),
+    );
     return resp;
   }
 }

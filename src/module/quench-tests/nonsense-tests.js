@@ -9,9 +9,17 @@ export function registerExampleTests(quench) {
     registerBasicFailingTestBatch,
     registerNestedTestBatch,
     registerOtherTestBatch,
+    registerSnapshotTestBatch,
   ].forEach((f) => f(quench));
 }
 
+/**
+ * A batch registration function
+ *
+ * @typedef {(quench: import("../quench").default) => void } RegisterBatchFunction
+ */
+
+/** @type {RegisterBatchFunction} */
 function registerBasicPassingTestBatch(quench) {
   quench.registerBatch(
     "quench.examples.basic-pass",
@@ -21,20 +29,20 @@ function registerBasicPassingTestBatch(quench) {
         it("Passing Test", function () {
           assert.ok(true);
         });
-        it("Passing Test using expect", () => {
+        it("Passing Test using expect", function () {
           expect(2).to.equal(2);
         });
-        it("Passing Test using should", () => {
+        it("Passing Test using should", function () {
           const foo = { bar: "baz" };
           foo.should.have.property("bar", "baz");
         });
-        it("Passing Test using should helper", () => {
+        it("Passing Test using should helper", function () {
           should.not.equal(1, 2);
         });
-        it("Passing Test with a snapshot", () => {
+        it("Passing Test with a snapshot", function () {
           expect({ foo: "baz" }).to.matchSnapshot();
         });
-        it("Passing Test with snapshot and assert", () => {
+        it("Passing Test with snapshot and assert", function () {
           assert.matchSnapshot({ bar: "baz" });
         });
       });
@@ -43,6 +51,7 @@ function registerBasicPassingTestBatch(quench) {
   );
 }
 
+/** @type {RegisterBatchFunction} */
 function registerBasicFailingTestBatch(quench) {
   quench.registerBatch(
     "quench.examples.basic-fail",
@@ -59,6 +68,7 @@ function registerBasicFailingTestBatch(quench) {
   );
 }
 
+/** @type {RegisterBatchFunction} */
 function registerNestedTestBatch(quench) {
   quench.registerBatch(
     "quench.examples.nested",
@@ -103,6 +113,7 @@ function registerNestedTestBatch(quench) {
   );
 }
 
+/** @type {RegisterBatchFunction} */
 function registerOtherTestBatch(quench) {
   quench.registerBatch(
     "quench.examples.other",
@@ -123,5 +134,36 @@ function registerOtherTestBatch(quench) {
       });
     },
     { displayName: "QUENCH: Other" },
+  );
+}
+
+/** @type {RegisterBatchFunction} */
+function registerSnapshotTestBatch(quench) {
+  quench.registerBatch(
+    "quench.examples.snapshots",
+    (context) => {
+      const { describe, it, assert, expect } = context;
+      describe("Snapshot Testing", function () {
+        it("Passing Test using DOM element and expect", function () {
+          expect(game.actors.apps[0]._element).to.matchSnapshot();
+        });
+        it("Passing Test using simple object and assert", function () {
+          assert.matchSnapshot({ foo: "bar" });
+        });
+        it("Passing Test using should from prototype and string", function () {
+          "Some Test ¯\\_(ツ)_/¯".should.matchSnapshot();
+        });
+        it("Passing Test using temporary actor", function () {
+          const types = game.system.entityTypes ?? game.system.documentTypes;
+          const actorType = types["Actor"][0];
+          const actor = new Actor({ name: "Test Actor", type: actorType });
+          expect(actor).to.matchSnapshot();
+        });
+      });
+      it("Suite-less Snapshot Test", function () {
+        expect(1).to.matchSnapshot();
+      });
+    },
+    { displayName: "QUENCH: Snapshots Test", snapBaseDir: "some/other/weird/path" },
   );
 }

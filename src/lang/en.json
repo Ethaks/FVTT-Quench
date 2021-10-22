@@ -18,6 +18,8 @@
     "CollapseSuccessfulLabel": "Collapse Passing Suites",
     "CollapseSuccessfulHint": "When enabled, suites for which all children suites and tests are passing will be collapsed by default",
 
+    "UploadedSnapshots": "Updated {files} snapshot files for {batches} batches",
+
     "WARN": {
       "BatchAlreadyExists": "QUENCH: Test batch \"{key}\" already exists. Overwriting... "
     },

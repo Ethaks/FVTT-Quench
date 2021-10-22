@@ -25,7 +25,7 @@ Enabling or disabling batches allows you to pick and choose only a subset of sui
 
 ### `quenchReady` Hook
 
-_Usage of the `"quenchReady"` hook has been deprecated with Quench 0.5, but the hook is still fired for backwards compatibility._
+**Usage of the `"quenchReady"` hook has been deprecated with Quench 0.5, but the hook is still fired for backwards compatibility.**
 
 Quench provides a `"quenchReady"` hook, which indicates when Quench is ready for you to start registering batches.
 `"quenchReady"` is guaranteed to occur after the core `"init"` hook, as it is fired in Quench's `"setup"` hook.
@@ -70,7 +70,7 @@ Hooks.on("quenchReady", (quench) => {
 
 ### Snapshots
 
-_Snapshot handling is currently in alpha! The current API is not final and subject to change – all input is welcome!._
+**Snapshot handling is currently in alpha! The current API is not final and subject to change – all input is welcome!**
 
 Quench supports snapshot testing, allowing for Chai's comparisons to work with data previously serialised using [pretty-format](https://www.npmjs.com/package/pretty-format) – this includes support for regular JS objects, as well as e.g. DOM elements.
 To compare an object to a snapshot, you can use `matchSnapshot()` as assertion.

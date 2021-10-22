@@ -4,24 +4,23 @@
 
 ### Bug Fixes
 
-- The `clearWorld` utility function did not actually function after getting updated to use Documents
+- The `clearWorld` utility function did not actually work after getting updated to use Documents
 
 ### Features
 
 - Added snapshot support
     - The basic assertion function is `matchSnapshot`, which can be used like this: `expect({foo: "bar"}).to.matchSnapshot()`
     - Snapshots are stored in Foundry's `Data/__snapshots__/<package name>` directory by default
-    - Each batch gets its own directory, in which each test's snapshot is stored in their own file named by the test's hash
-    - The snapshot directory default can be overwritten by setting a `snapBaseDir` option to the batch registration options
+    - In this `snapBaseDir`, each batch gets its own directory, in which each test's snapshot is stored in their own file named by the test's hash
+    - The snapshot directory default can be overwritten by setting a `snapBaseDir` option in the batch registration options
 - `autoRun` tests are now guaranteed to start *after* the `ready` hook is fired
 
 ### API
 
 - The `quenchReady` hook is now deprecated
-    - To remain compatible to old batch registration for now, the `quenchReady` hook is still fired in Foundry's `setup` hook
+    - To remain compatible with old batch registration for now, the `quenchReady` hook is still fired in Foundry's `setup` hook
 - The `quench` global is now guaranteed to get initialised in the `init` hook and can be used afterwards
-- Registering batches with names not starting with a package name is now deprecated
-    - For now, this will trigger an error shown in the UI and naming is not enforced – support will be removed in the future!
+- Registering a batch whose name does not belong to a package will now trigger a UI warning
 
 ## [0.4.2] 2021-10-06
 
