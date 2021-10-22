@@ -4,7 +4,7 @@ import "mocha/mocha.js";
 import * as chai from "chai";
 
 import { registerExampleTests } from "./quench-tests/nonsense-tests.js";
-import { QuenchSnapshotManager } from "./snapshot.js";
+import { QuenchSnapshotManager } from "./quench-snapshot.js";
 
 /**
  * Sets up Quench and its dependencies

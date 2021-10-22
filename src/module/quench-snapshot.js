@@ -297,28 +297,34 @@ export class QuenchSnapshotManager {
       else _info.call(this, ...args);
     };
 
-    const uploadPromises = Array.from(this.updateQueue).map(async (batchKey) => {
-      const snapDir = this.getSnapDir(batchKey);
+    try {
+      const uploadPromises = Array.from(this.updateQueue).map(async (batchKey) => {
+        const snapDir = this.getSnapDir(batchKey);
 
-      // Get the batch's snapshot data from the cache, or create a new object to store this test in
-      const data = this.fileCache[batchKey] ?? {};
-      const filePromises = Object.entries(data).map(([key, value]) => {
-        const newFile = new File([value], `${key}.snap.txt`, { type: "text/plain" });
-        return FilePicker.upload("data", snapDir, newFile);
+        // Get the batch's snapshot data from the cache, or create a new object to store this test in
+        const data = this.fileCache[batchKey] ?? {};
+        const filePromises = Object.entries(data).map(([key, value]) => {
+          const newFile = new File([value], `${key}.snap.txt`, { type: "text/plain" });
+          return FilePicker.upload("data", snapDir, newFile);
+        });
+        return Promise.all(filePromises);
       });
-      return Promise.all(filePromises);
-    });
-    const resp = await Promise.all(uploadPromises);
-    this.updateQueue.clear();
+      const resp = await Promise.all(uploadPromises);
+      this.updateQueue.clear();
 
-    // Restore original info method and create one notification for the upload
-    ui.notifications.info = _info;
-    ui.notifications.info(
-      game.i18n.format("QUENCH.UploadedSnapshots", {
-        batches: resp.length,
-        files: resp.flat().filter((r) => r.status === "success").length,
-      }),
-    );
-    return resp;
+      // Restore original info method and create one notification for the upload
+      ui.notifications.info = _info;
+      ui.notifications.info(
+        game.i18n.format("QUENCH.UploadedSnapshots", {
+          batches: resp.length,
+          files: resp.flat().filter((r) => r.status === "success").length,
+        }),
+      );
+      return resp;
+    } catch (error) {
+      // Ensure ui.notifications.info patch is reverted
+      ui.notifications.info = _info;
+      throw error;
+    }
   }
 }
