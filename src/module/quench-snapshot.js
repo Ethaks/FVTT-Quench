@@ -5,8 +5,6 @@ import { internalUtils } from "./utils/quench-utils.js";
 /**
  * The `QuenchSnapshotManager` class is a helper class, meant to be instantiated alongside a `Quench` class.
  * It provides various methods enabling the fetching, caching, managing, and updating of snapshots.
- *
- * @property {Quench} quench - The `Quench` instance this manager belongs to
  */
 export class QuenchSnapshotManager {
   constructor(quench) {
@@ -115,8 +113,8 @@ export class QuenchSnapshotManager {
   /**
    * Enables snapshot usage by adding `matchSnapshot` assertion to chai
    *
-   * @param {object} chai - The global chai object
-   * @param {object} utils - Chai utils
+   * @param {Chai} chai - The global chai object
+   * @param {Chai.ChaiUtils} utils - Chai utils
    */
   static enableSnapshots(chai, utils) {
     // Enable `matchSnapshot` for assert style
@@ -328,3 +326,9 @@ export class QuenchSnapshotManager {
     }
   }
 }
+
+/**
+ * The global chai object
+ *
+ * @typedef {import("chai")} Chai
+ */

@@ -6,22 +6,30 @@ import { QuenchSnapshotManager } from "./quench-snapshot.js";
 /**
  * The `Quench` class is the "hub" of the Quench module. It contains the primary public API for Quench, as well as references to the global
  * mocha and chai objects.
- *
- * @property {Mocha} mocha - the global mocha instance
- * @property {object} chai - the global chai instance
- * @property {object} utils - Various utility functions
- * @property {Map<string, object>} _testBatches - a map of registered test batches
- * @property {QuenchResults} app - the singleton instance of `QuenchResults` that this `Quench` instance uses
- * @property {QuenchSnapshotManager} snapshots - the `QuenchSnapshotManager` instance used by this `Quench` instance
  */
 export default class Quench {
+  /**
+   * @param {BrowserMocha} mocha - Mocha's global
+   * @param {Chai} chai - The global chai object
+   */
   constructor(mocha, chai) {
+    /** @type {BrowserMocha} The global mocha instance (for browser support) */
     this.mocha = mocha;
     this.mocha._cleanReferencesAfterRun = false;
+
+    /** @type {Chai} The usually global chai object */
     this.chai = chai;
+
+    /** @type {quenchUtils} Various utility functions */
     this.utils = quenchUtils;
+
+    /** @type {Map<string, BatchData>} A map of registered test batches */
     this._testBatches = new Map();
+
+    /** @type {QuenchResults} The singleton instance of `QuenchResults` that this `Quench` instance uses */
     this.app = new QuenchResults(this);
+
+    /** @type {QuenchSnapshotManager} The `QuenchSnapshotManager` instance that this `Quench` instance uses */
     this.snapshots = new QuenchSnapshotManager(this);
   }
 
@@ -50,7 +58,7 @@ export default class Quench {
    * @param {string} key - The test batch's unique string key. Only one test batch with a given key can exist at one time.
    *     If you register a test batch with a pre-existing key, it will overwrite the previous test batch.
    * @param {function} fn - The function which will be called to register the suites and tests within your test batch.
-   * @param {object} options
+   * @param {object} [options]
    * @param {string|null} [options.displayName] - A user-friendly name to show in the Quench UI and detailed results.
    * @param {string|null} [options.snapBaseDir] - The directory in which snapshots for this batch are stored.
    */
@@ -76,7 +84,7 @@ export default class Quench {
    * Returns a single batch's data.
    *
    * @param {string} key - The batch key
-   * @returns {object} Batch data
+   * @returns {BatchData} Batch data
    */
   getBatch(key) {
     return this._testBatches.get(key);
@@ -179,3 +187,18 @@ export default class Quench {
     this._currentRunner?.abort();
   }
 }
+
+/**
+ * The global chai object
+ *
+ * @typedef {import("chai")} Chai
+ */
+
+/**
+ * A batch's data
+ *
+ * @typedef {object} BatchData
+ * @property {string} displayName - A user-friendly name to show in the Quench UI and detailed results
+ * @property {function} fn - The function which will be called to register the suites and tests in this batch
+ * @property {string} snapBaseDir - The directory in which snapshots for this batch are stored
+ */

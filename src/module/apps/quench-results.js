@@ -8,6 +8,7 @@ const { RUNNABLE_STATE, getTestState, getSuiteState } = quenchUtils._internal;
 export default class QuenchResults extends Application {
   constructor(quench, options) {
     super(options);
+    /** @type {import("../quench").default} The `Quench` instance this application is used by */
     this.quench = quench;
   }
 
@@ -107,7 +108,7 @@ export default class QuenchResults extends Application {
   _getCheckedBatches() {
     const $batchEls = this.element.find("#quench-batches-list li");
     return $batchEls
-      .map((i, el) => {
+      .map((_, el) => {
         const enabled = $(el).find("input[type=checkbox]").prop("checked");
         return { key: el.dataset.batch, enabled };
       })
@@ -159,7 +160,7 @@ export default class QuenchResults extends Application {
     const $expandable = $li.find("> .expandable");
     if (isTest) $expandable.hide();
 
-    $expander.click(() => {
+    $expander.on("click", () => {
       $expander.removeClass("fa-caret-down");
       $expander.removeClass("fa-caret-right");
       const expanded = $expandable.is(":visible");
