@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## [0.5.0] 2021-10-23
 
 ### Bug Fixes
 
