@@ -75,7 +75,7 @@ Hooks.on("renderSidebar", function (_sidebar, html, _options) {
     `<button class="quench-button"><b>${game.i18n.localize("QUENCH.Title")}</b></button>`,
   );
 
-  $quenchButton.click(function onClick() {
+  $quenchButton.on("click", function onClick() {
     quench.app.render(true);
   });
 
@@ -94,7 +94,7 @@ Hooks.on("ready", async () => {
   if (shouldRender) quench.app.render(true);
 
   if (game.settings.get("quench", "autoRun")) {
-    if (shouldRender) await quenchUtils.pause(500);
+    if (shouldRender) await quenchUtils.pause(1000);
     quench.runAllBatches();
   }
 });
