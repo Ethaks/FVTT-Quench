@@ -1,9 +1,22 @@
-# Quench
+<h1 align=center>
+    <img alt="Quench Logo" src="docs/quench-logo.webp" width=256 height=256>
+  <br>
+  Quench
+</h1>
 
-![Latest Release Download Count](https://img.shields.io/github/downloads/Ethaks/FVTT-Quench/latest/module.zip)
-[![Forge Installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Fquench&colorB=4aa94a)](https://forge-vtt.com/bazaar#package=quench)
-[![Foundry Hub Endorsements](https://img.shields.io/endpoint?logoColor=white&url=https%3A%2F%2Fwww.foundryvtt-hub.com%2Fwp-json%2Fhubapi%2Fv1%2Fpackage%2Fquench%2Fshield%2Fendorsements)](https://www.foundryvtt-hub.com/package/quench/)
-![Supported Foundry Versions](https://img.shields.io/endpoint?url=https://foundryshields.com/version?url=https://github.com/Ethaks/FVTT-Quench/releases/latest/download/module.json)
+<p align=center>
+  <a href="https://github.com/Ethaks/FVTT-Quench/releases/latest">
+    <img src="https://img.shields.io/github/downloads/Ethaks/FVTT-Quench/latest/module.zip" alt="Downloads" />
+  </a>
+  <a href="https://forge-vtt.com/bazaar#package=quench">
+    <img src="https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Fquench&colorB=4aa94a" alt="Forge Install %" />
+  </a>
+  <br />
+  <a href="https://www.foundryvtt-hub.com/package/quench/">
+    <img src="https://img.shields.io/endpoint?logoColor=white&url=https%3A%2F%2Fwww.foundryvtt-hub.com%2Fwp-json%2Fhubapi%2Fv1%2Fpackage%2Fquench%2Fshield%2Fendorsements" alt="Foundry Hub Endorsements" />
+  </a>
+  <img src="https://img.shields.io/endpoint?url=https://foundryshields.com/version?url=https://github.com/Ethaks/FVTT-Quench/releases/latest/download/module.json" alt="Supported Foundry Versions" />
+</p>
 
 Harden your Foundry module or system code with end-to-end UI tests directly within Foundry.
 Powered by [Mocha](https://mochajs.org/) and also includes [Chai](https://www.chaijs.com/).
