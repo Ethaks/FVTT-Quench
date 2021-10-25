@@ -1,15 +1,20 @@
 import { quenchUtils } from "./utils/quench-utils.js";
 
-const { RUNNABLE_STATE, getTestState } = quenchUtils._internal;
+const { RUNNABLE_STATES, getTestState } = quenchUtils._internal;
 
 /**
  * Given a mocha Runner, reports test results to the singleton instance of {@link QuenchResults} and in the console if enabled
  */
-export default class QuenchReporter {
-  constructor(runner) {
-    const app = quench.app;
+export default class QuenchReporter extends Mocha.reporters.Base {
+  /** Prefix to appear in log messages */
+  _logPrefix = "QUENCH | " as const;
 
-    this._logPrefix = "QUENCH | ";
+  /**
+   * @param {Mocha.Runner} runner
+   */
+  constructor(runner: Mocha.Runner) {
+    super(runner);
+    const app = quench.app;
 
     const {
       EVENT_RUN_BEGIN,
@@ -19,7 +24,7 @@ export default class QuenchReporter {
       EVENT_TEST_BEGIN,
       EVENT_TEST_END,
       EVENT_TEST_FAIL,
-    } = runner.constructor.constants;
+    } = Mocha.Runner.constants;
 
     runner
       .once(EVENT_RUN_BEGIN, () => {
@@ -40,7 +45,7 @@ export default class QuenchReporter {
           const batchKey = suite._quench_parentBatch;
           const isBatchRoot = suite._quench_batchRoot;
           if (isBatchRoot) {
-            console.group(quench._testBatches.get(batchKey).displayName);
+            console.group(quench.getBatch(batchKey)?.displayName);
           } else {
             console.group(`Suite: ${suite.title}`, { suite });
           }
@@ -60,18 +65,18 @@ export default class QuenchReporter {
       })
       .on(EVENT_TEST_END, (test) => {
         const state = getTestState(test);
-        if (state === RUNNABLE_STATE.FAILURE) return;
+        if (state === RUNNABLE_STATES.FAILURE) return;
 
         app.handleTestEnd(test);
 
         if (QuenchReporter._shouldLogTestDetails()) {
           let stateString, stateColor;
           switch (state) {
-            case RUNNABLE_STATE.PENDING:
+            case RUNNABLE_STATES.PENDING:
               stateString = "PENDING";
               stateColor = CONSOLE_COLORS.pending;
               break;
-            case RUNNABLE_STATE.SUCCESS:
+            case RUNNABLE_STATES.SUCCESS:
               stateString = "PASS";
               stateColor = CONSOLE_COLORS.pass;
               break;
@@ -99,7 +104,7 @@ export default class QuenchReporter {
       })
       .once(EVENT_RUN_END, () => {
         const stats = runner.stats;
-        app.handleRunEnd(stats);
+        if (stats) app.handleRunEnd(stats);
 
         if (QuenchReporter._shouldLogTestDetails()) {
           console.groupEnd();
@@ -110,10 +115,8 @@ export default class QuenchReporter {
 
   /**
    * Determines whether the setting to show detailed log results is enabled
-   * @returns {boolean}
-   * @private
    */
-  static _shouldLogTestDetails() {
+  private static _shouldLogTestDetails(): boolean {
     return game.settings.get("quench", "logTestDetails");
   }
 }
@@ -123,4 +126,4 @@ const CONSOLE_COLORS = {
   fail: "#FF4444",
   pass: "#55AA55",
   pending: "#8844FF",
-};
+} as const;

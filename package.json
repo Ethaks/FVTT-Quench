@@ -40,6 +40,11 @@
   "homepage": "https://github.com/Ethaks/FVTT-Quench#readme",
   "devDependencies": {
     "@babel/eslint-parser": "^7.15.8",
+    "@league-of-foundry-developers/foundry-vtt-types": "^0.8.9-7",
+    "@types/chai": "^4.2.22",
+    "@types/mocha": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.2.0",
+    "@typescript-eslint/parser": "^5.2.0",
     "@typhonjs-fvtt/eslint-config-foundry.js": "^0.8.0",
     "chai": "^4.3.4",
     "chalk": "^4.1.2",
@@ -56,6 +61,7 @@
     "prettier": "^2.4.1",
     "pretty-format": "^27.2.5",
     "semver": "^7.3.5",
+    "typescript": "^4.4.4",
     "yargs": "^17.2.1"
   },
   "lint-staged": {

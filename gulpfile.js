@@ -14,7 +14,7 @@ const sourceDirectory = "./src";
 const distDirectory = "./dist";
 const stylesDirectory = `${sourceDirectory}/styles`;
 const stylesExtension = "css";
-const sourceFileExtension = "js";
+const sourceFileExtension = "ts";
 const staticFiles = ["lang", "templates", "module.json"];
 const distFiles = ["LICENSE"];
 const getDownloadURL = (version) =>
@@ -29,7 +29,7 @@ const getDownloadURL = (version) =>
  */
 async function buildCode() {
   return esbuild.buildSync({
-    entryPoints: [`${sourceDirectory}/module/quench-init.js`],
+    entryPoints: [`${sourceDirectory}/module/quench-init.ts`],
     bundle: true,
     minify: false,
     sourcemap: true,

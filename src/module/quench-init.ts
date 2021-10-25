@@ -1,17 +1,17 @@
+import * as chai from "chai";
+import "mocha/mocha.js";
+
+import { QuenchSnapshotManager } from "./quench-snapshot.js";
+import { registerExampleTests } from "./quench-tests/nonsense-tests.js";
 import Quench from "./quench.js";
 import { quenchUtils } from "./utils/quench-utils.js";
-import "mocha/mocha.js";
-import * as chai from "chai";
-
-import { registerExampleTests } from "./quench-tests/nonsense-tests.js";
-import { QuenchSnapshotManager } from "./quench-snapshot.js";
 
 /**
  * Sets up Quench and its dependencies
  */
 Hooks.on("init", function quenchInit() {
   chai.use(QuenchSnapshotManager.enableSnapshots);
-  const quench = new Quench(mocha, chai);
+  const quench = new Quench();
   globalThis.quench = quench;
 
   game.settings.register("quench", "logTestDetails", {
@@ -30,7 +30,7 @@ Hooks.on("init", function quenchInit() {
     config: true,
     type: Boolean,
     default: false,
-    onChange: debounce(() => {
+    onChange: foundry.utils.debounce(() => {
       location.reload();
     }, 500),
   });
@@ -70,7 +70,7 @@ Hooks.on("setup", function () {
 /**
  * Inject QUENCH button in sidebar
  */
-Hooks.on("renderSidebar", function (_sidebar, html, _options) {
+Hooks.on("renderSidebar", function (_sidebar: Application, html: JQuery<HTMLElement>) {
   const $quenchButton = $(
     `<button class="quench-button"><b>${game.i18n.localize("QUENCH.Title")}</b></button>`,
   );

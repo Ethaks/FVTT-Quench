@@ -1,9 +1,9 @@
 module.exports = {
-  parser: "@babel/eslint-parser",
+  parser: "@typescript-eslint/parser",
+
   parserOptions: {
     ecmaVersion: 2020,
     sourceType: "module",
-    requireConfigFile: false,
   },
 
   env: {
@@ -11,31 +11,31 @@ module.exports = {
     es2020: true,
   },
 
-  extends: [
-    "eslint:recommended",
-    "@typhonjs-fvtt/eslint-config-foundry.js/0.8.0",
-    "plugin:prettier/recommended",
-  ],
+  extends: ["plugin:@typescript-eslint/recommended", "plugin:prettier/recommended"],
+
+  plugins: ["@typescript-eslint"],
 
   rules: {
-    "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
-    "prefer-const": ["error"],
+    "@typescript-eslint/no-explicit-any": ["error", { ignoreRestArgs: true }],
+    "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+    "@typescript-eslint/ban-ts-comment": [
+      "error",
+      {
+        "ts-expect-error": "allow-with-description",
+      },
+    ],
   },
 
   overrides: [
     {
       files: ["./*.js"],
+      rules: {
+        "@typescript-eslint/no-var-requires": "off",
+      },
+
       env: {
         node: true,
       },
     },
   ],
-
-  globals: {
-    mocha: "readonly",
-    Mocha: "readonly",
-    chai: "readonly",
-    $: "readonly",
-    quench: "readonly",
-  },
 };

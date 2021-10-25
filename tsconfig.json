@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "module": "es6",
+    "target": "es2020",
+    "types": ["@league-of-foundry-developers/foundry-vtt-types", "@types/mocha"],
+    "moduleResolution": "node",
+    "strictNullChecks": true,
+    "strict": true
+  },
+  "exclude": ["dist", "foundry"],
+  "include": ["src/**/*.ts"]
+}

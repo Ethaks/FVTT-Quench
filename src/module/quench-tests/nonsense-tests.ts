@@ -1,9 +1,11 @@
+import Quench from "../quench";
+
 /**
  * Registers all example tests, which also serves as a quick self-test.
  *
- * @param {Quench} quench - the quench instance the tests are registered with
+ * @param quench - the quench instance the tests are registered with
  */
-export function registerExampleTests(quench) {
+export function registerExampleTests(quench: Quench) {
   [
     registerBasicPassingTestBatch,
     registerBasicFailingTestBatch,
@@ -13,14 +15,7 @@ export function registerExampleTests(quench) {
   ].forEach((f) => f(quench));
 }
 
-/**
- * A batch registration function
- *
- * @typedef {(quench: import("../quench").default) => void } RegisterBatchFunction
- */
-
-/** @type {RegisterBatchFunction} */
-function registerBasicPassingTestBatch(quench) {
+function registerBasicPassingTestBatch(quench: Quench) {
   quench.registerBatch(
     "quench.examples.basic-pass",
     (context) => {
@@ -47,12 +42,14 @@ function registerBasicPassingTestBatch(quench) {
         });
       });
     },
-    { displayName: "QUENCH: Basic Passing Test", snapBaseDir: "some/other/weird/path" },
+    {
+      displayName: "QUENCH: Basic Passing Test",
+      snapBaseDir: "__snapshots__/quench/some/other/weird/path",
+    },
   );
 }
 
-/** @type {RegisterBatchFunction} */
-function registerBasicFailingTestBatch(quench) {
+function registerBasicFailingTestBatch(quench: Quench) {
   quench.registerBatch(
     "quench.examples.basic-fail",
     (context) => {
@@ -68,8 +65,7 @@ function registerBasicFailingTestBatch(quench) {
   );
 }
 
-/** @type {RegisterBatchFunction} */
-function registerNestedTestBatch(quench) {
+function registerNestedTestBatch(quench: Quench) {
   quench.registerBatch(
     "quench.examples.nested",
     (context) => {
@@ -87,7 +83,7 @@ function registerNestedTestBatch(quench) {
         });
 
         describe("level 1 B", function () {
-          it("times out", async function () {
+          it("times out", async function (this: Mocha.Test) {
             this.timeout(200);
             await quench.utils.pause(300);
             assert.ok(true);
@@ -113,18 +109,21 @@ function registerNestedTestBatch(quench) {
   );
 }
 
-/** @type {RegisterBatchFunction} */
-function registerOtherTestBatch(quench) {
+function registerOtherTestBatch(quench: Quench) {
   quench.registerBatch(
     "quench.examples.other",
     (context) => {
       const { describe, it, assert } = context;
 
-      it("suite-less test", function () {});
+      it("suite-less test", function () {
+        assert.ok(true);
+      });
       it("pending test");
 
       describe("suite alpha", function () {
-        it("test alpha", function () {});
+        it("test alpha", function () {
+          assert.ok(true);
+        });
       });
       describe("suite beta", function () {
         it("test beta", function () {
@@ -137,15 +136,15 @@ function registerOtherTestBatch(quench) {
   );
 }
 
-/** @type {RegisterBatchFunction} */
-function registerSnapshotTestBatch(quench) {
+function registerSnapshotTestBatch(quench: Quench) {
   quench.registerBatch(
     "quench.examples.snapshots",
     (context) => {
       const { describe, it, assert, expect } = context;
       describe("Snapshot Testing", function () {
         it("Passing Test using DOM element and expect", function () {
-          expect(game.actors.apps[0]._element).to.matchSnapshot();
+          // @ts-expect-error Element is private, but this is a quick test using some available element
+          expect(game.actors?.apps[0]._element).to.matchSnapshot();
         });
         it("Passing Test using simple object and assert", function () {
           assert.matchSnapshot({ foo: "bar" });
@@ -154,6 +153,7 @@ function registerSnapshotTestBatch(quench) {
           "Some Test ¯\\_(ツ)_/¯".should.matchSnapshot();
         });
         it("Passing Test using temporary actor", function () {
+          // @ts-expect-error documentTypes will exist come v9
           const types = game.system.entityTypes ?? game.system.documentTypes;
           const actorType = types["Actor"][0];
           const actor = new Actor({ name: "Test Actor", type: actorType });
@@ -164,6 +164,9 @@ function registerSnapshotTestBatch(quench) {
         expect(1).to.matchSnapshot();
       });
     },
-    { displayName: "QUENCH: Snapshots Test", snapBaseDir: "some/other/weird/path" },
+    {
+      displayName: "QUENCH: Snapshots Test",
+      snapBaseDir: "__snapshots__/quench/some/other/weird/path",
+    },
   );
 }

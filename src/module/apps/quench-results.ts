@@ -1,16 +1,22 @@
-import { quenchUtils } from "../utils/quench-utils.js";
+import Quench from "../quench.js";
+import { quenchUtils, RUNNABLE_STATE } from "../utils/quench-utils.js";
 
-const { RUNNABLE_STATE, getTestState, getSuiteState } = quenchUtils._internal;
+const { RUNNABLE_STATES, getTestState, getSuiteState } = quenchUtils._internal;
 
 /**
  * The visual UI for representing Quench test batches and the tests results thereof.
  */
 export default class QuenchResults extends Application {
-  constructor(quench, options) {
+  /**
+   * @param {import("../quench").default} quench
+   * @param {Application.Options} [options]
+   */
+  constructor(quench: Quench, options?: Application.Options) {
     super(options);
     /** @type {import("../quench").default} The `Quench` instance this application is used by */
     this.quench = quench;
   }
+  quench: Quench;
 
   /** @override */
   static get defaultOptions() {
@@ -45,33 +51,33 @@ export default class QuenchResults extends Application {
   }
 
   /** @override */
-  activateListeners($html) {
+  activateListeners($html: JQuery<HTMLElement>) {
     super.activateListeners($html);
 
     // Select All Button
-    $html.find("#quench-select-all").click(() => {
+    $html.find("#quench-select-all").on("click", () => {
       this.element
         .find(`#quench-batches-list .test-batch input[type="checkbox"]`)
         .prop("checked", true);
     });
 
     // Select None Button
-    $html.find("#quench-select-none").click(() => {
+    $html.find("#quench-select-none").on("click", () => {
       this.element
         .find(`#quench-batches-list .test-batch input[type="checkbox"]`)
         .prop("checked", false);
     });
 
     // Run Button
-    $html.find("#quench-run").click(async () => {
-      const enabledBatches = this._getCheckedBatches().reduce((acc, next) => {
+    $html.find("#quench-run").on("click", async () => {
+      const enabledBatches = this._getCheckedBatches().reduce((acc: string[], next) => {
         return next.enabled ? [...acc, next.key] : acc;
       }, []);
       await this.quench.runSelectedBatches(enabledBatches);
     });
 
     // Abort Button
-    $html.find("#quench-abort").click(() => {
+    $html.find("#quench-abort").on("click", () => {
       this.quench.abort();
     });
   }
@@ -87,7 +93,8 @@ export default class QuenchResults extends Application {
     try {
       await this._render(false);
     } catch (err) {
-      err.message = `An error occurred while rendering ${this.constructor.name} ${this.appId}: ${err.message}`;
+      if (err instanceof Error)
+        err.message = `An error occurred while rendering ${this.constructor.name} ${this.appId}: ${err.message}`;
       console.error(err);
       this._state = Application.RENDER_STATES.ERROR;
     }
@@ -102,26 +109,24 @@ export default class QuenchResults extends Application {
 
   /**
    * Determines which test batch elements are checked in the UI
-   * @returns {{key: string, enabled: boolean}[]} - An array of objects indicating whether each test batch (defined by the batch's key) is enabled or not.
-   * @private
+   * @returns An array of objects indicating whether each test batch (defined by the batch's key) is enabled or not.
    */
-  _getCheckedBatches() {
+  private _getCheckedBatches(): { key: string; enabled: boolean }[] {
     const $batchEls = this.element.find("#quench-batches-list li");
     return $batchEls
       .map((_, el) => {
-        const enabled = $(el).find("input[type=checkbox]").prop("checked");
-        return { key: el.dataset.batch, enabled };
+        const enabled = !!$(el).find("input[type=checkbox]").prop("checked");
+        return { key: el.dataset.batch ?? "", enabled };
       })
       .get();
   }
 
   /**
    * Finds or creates an unordered list to contain items for each child runnable (test or suite) of the given parent
-   * @param {jQuery} $parentListEl - The <li> of the parent test batch or suite
-   * @returns {jquery} - The <ul> into which child runnables can be inserted.
-   * @private
+   * @param $parentListEl - The <li> of the parent test batch or suite
+   * @returns The <ul> into which child runnables can be inserted.
    */
-  _findOrMakeChildList($parentListEl) {
+  private _findOrMakeChildList($parentListEl: JQuery<HTMLElement>): JQuery<HTMLElement> {
     const $expandable = $parentListEl.find(`> div.expandable`);
     let $childList = $expandable.find(`> ul.runnable-list`);
     if (!$childList.length) {
@@ -134,13 +139,12 @@ export default class QuenchResults extends Application {
 
   /**
    * Creates a new <li> to represent the runnable given by the provided details
-   * @param {string} title - The runnable title to show in the UI.
-   * @param {string} id - The mocha id of the runnable.
-   * @param {boolean} isTest - Whether this runnable is a test (or a suite, if false)
-   * @returns {jQuery} - The <li> element representing this runnable.
-   * @private
+   * @param title - The runnable title to show in the UI.
+   * @param id - The mocha id of the runnable.
+   * @param isTest - Whether this runnable is a test (or a suite, if false)
+   * @returns The <li> element representing this runnable.
    */
-  _makeRunnableLineItem(title, id, isTest) {
+  private _makeRunnableLineItem(title: string, id: string, isTest: boolean): JQuery<HTMLElement> {
     const type = isTest ? "test" : "suite";
     const typeIcon = isTest ? "fa-flask" : "fa-folder";
     const expanderIcon = isTest ? "fa-caret-right" : "fa-caret-down";
@@ -169,28 +173,29 @@ export default class QuenchResults extends Application {
       $expandable.slideToggle(50);
     });
 
-    this._updateLineItemStatus($li, RUNNABLE_STATE.IN_PROGRESS, isTest);
+    this._updateLineItemStatus($li, RUNNABLE_STATES.IN_PROGRESS, isTest);
     return $li;
   }
 
   /**
    * Updates the given existing <li> representing a runnable based on the given state
-   * @param {jQuery} $listEl - The list element representing the runnable
-   * @param {RUNNABLE_STATE} state - the state of the runnable
+   * @param $listEl - The list element representing the runnable
+   * @param state - the state of the runnable
+   * @param [isTest] - whether the item is a test
    * @private
    */
-  _updateLineItemStatus($listEl, state, isTest) {
+  _updateLineItemStatus($listEl: JQuery<HTMLElement>, state: RUNNABLE_STATE, isTest?: boolean) {
     const $icon = $listEl.find("> .summary > i.status-icon");
     let icon = "fa-sync";
     const style = "fas";
     switch (state) {
-      case RUNNABLE_STATE.PENDING:
+      case RUNNABLE_STATES.PENDING:
         icon = "fa-minus-circle";
         break;
-      case RUNNABLE_STATE.SUCCESS:
+      case RUNNABLE_STATES.SUCCESS:
         icon = "fa-check-circle";
         break;
-      case RUNNABLE_STATE.FAILURE:
+      case RUNNABLE_STATES.FAILURE:
         icon = "fa-times-circle";
         break;
     }
@@ -199,7 +204,7 @@ export default class QuenchResults extends Application {
 
     if (
       game.settings.get("quench", "collapseSuccessful") &&
-      state === RUNNABLE_STATE.SUCCESS &&
+      state === RUNNABLE_STATES.SUCCESS &&
       !isTest
     ) {
       $listEl
@@ -216,9 +221,9 @@ export default class QuenchResults extends Application {
 
   /**
    * Called by {@link QuenchReporter} when a mocha suite begins running
-   * @param {Suite} suite
+   * @param suite
    */
-  handleSuiteBegin(suite) {
+  handleSuiteBegin(suite: Mocha.Suite) {
     const batchkey = suite._quench_parentBatch;
     const isBatchRoot = suite._quench_batchRoot;
 
@@ -226,7 +231,7 @@ export default class QuenchResults extends Application {
     if (!batchkey || isBatchRoot) return;
 
     // Get the li to add this test batch to
-    const parentId = suite.parent.id;
+    const parentId = suite.parent?.id;
     const $batchLi = this.element.find(`li.test-batch[data-batch="${batchkey}"]`);
     let $parentLi = $batchLi.find(`li.suite[data-suite-id="${parentId}"]`);
     if (!$parentLi.length) $parentLi = $batchLi;
@@ -238,9 +243,9 @@ export default class QuenchResults extends Application {
 
   /**
    * Called by {@link QuenchReporter} when a mocha suite finishes running
-   * @param {Suite} suite
+   * @param suite
    */
-  handleSuiteEnd(suite) {
+  handleSuiteEnd(suite: Mocha.Suite) {
     const isBatchRoot = suite._quench_batchRoot;
     if (isBatchRoot) return;
 
@@ -250,11 +255,11 @@ export default class QuenchResults extends Application {
 
   /**
    * Called by {@link QuenchReporter} when a mocha test begins running
-   * @param {Test} test
+   * @param test
    */
-  handleTestBegin(test) {
+  handleTestBegin(test: Mocha.Test) {
     const batchKey = test._quench_parentBatch;
-    const parentId = test.parent.id;
+    const parentId = test.parent?.id;
 
     const $batchLi = this.element.find(`li.test-batch[data-batch="${batchKey}"]`);
     let $parentLi = $batchLi.find(`li.suite[data-suite-id="${parentId}"]`);
@@ -266,9 +271,9 @@ export default class QuenchResults extends Application {
 
   /**
    * Called by {@link QuenchReporter} when a mocha test finishes running
-   * @param {Test} test
+   * @param test
    */
-  handleTestEnd(test) {
+  handleTestEnd(test: Mocha.Test) {
     let $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
 
     // If there is not already a list item for this test, create a new one. This is necessary because `handleTestBegin` is not called
@@ -284,13 +289,13 @@ export default class QuenchResults extends Application {
 
   /**
    * Called by {@link QuenchReporter} when a mocha test finishes running and fails
-   * @param {Test} test
-   * @param {Error} err
+   * @param test
+   * @param err
    */
-  handleTestFail(test, err) {
+  handleTestFail(test: Mocha.Test, err: Error) {
     const $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
     $testLi.find("> .expandable").append(`<div class="error-message">${err.message}</div>`);
-    this._updateLineItemStatus($testLi, RUNNABLE_STATE.FAILURE);
+    this._updateLineItemStatus($testLi, RUNNABLE_STATES.FAILURE);
   }
 
   /**
@@ -306,9 +311,9 @@ export default class QuenchResults extends Application {
 
   /**
    * Called by {@link QuenchReporter} when mocha completes a test run
-   * @param {object} stats - Run statistics
+   * @param stats - Run statistics
    */
-  handleRunEnd(stats) {
+  handleRunEnd(stats: Mocha.Stats) {
     // Add summary
     const style = stats.failures ? "stats-fail" : "stats-pass";
     const $stats = $(`
