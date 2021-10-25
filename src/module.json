@@ -34,5 +34,22 @@
   "download": "https://github.com/Ethaks/FVTT-Quench/releases/download/0.5.0/module.zip",
   "license": "https://github.com/Ethaks/FVTT-Quench/blob/master/LICENSE",
   "readme": "https://github.com/Ethaks/FVTT-Quench#readme",
-  "changelog": "https://github.com/Ethaks/FVTT-Quench/blob/master/CHANGELOG.md"
+  "changelog": "https://github.com/Ethaks/FVTT-Quench/blob/master/CHANGELOG.md",
+  "media": [
+    {
+      "type": "icon",
+      "url": "https://raw.githubusercontent.com/Ethaks/FVTT-Quench/master/docs/quench-logo.webp",
+      "caption": "Quench"
+    },
+    {
+      "type": "cover",
+      "url": "https://raw.githubusercontent.com/Ethaks/FVTT-Quench/master/docs/quench-banner.webp",
+      "caption": "Quench"
+    },
+    {
+      "type": "screenshot",
+      "url": "https://raw.githubusercontent.com/Ethaks/FVTT-Quench/master/docs/example-tests.webp",
+      "caption": "Quench displaying test results within Foundry"
+    }
+  ]
 }
