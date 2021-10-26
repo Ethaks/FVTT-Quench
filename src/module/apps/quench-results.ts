@@ -1,5 +1,5 @@
-import Quench from "../quench.js";
-import { quenchUtils, RUNNABLE_STATE } from "../utils/quench-utils.js";
+import Quench from "../quench";
+import { quenchUtils, RUNNABLE_STATE } from "../utils/quench-utils";
 
 const { RUNNABLE_STATES, getTestState, getSuiteState } = quenchUtils._internal;
 

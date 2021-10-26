@@ -1,9 +1,9 @@
 import * as chai from "chai";
 
-import QuenchResults from "./apps/quench-results.js";
-import QuenchReporter from "./quench-reporter.js";
-import { QuenchSnapshotManager } from "./quench-snapshot.js";
-import { quenchUtils } from "./utils/quench-utils.js";
+import QuenchResults from "./apps/quench-results";
+import QuenchReporter from "./quench-reporter";
+import { QuenchSnapshotManager } from "./quench-snapshot";
+import { quenchUtils } from "./utils/quench-utils";
 
 /**
  * The `Quench` class is the "hub" of the Quench module. It contains the primary public API for Quench, as well as references to the global

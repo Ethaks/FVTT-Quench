@@ -1,10 +1,10 @@
 import * as chai from "chai";
 import "mocha/mocha.js";
 
-import { QuenchSnapshotManager } from "./quench-snapshot.js";
-import { registerExampleTests } from "./quench-tests/nonsense-tests.js";
-import Quench from "./quench.js";
-import { quenchUtils } from "./utils/quench-utils.js";
+import { QuenchSnapshotManager } from "./quench-snapshot";
+import { registerExampleTests } from "./quench-tests/nonsense-tests";
+import Quench from "./quench";
+import { quenchUtils } from "./utils/quench-utils";
 
 /**
  * Sets up Quench and its dependencies

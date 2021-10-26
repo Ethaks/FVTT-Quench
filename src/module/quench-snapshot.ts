@@ -1,7 +1,7 @@
 import fnv1a from "@sindresorhus/fnv1a";
 import { format as prettyFormat, plugins as formatPlugins } from "pretty-format";
-import Quench from "./quench.js";
-import { internalUtils } from "./utils/quench-utils.js";
+import Quench from "./quench";
+import { internalUtils } from "./utils/quench-utils";
 
 /**
  * The `QuenchSnapshotManager` class is a helper class, meant to be instantiated alongside a `Quench` class.

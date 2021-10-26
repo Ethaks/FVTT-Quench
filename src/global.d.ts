@@ -1,5 +1,5 @@
-import { QuenchSnapshotManager } from "./module/quench-snapshot.js";
-import Quench from "./module/quench.js";
+import { QuenchSnapshotManager } from "./module/quench-snapshot";
+import Quench from "./module/quench";
 export {};
 
 declare global {
