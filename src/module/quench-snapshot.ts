@@ -1,4 +1,4 @@
-import hash from "hash-sum";
+import fnv1a from "@sindresorhus/fnv1a";
 import { format as prettyFormat, plugins as formatPlugins } from "pretty-format";
 import Quench from "./quench.js";
 import { internalUtils } from "./utils/quench-utils.js";
@@ -151,6 +151,11 @@ export class QuenchSnapshotManager {
     });
   }
 
+  static hash(string: string) {
+    const bigint = fnv1a(string, { size: 64 });
+    return bigint.toString(32);
+  }
+
   /** Resets the current fileCache */
   resetCache() {
     this.fileCache = {};
@@ -175,7 +180,7 @@ export class QuenchSnapshotManager {
    * @returns A snapshot string
    */
   readSnap(batchKey: string, fullTitle: string) {
-    const name = hash(fullTitle);
+    const name = QuenchSnapshotManager.hash(fullTitle);
     if (!this.fileCache[batchKey] || !(name in this.fileCache[batchKey]))
       throw Error("Snapshot not found");
     return this.fileCache[batchKey][name];
@@ -234,7 +239,7 @@ export class QuenchSnapshotManager {
   queueBatchUpdate(batchKey: string, fullTitle: string, newData: string) {
     this.updateQueue.add(batchKey);
     const data = this.fileCache[batchKey] ?? (this.fileCache[batchKey] = {});
-    data[hash(fullTitle)] = newData;
+    data[QuenchSnapshotManager.hash(fullTitle)] = newData;
   }
 
   /**
