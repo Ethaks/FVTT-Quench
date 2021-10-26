@@ -24,18 +24,34 @@ const getDownloadURL = (version) =>
 /*      BUILD       */
 /********************/
 
+/** ESBuild's previous result for incremental builds */
+let buildResult;
 /**
  * Build the distributable JavaScript code
  */
-async function buildCode() {
-  return esbuild.buildSync({
-    entryPoints: [`${sourceDirectory}/module/quench-init.ts`],
-    bundle: true,
-    minify: false,
-    sourcemap: true,
-    outfile: `${distDirectory}/quench.js`,
-    sourceRoot: name,
-  });
+async function _buildCode(prod) {
+  if (buildResult) buildResult.rebuild();
+  else
+    buildResult = await esbuild.build({
+      entryPoints: [`${sourceDirectory}/module/quench-init.ts`],
+      bundle: true,
+      minify: prod ? true : false,
+      sourcemap: true,
+      outfile: `${distDirectory}/${name}.js`,
+      sourceRoot: name,
+      incremental: prod ? false : true,
+    });
+  return buildResult;
+}
+
+/** Build JS for development */
+function buildDev() {
+  return _buildCode(false);
+}
+
+/** Build JS for production */
+function buildProd() {
+  return _buildCode(true);
 }
 
 /**
@@ -65,7 +81,7 @@ async function copyFiles() {
  * Watch for changes for each build step
  */
 function buildWatch() {
-  gulp.watch(`${sourceDirectory}/**/*.${sourceFileExtension}`, { ignoreInitial: false }, buildCode);
+  gulp.watch(`${sourceDirectory}/**/*.${sourceFileExtension}`, { ignoreInitial: false }, buildDev);
   gulp.watch(`${stylesDirectory}/**/*.${stylesExtension}`, { ignoreInitial: false }, buildStyles);
   gulp.watch(
     staticFiles.map((file) => `${sourceDirectory}/${file}`),
@@ -178,7 +194,7 @@ function bumpVersion(cb) {
   }
 }
 
-const execBuild = gulp.parallel(buildCode, buildStyles, copyFiles);
+const execBuild = gulp.parallel(buildProd, buildStyles, copyFiles);
 
 exports.build = gulp.series(clean, execBuild);
 exports.watch = buildWatch;
