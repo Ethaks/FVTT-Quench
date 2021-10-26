@@ -5,6 +5,7 @@
 </h1>
 
 <p align=center>
+  <img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/Ethaks/FVTT-Quench/Checks?label=Checks&logo=github">
   <a href="https://github.com/Ethaks/FVTT-Quench/releases/latest">
     <img src="https://img.shields.io/github/downloads/Ethaks/FVTT-Quench/latest/module.zip" alt="Downloads" />
   </a>
