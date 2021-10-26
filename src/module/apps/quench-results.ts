@@ -7,19 +7,19 @@ const { RUNNABLE_STATES, getTestState, getSuiteState } = quenchUtils._internal;
  * The visual UI for representing Quench test batches and the tests results thereof.
  */
 export default class QuenchResults extends Application {
+  /** The `Quench` instance this `Application` is used by */
+  quench: Quench;
+
   /**
-   * @param {import("../quench").default} quench
-   * @param {Application.Options} [options]
+   * @param quench - The `Quench` instance this `Application` belongs to
+   * @param [options]
    */
   constructor(quench: Quench, options?: Application.Options) {
     super(options);
-    /** @type {import("../quench").default} The `Quench` instance this application is used by */
     this.quench = quench;
   }
-  quench: Quench;
 
-  /** @override */
-  static get defaultOptions() {
+  static override get defaultOptions() {
     const width = 550;
     const sidebarWidth = 300;
     const margin = 10;
@@ -36,8 +36,7 @@ export default class QuenchResults extends Application {
     });
   }
 
-  /** @override */
-  getData() {
+  override getData() {
     return {
       anyBatches: this.quench._testBatches.size > 0,
       batches: Array.from(this.quench._testBatches.entries()).map((entry) => {
@@ -50,8 +49,7 @@ export default class QuenchResults extends Application {
     };
   }
 
-  /** @override */
-  activateListeners($html: JQuery<HTMLElement>) {
+  override activateListeners($html: JQuery<HTMLElement>) {
     super.activateListeners($html);
 
     // Select All Button
@@ -182,9 +180,12 @@ export default class QuenchResults extends Application {
    * @param $listEl - The list element representing the runnable
    * @param state - the state of the runnable
    * @param [isTest] - whether the item is a test
-   * @private
    */
-  _updateLineItemStatus($listEl: JQuery<HTMLElement>, state: RUNNABLE_STATE, isTest?: boolean) {
+  private _updateLineItemStatus(
+    $listEl: JQuery<HTMLElement>,
+    state: RUNNABLE_STATE,
+    isTest?: boolean,
+  ) {
     const $icon = $listEl.find("> .summary > i.status-icon");
     let icon = "fa-sync";
     const style = "fas";
@@ -322,7 +323,7 @@ export default class QuenchResults extends Application {
                   quantity: stats.tests,
                   duration: stats.duration,
                 })}</div>
-                <div class="${style}">${game.i18n.format("QUENCH.StatsResults", stats)}</div>
+                <div class="${style}">${game.i18n.format("QUENCH.StatsResults", { ...stats })}</div>
             </div>
         `);
     const $container = this.element.find("#quench-results-stats");

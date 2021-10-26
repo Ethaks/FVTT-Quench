@@ -3,6 +3,7 @@ import Quench from "./module/quench";
 export {};
 
 declare global {
+  /* eslint-disable-next-line no-var */ // Necessary for global addition
   var quench: Quench;
 
   interface QuenchSnapshotManager {
@@ -19,20 +20,21 @@ declare global {
     game: never;
   }
 
-  interface AssertStatic {
-    matchSnapshot: matchSnapshot;
-  }
   namespace Chai {
     interface AssertStatic {
-      matchSnapshot: matchSnapshot;
+      /** Compares equality of serialised argument and previously stored snapshot */
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // This function is meant to consume anything
+      matchSnapshot: (obj: any) => void;
     }
 
     interface Assertion {
-      matchSnapshot: matchSnapshot;
+      /** Compares equality of a test's serialised object and previously stored snapshot */
+      matchSnapshot: () => void;
     }
   }
 
   namespace Mocha {
+    /* eslint-disable-next-line @typescript-eslint/no-empty-interface */ // Error in mocha types
     interface utils {}
     interface Runnable {
       _quench_parentBatch: string;
@@ -51,5 +53,3 @@ declare global {
     _cleanReferencesAfterRun: boolean;
   }
 }
-
-declare type matchSnapshot = (obj?: any) => void;

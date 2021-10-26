@@ -22,10 +22,10 @@ export class QuenchSnapshotManager {
   /**
    * This instance's file cache, containing all serialised snapshots, ordered first by batch name, then by hashed full test titles
    */
-  fileCache: Record<string, Record<string, string>> = {};
+  private fileCache: Record<string, Record<string, string>> = {};
 
   /** A cache array containing batchKeys whose data has to be updated */
-  updateQueue: Set<string> = new Set();
+  private updateQueue: Set<string> = new Set();
 
   /** A boolean that determines whether snapshots should be updated after the next run. */
   enableUpdates: boolean | null = null;
@@ -113,7 +113,7 @@ export class QuenchSnapshotManager {
    * @param chai - The global chai object
    * @param utils - Chai utils
    */
-  static enableSnapshots(chai: Chai.ChaiStatic, utils: Chai.ChaiUtils) {
+  static enableSnapshots(chai: Chai.ChaiStatic, utils: Chai.ChaiUtils): void {
     // Enable `matchSnapshot` for assert style
     // Create a wrapper around `matchSnapshot`, providing the actual object
     chai.assert.matchSnapshot = function (obj) {
@@ -151,13 +151,19 @@ export class QuenchSnapshotManager {
     });
   }
 
-  static hash(string: string) {
+  /**
+   * Creates a 13 character hash from a string using fnv1a
+   *
+   * @param string - The string to be hashed
+   * @returns The string's hash
+   */
+  static hash(string: string): string {
     const bigint = fnv1a(string, { size: 64 });
-    return bigint.toString(32);
+    return bigint.toString(32).padStart(13, "0");
   }
 
   /** Resets the current fileCache */
-  resetCache() {
+  resetCache(): void {
     this.fileCache = {};
   }
 
@@ -167,7 +173,7 @@ export class QuenchSnapshotManager {
    * @param batchKey - The batch whose directory is requested
    * @returns The batch's snapshot directory
    */
-  getSnapDir(batchKey: string) {
+  getSnapDir(batchKey: string): string {
     return this.quench.getBatch(batchKey)?.snapBaseDir + `/${batchKey}`;
   }
 
@@ -179,7 +185,7 @@ export class QuenchSnapshotManager {
    * @throws {Error} Throws an error if the requested snapshot cannot be found
    * @returns A snapshot string
    */
-  readSnap(batchKey: string, fullTitle: string) {
+  readSnap(batchKey: string, fullTitle: string): string {
     const name = QuenchSnapshotManager.hash(fullTitle);
     if (!this.fileCache[batchKey] || !(name in this.fileCache[batchKey]))
       throw Error("Snapshot not found");
@@ -190,8 +196,8 @@ export class QuenchSnapshotManager {
    * Loads all snaps for a Quench run
    *
    * @async
-   * @param {string[]} batchKeys - The array of batch keys to be run
-   * @returns {Promise<object>} A Promise that is resolved when all snapshot files are loaded
+   * @param batchKeys - The array of batch keys to be run
+   * @returns A Promise that is resolved when all snapshot files are loaded
    */
   async loadBatchSnaps(batchKeys: string[]): Promise<Record<string, Record<string, string>>> {
     this.resetCache();
@@ -236,7 +242,7 @@ export class QuenchSnapshotManager {
    * @param fullTitle - The test's full title
    * @param newData - The new snapshot data
    */
-  queueBatchUpdate(batchKey: string, fullTitle: string, newData: string) {
+  queueBatchUpdate(batchKey: string, fullTitle: string, newData: string): void {
     this.updateQueue.add(batchKey);
     const data = this.fileCache[batchKey] ?? (this.fileCache[batchKey] = {});
     data[QuenchSnapshotManager.hash(fullTitle)] = newData;
@@ -244,10 +250,10 @@ export class QuenchSnapshotManager {
 
   /**
    * Updates all snapshots whose data was changed in the last run (i.e. all batches listed in {@link QuenchSnapshotManager#updateQueue})
-   *
-   * @async
    */
-  async updateSnapshots() {
+  async updateSnapshots(): Promise<
+    (false | void | (Response & { path: string; message?: string | undefined }))[][]
+  > {
     // Get all snapshot directories
     const snapDirs = [...this.updateQueue].map((batchKey) => this.getSnapDir(batchKey));
     const dirTree: object = snapDirs.reduce((acc, dir) => {
