@@ -66,10 +66,5 @@
   "lint-staged": {
     "*.(ts|js)": "eslint --cache --fix",
     "*.(json|css|yml)": "prettier --write"
-  },
-  "standard-version": {
-    "scripts": {
-      "prerelease": "gulp bumpVersion && git add src/module.json"
-    }
   }
 }

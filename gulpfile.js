@@ -15,8 +15,6 @@ const stylesExtension = "css";
 const sourceFileExtension = "ts";
 const staticFiles = ["lang", "templates", "module.json"];
 const distFiles = ["LICENSE"];
-const getDownloadURL = (version) =>
-  `https://github.com/Ethaks/FVTT-Quench/releases/download/${version}/module.zip`;
 
 /********************/
 /*      BUILD       */
@@ -122,55 +120,8 @@ async function clean() {
   }
 }
 
-/********************/
-/*    VERSIONING    */
-/********************/
-
-/**
- * Get the contents of the manifest file as object.
- */
-function getManifest() {
-  const manifestPath = `${sourceDirectory}/module.json`;
-
-  if (fs.existsSync(manifestPath)) {
-    return {
-      file: fs.readJSONSync(manifestPath),
-      name: "module.json",
-    };
-  }
-}
-
-/**
- * Update version and download URL.
- */
-function bumpVersion(cb) {
-  const packageJson = fs.readJSONSync("package.json");
-  const manifest = getManifest();
-
-  if (!manifest) cb(Error(chalk.red("Manifest JSON not found")));
-
-  try {
-    const targetVersion = packageJson.version;
-
-    if (!targetVersion) {
-      return cb(new Error(chalk.red("Error: Incorrect version arguments")));
-    }
-
-    console.log(`Updating version number to '${targetVersion}'`);
-
-    manifest.file.version = targetVersion;
-    manifest.file.download = getDownloadURL(targetVersion);
-    fs.writeJSONSync(`${sourceDirectory}/${manifest.name}`, manifest.file, { spaces: 2 });
-
-    return cb();
-  } catch (err) {
-    cb(err);
-  }
-}
-
 const execBuild = gulp.parallel(buildProd, buildStyles, copyFiles);
 
 exports.build = gulp.series(clean, execBuild);
 exports.watch = buildWatch;
 exports.clean = clean;
-exports.bumpVersion = bumpVersion;
