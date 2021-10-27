@@ -2,7 +2,7 @@
   "name": "quench",
   "title": "Quench",
   "description": "Harden your Foundry module or system code with end-to-end UI tests directly within Foundry. Powered by Mocha.",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "author": "Ethaks",
   "authors": [
     {
@@ -11,18 +11,9 @@
       "ko-fi": "ethaks",
       "url": "https://gitlab.com/Ethaks"
     },
-    {
-      "name": "Cole Schultz",
-      "discord": "cole#9640"
-    }
+    { "name": "Cole Schultz", "discord": "cole#9640" }
   ],
-  "languages": [
-    {
-      "lang": "en",
-      "name": "English",
-      "path": "lang/en.json"
-    }
-  ],
+  "languages": [{ "lang": "en", "name": "English", "path": "lang/en.json" }],
   "scripts": ["./quench.js"],
   "styles": ["styles/quench.css"],
   "minimumCoreVersion": "0.8.5",
@@ -31,7 +22,7 @@
   "library": true,
   "url": "https://github.com/Ethaks/FVTT-Quench",
   "manifest": "https://github.com/Ethaks/FVTT-Quench/releases/latest/download/module.json",
-  "download": "https://github.com/Ethaks/FVTT-Quench/releases/download/0.5.0/module.zip",
+  "download": "https://github.com/Ethaks/FVTT-Quench/releases/download/0.5.1/module.zip",
   "license": "https://github.com/Ethaks/FVTT-Quench/blob/master/LICENSE",
   "readme": "https://github.com/Ethaks/FVTT-Quench#readme",
   "changelog": "https://github.com/Ethaks/FVTT-Quench/blob/master/CHANGELOG.md",

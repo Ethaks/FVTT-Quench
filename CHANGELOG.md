@@ -1,4 +1,13 @@
-# CHANGELOG
+# Changelog
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+### 0.5.1 (2021-10-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* **snapshots:** Quench now uses fnv1a for hashing, which means new hashes will differ from previous ones, breaking the current association of test to file ([732bb2a](https://github.com/Ethaks/FVTT-Quench/commit/732bb2a9e1d20d4d700bf142947407bc710a95c2))
 
 ## [0.5.0] 2021-10-23
 
