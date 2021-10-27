@@ -1,8 +1,6 @@
-const argv = require("yargs").argv;
 const chalk = require("chalk");
 const fs = require("fs-extra");
 const gulp = require("gulp");
-const semver = require("semver");
 const esbuild = require("esbuild");
 
 /********************/
@@ -24,23 +22,35 @@ const getDownloadURL = (version) =>
 /*      BUILD       */
 /********************/
 
-/** ESBuild's previous result for incremental builds */
-let buildResult;
+/**
+ * ESBuild's previous result for incremental builds
+ * @type {esbuild.BuildResult|null}
+ */
+let buildResult = null;
 /**
  * Build the distributable JavaScript code
+ *
+ * @param {boolean} prod - Whether this build is meant for production
+ * @returns {Promise<esbuild.BuildResult>}
  */
-async function _buildCode(prod) {
-  if (buildResult) buildResult.rebuild();
-  else
+async function _buildCode(prod = false) {
+  if (!buildResult)
     buildResult = await esbuild.build({
       entryPoints: [`${sourceDirectory}/module/quench-init.ts`],
       bundle: true,
-      minify: prod ? true : false,
       sourcemap: true,
       outfile: `${distDirectory}/${name}.js`,
       sourceRoot: name,
-      incremental: prod ? false : true,
+      format: "iife",
+      legalComments: "none",
+      minify: prod,
+      keepNames: true,
+      incremental: !prod,
     });
+  else {
+    buildResult = await buildResult.rebuild();
+  }
+
   return buildResult;
 }
 
@@ -131,58 +141,22 @@ function getManifest() {
 }
 
 /**
- * Get the target version based on on the current version and the argument passed as release.
- */
-function getTargetVersion(currentVersion, release) {
-  if (
-    ["major", "premajor", "minor", "preminor", "patch", "prepatch", "prerelease"].includes(release)
-  ) {
-    return semver.inc(currentVersion, release);
-  } else {
-    return semver.valid(release);
-  }
-}
-
-/**
  * Update version and download URL.
  */
 function bumpVersion(cb) {
   const packageJson = fs.readJSONSync("package.json");
-  const packageLockJson = fs.existsSync("package-lock.json")
-    ? fs.readJSONSync("package-lock.json")
-    : undefined;
   const manifest = getManifest();
 
   if (!manifest) cb(Error(chalk.red("Manifest JSON not found")));
 
   try {
-    const release = argv.release || argv.r;
-
-    const currentVersion = packageJson.version;
-
-    if (!release) {
-      return cb(Error("Missing release type"));
-    }
-
-    const targetVersion = getTargetVersion(currentVersion, release);
+    const targetVersion = packageJson.version;
 
     if (!targetVersion) {
       return cb(new Error(chalk.red("Error: Incorrect version arguments")));
     }
 
-    if (targetVersion === currentVersion) {
-      return cb(new Error(chalk.red("Error: Target version is identical to current version")));
-    }
-
     console.log(`Updating version number to '${targetVersion}'`);
-
-    packageJson.version = targetVersion;
-    fs.writeJSONSync("package.json", packageJson, { spaces: 2 });
-
-    if (packageLockJson) {
-      packageLockJson.version = targetVersion;
-      fs.writeJSONSync("package-lock.json", packageLockJson, { spaces: 2 });
-    }
 
     manifest.file.version = targetVersion;
     manifest.file.download = getDownloadURL(targetVersion);

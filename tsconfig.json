@@ -3,9 +3,14 @@
     "module": "es6",
     "target": "es2020",
     "types": ["@league-of-foundry-developers/foundry-vtt-types", "@types/mocha"],
+    "esModuleInterop": true,
     "moduleResolution": "node",
     "strictNullChecks": true,
-    "strict": true
+    "strict": true,
+    "lib": ["DOM", "ES2020"],
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "outDir": "dist/types"
   },
   "exclude": ["dist", "foundry"],
   "include": ["src/**/*.ts"]

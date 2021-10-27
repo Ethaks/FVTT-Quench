@@ -23,7 +23,8 @@
     "build": "gulp build",
     "build:watch": "gulp watch",
     "clean": "gulp clean",
-    "bump-version": "gulp bumpVersion"
+    "bump-version": "gulp bumpVersion",
+    "release": "gulp build && standard-version"
   },
   "repository": {
     "type": "git",
@@ -58,11 +59,17 @@
     "prettier": "^2.4.1",
     "pretty-format": "^27.2.5",
     "semver": "^7.3.5",
+    "standard-version": "^9.3.2",
     "typescript": "^4.4.4",
     "yargs": "^17.2.1"
   },
   "lint-staged": {
     "*.(ts|js)": "eslint --cache --fix",
     "*.(json|css|yml)": "prettier --write"
+  },
+  "standard-version": {
+    "scripts": {
+      "prerelease": "gulp bumpVersion && git add src/module.json"
+    }
   }
 }
