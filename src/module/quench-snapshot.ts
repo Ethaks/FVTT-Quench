@@ -110,6 +110,39 @@ export class QuenchSnapshotManager {
   }
 
   /**
+   * Creates a directory tree mirroring a given object's tree.
+   * Defined as function to enable recursive usage.
+   *
+   * @param obj - The object used as blueprint for the directory tree
+   * @param [prev] - String accumulator for already created directories, needed to get a full path
+   */
+  static async createDirectoryTree(obj: object, prev = "") {
+    // Create all dirs of current tree layer, don't need to await individual non-interfering requests
+    const currentLayerDirs = await Promise.all(
+      Object.entries(obj).map(async ([dirKey, valObj]) => {
+        const dirExists = await this.createDirectory(`${prev}${dirKey}`, {
+          recursive: false,
+        });
+        // Return data necessary for the next level creation workflow
+        return [dirExists, dirKey, valObj];
+      }),
+    );
+    // Only continue in directories that exists
+    const nextLayerPromises = currentLayerDirs
+      .filter(([dirExists]) => dirExists === true)
+      .reduce((promises, [dirExists, prevDir, newDirObj]) => {
+        // Push next layer creation request
+        if (dirExists) promises.push(this.createDirectoryTree(newDirObj, `${prev}${prevDir}/`));
+        else {
+          console.error(`Could not create directory ${prev}${prevDir}`);
+        }
+        return promises;
+      }, []);
+    // Return Promise for next layer
+    return Promise.all(nextLayerPromises);
+  }
+
+  /**
    * Enables snapshot usage by adding `matchSnapshot` assertion to chai
    *
    * @param chai - The global chai object
@@ -271,41 +304,8 @@ export class QuenchSnapshotManager {
       return acc;
     }, {});
 
-    /**
-     * Creates a directory tree mirroring a given object's tree.
-     * Defined as function to enable recursive usage.
-     *
-     * @param obj - The object used as blueprint for the directory tree
-     * @param [prev] - String accumulator for already created directories, needed to get a full path
-     */
-    const createDirTree = async (obj: object, prev = "") => {
-      // Create all dirs of current tree layer, don't need to await individual non-interfering requests
-      const currentLayerDirs = await Promise.all(
-        Object.entries(obj).map(async ([dirKey, valObj]) => {
-          const dirExists = await QuenchSnapshotManager.createDirectory(`${prev}${dirKey}`, {
-            recursive: false,
-          });
-          // Return data necessary for the next level creation workflow
-          return [dirExists, dirKey, valObj];
-        }),
-      );
-      // Only continue in directories that exists
-      const nextLayerPromises = currentLayerDirs
-        .filter(([dirExists]) => dirExists === true)
-        .reduce((promises, [dirExists, prevDir, newDirObj]) => {
-          // Push next layer creation request
-          if (dirExists) promises.push(createDirTree(newDirObj, `${prev}${prevDir}/`));
-          else {
-            console.error(`Could not create directory ${prev}${prevDir}`);
-          }
-          return promises;
-        }, []);
-      // Return Promise for next layer
-      return Promise.all(nextLayerPromises);
-    };
-
     // Ensure that all all snapshot directories are created so that files can be stored
-    await createDirTree(dirTree);
+    await QuenchSnapshotManager.createDirectoryTree(dirTree);
 
     // Temporarily patch `ui.notifications.info` to prevent every single upload generating a notification
     const _info = ui.notifications?.info;
