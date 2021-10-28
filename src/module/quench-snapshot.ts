@@ -30,6 +30,8 @@ export class QuenchSnapshotManager {
   /** A boolean that determines whether snapshots should be updated after the next run. */
   enableUpdates: boolean | null = null;
 
+  private _logPrefix = `QUENCH | ` as const;
+
   /**
    * Serializes a given data object using the "pretty-format" package.
    *
@@ -252,7 +254,11 @@ export class QuenchSnapshotManager {
    * Updates all snapshots whose data was changed in the last run (i.e. all batches listed in {@link QuenchSnapshotManager#updateQueue})
    */
   async updateSnapshots(): Promise<
-    (false | void | (Response & { path: string; message?: string | undefined }))[][]
+    {
+      batch: string;
+      dir: string;
+      files: { batch: string; file: string; status: string | number }[];
+    }[]
   > {
     // Get all snapshot directories
     const snapDirs = [...this.updateQueue].map((batchKey) => this.getSnapDir(batchKey));
@@ -315,13 +321,37 @@ export class QuenchSnapshotManager {
 
         // Get the batch's snapshot data from the cache, or create a new object to store this test in
         const data = this.fileCache[batchKey] ?? {};
-        const filePromises = Object.entries(data).map(([key, value]) => {
-          const newFile = new File([value], `${key}.snap.txt`, { type: "text/plain" });
-          return FilePicker.upload("data", snapDir, newFile);
+        const filePromises = Object.entries(data).map(async ([key, value]) => {
+          const fileName = `${key}.snap.txt`;
+          const newFile = new File([value], fileName, { type: "text/plain" });
+          const fileUpload = await FilePicker.upload("data", snapDir, newFile);
+          return {
+            batch: batchKey,
+            file: fileName,
+            status:
+              typeof fileUpload === "object" && "status" in fileUpload
+                ? fileUpload.status
+                : "error",
+          };
         });
-        return Promise.all(filePromises);
+        const dirPromise = await Promise.all(filePromises);
+        return { batch: batchKey, dir: snapDir, files: dirPromise };
       });
       const resp = await Promise.all(uploadPromises);
+      const numberOfBatches = resp.length;
+      const numberOfFiles = resp.map((batch) => batch.files).flat().length;
+
+      // Create detailed upload report in console
+      console.group(
+        `${this._logPrefix}UPLOADED SNAPSHOTS (${numberOfBatches} batches, ${numberOfFiles} files)`,
+      );
+      resp.forEach((batch) => {
+        console.groupCollapsed(`Batch: ${batch.batch}, directory: ${batch.dir}`);
+        console.table(batch.files, ["file", "status"]);
+        console.groupEnd();
+      });
+      console.groupEnd();
+
       this.updateQueue.clear();
 
       if (ui.notifications && _info) {
@@ -329,8 +359,8 @@ export class QuenchSnapshotManager {
         ui.notifications.info = _info;
         ui.notifications.info(
           game.i18n.format("QUENCH.UploadedSnapshots", {
-            batches: resp.length,
-            files: resp.flat().filter((r) => r).length,
+            batches: numberOfBatches,
+            files: numberOfFiles,
           }),
         );
       }
