@@ -41,6 +41,16 @@
       "type": "screenshot",
       "url": "https://raw.githubusercontent.com/Ethaks/FVTT-Quench/master/docs/example-tests.webp",
       "caption": "Quench displaying test results within Foundry"
+    },
+    {
+      "type": "screenshot",
+      "url": "https://raw.githubusercontent.com/Ethaks/FVTT-Quench/master/docs/example-test-fail.webp",
+      "caption": "Quench displaying a failed test's output"
+    },
+    {
+      "type": "screenshot",
+      "url": "https://raw.githubusercontent.com/Ethaks/FVTT-Quench/master/docs/example-console-output.webp",
+      "caption": "Quench's detailed output in Chrome's console"
     }
   ]
 }
