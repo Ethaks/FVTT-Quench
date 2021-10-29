@@ -1,4 +1,5 @@
 import Quench from "../quench";
+import { SnapshotError } from "../utils/quench-SnapshotError";
 import { quenchUtils, RUNNABLE_STATE } from "../utils/quench-utils";
 
 const { RUNNABLE_STATES, getTestState, getSuiteState } = quenchUtils._internal;
@@ -9,6 +10,9 @@ const { RUNNABLE_STATES, getTestState, getSuiteState } = quenchUtils._internal;
 export default class QuenchResults extends Application {
   /** The `Quench` instance this `Application` is used by */
   quench: Quench;
+
+  /** Whether the button allowing snapshot updates should be shown after a run */
+  private _enableSnapshotUpdates = false;
 
   /**
    * @param quench - The `Quench` instance this `Application` belongs to
@@ -77,6 +81,10 @@ export default class QuenchResults extends Application {
     // Abort Button
     $html.find("#quench-abort").on("click", () => {
       this.quench.abort();
+    });
+
+    $html.find("#quench-update-snapshots").on("click", async () => {
+      await this.quench.snapshots.updateSnapshots();
     });
   }
 
@@ -293,10 +301,15 @@ export default class QuenchResults extends Application {
    * @param test
    * @param err
    */
-  handleTestFail(test: Mocha.Test, err: Error) {
+  handleTestFail(test: Mocha.Test, err: Chai.AssertionError | SnapshotError) {
     const $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
-    $testLi.find("> .expandable").append(`<div class="error-message">${err.message}</div>`);
+    // Allow possibly long paths from `SnapshotError`s to be line wrapped sanely
+    const message =
+      err instanceof SnapshotError ? err.message.replaceAll("/", "/<wbr>") : err.message;
+    $testLi.find("> .expandable").append(`<div class="error-message">${message}</div>`);
     this._updateLineItemStatus($testLi, RUNNABLE_STATES.FAILURE);
+    if (("snapshotError" in err && err.snapshotError) || err instanceof SnapshotError)
+      this._enableSnapshotUpdates = true;
   }
 
   /**
@@ -308,6 +321,8 @@ export default class QuenchResults extends Application {
     this.element.find("#quench-select-none").prop("disabled", true);
     this.element.find("#quench-run").prop("disabled", true);
     this.element.find("#quench-abort").show();
+    this.element.find("#quench-update-snapshots").hide();
+    this._enableSnapshotUpdates = false;
   }
 
   /**
@@ -335,5 +350,6 @@ export default class QuenchResults extends Application {
     this.element.find("#quench-select-none").prop("disabled", false);
     this.element.find("#quench-run").prop("disabled", false);
     this.element.find("#quench-abort").hide();
+    if (this._enableSnapshotUpdates) this.element.find("#quench-update-snapshots").show();
   }
 }

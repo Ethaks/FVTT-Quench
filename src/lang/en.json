@@ -3,6 +3,7 @@
     "Title": "QUENCH",
     "Run": "Run",
     "Abort": "Abort",
+    "UpdateSnapshots": "Update Snapshots",
     "SelectAll": "Select All",
     "SelectNone": "Select None",
     "StatsSummary": "Ran {quantity} tests in {duration}ms.",

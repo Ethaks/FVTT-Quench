@@ -80,11 +80,14 @@ function getBatchNameParts(batchKey: string): [string, string] {
   return [batchKey.slice(0, index), batchKey.slice(index + 1)];
 }
 
+const logPrefix = "QUENCH | " as const;
+
 export const internalUtils = {
   RUNNABLE_STATES,
   getTestState,
   getSuiteState,
   getBatchNameParts,
+  logPrefix,
 };
 
 export const quenchUtils = {

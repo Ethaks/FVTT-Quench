@@ -1,14 +1,11 @@
 import { quenchUtils } from "./utils/quench-utils";
 
-const { RUNNABLE_STATES, getTestState } = quenchUtils._internal;
+const { RUNNABLE_STATES, getTestState, logPrefix } = quenchUtils._internal;
 
 /**
  * Given a mocha Runner, reports test results to the singleton instance of {@link QuenchResults} and in the console if enabled
  */
 export default class QuenchReporter extends Mocha.reporters.Base {
-  /** Prefix to appear in log messages */
-  _logPrefix = "QUENCH | " as const;
-
   /**
    * @param {Mocha.Runner} runner
    */
@@ -33,7 +30,7 @@ export default class QuenchReporter extends Mocha.reporters.Base {
 
         // Log detailed results in console
         if (QuenchReporter._shouldLogTestDetails()) {
-          console.group(`${this._logPrefix}DETAILED TEST RESULTS`);
+          console.group(`${logPrefix}DETAILED TEST RESULTS`);
         }
       })
       .on(EVENT_SUITE_BEGIN, (suite) => {
@@ -108,7 +105,7 @@ export default class QuenchReporter extends Mocha.reporters.Base {
 
         if (QuenchReporter._shouldLogTestDetails()) {
           console.groupEnd();
-          console.log(`${this._logPrefix}TEST RUN COMPLETE`, { stats });
+          console.log(`${logPrefix}TEST RUN COMPLETE`, { stats });
         }
       });
   }

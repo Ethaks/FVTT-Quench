@@ -1,7 +1,10 @@
 import fnv1a from "@sindresorhus/fnv1a";
 import { format as prettyFormat, plugins as formatPlugins } from "pretty-format";
 import Quench from "./quench";
-import { internalUtils } from "./utils/quench-utils";
+import { SnapshotError } from "./utils/quench-SnapshotError";
+import { internalUtils, quenchUtils } from "./utils/quench-utils";
+
+const { logPrefix } = quenchUtils._internal;
 
 /**
  * The `QuenchSnapshotManager` class is a helper class, meant to be instantiated alongside a `Quench` class.
@@ -25,12 +28,10 @@ export class QuenchSnapshotManager {
   private fileCache: Record<string, Record<string, string>> = {};
 
   /** A cache array containing batchKeys whose data has to be updated */
-  private updateQueue: Set<string> = new Set();
+  private updateQueue: Set<SnapshotUpdateData> = new Set();
 
   /** A boolean that determines whether snapshots should be updated after the next run. */
   enableUpdates: boolean | null = null;
-
-  private _logPrefix = `QUENCH | ` as const;
 
   /**
    * Serializes a given data object using the "pretty-format" package.
@@ -173,16 +174,23 @@ export class QuenchSnapshotManager {
         expected = quench.snapshots.readSnap(quenchBatch, fullTitle);
       } catch (e) {
         if (!updateSnapshot) {
+          quench.snapshots.queueSnapUpdate(quenchBatch, fullTitle, actual);
           throw e;
         }
       }
-      if (updateSnapshot) {
-        quench.snapshots.queueBatchUpdate(quenchBatch, fullTitle, actual);
-        expected = actual;
-      }
-
       // Use equal assertion to compare strings, throwing default chai error on mismatch
-      chai.assert.equal(actual, expected);
+      try {
+        chai.assert.equal(actual, expected);
+      } catch (error) {
+        if (error instanceof chai.AssertionError) {
+          error.snapshotError = true;
+          // Always queue update – either enableSnapshots was set preemptively and this snapshot did not match
+          // (and this snapshot should be updated), or the actual is queued for a potential UI-triggered update
+          quench.snapshots.queueSnapUpdate(quenchBatch, fullTitle, actual);
+          if (updateSnapshot) chai.assert(true);
+          else throw error;
+        }
+      }
     });
   }
 
@@ -222,8 +230,9 @@ export class QuenchSnapshotManager {
    */
   readSnap(batchKey: string, fullTitle: string): string {
     const name = QuenchSnapshotManager.hash(fullTitle);
-    if (!this.fileCache[batchKey] || !(name in this.fileCache[batchKey]))
-      throw Error("Snapshot not found");
+    if (!this.fileCache[batchKey] || !(name in this.fileCache[batchKey])) {
+      throw new SnapshotError({ batchKey, hash: name });
+    }
     return this.fileCache[batchKey][name];
   }
 
@@ -277,24 +286,21 @@ export class QuenchSnapshotManager {
    * @param fullTitle - The test's full title
    * @param newData - The new snapshot data
    */
-  queueBatchUpdate(batchKey: string, fullTitle: string, newData: string): void {
-    this.updateQueue.add(batchKey);
-    const data = this.fileCache[batchKey] ?? (this.fileCache[batchKey] = {});
-    data[QuenchSnapshotManager.hash(fullTitle)] = newData;
+  queueSnapUpdate(batchKey: string, fullTitle: string, newData: string): void {
+    this.updateQueue.add({
+      batchKey,
+      fullTitle,
+      data: newData,
+      hash: QuenchSnapshotManager.hash(fullTitle),
+    });
   }
 
   /**
    * Updates all snapshots whose data was changed in the last run (i.e. all batches listed in {@link QuenchSnapshotManager#updateQueue})
    */
-  async updateSnapshots(): Promise<
-    {
-      batch: string;
-      dir: string;
-      files: { batch: string; file: string; status: string | number }[];
-    }[]
-  > {
+  async updateSnapshots(): Promise<{ batch: string; file: string; status: string | number }[]> {
     // Get all snapshot directories
-    const snapDirs = [...this.updateQueue].map((batchKey) => this.getSnapDir(batchKey));
+    const snapDirs = [...this.updateQueue].map(({ batchKey }) => this.getSnapDir(batchKey));
     const dirTree: object = snapDirs.reduce((acc, dir) => {
       let cur = acc;
       for (const part of dir.split("/")) {
@@ -316,38 +322,40 @@ export class QuenchSnapshotManager {
       };
 
     try {
-      const uploadPromises = Array.from(this.updateQueue).map(async (batchKey) => {
+      const uploadPromises = Array.from(this.updateQueue).map(async ({ batchKey, data, hash }) => {
         const snapDir = this.getSnapDir(batchKey);
 
-        // Get the batch's snapshot data from the cache, or create a new object to store this test in
-        const data = this.fileCache[batchKey] ?? {};
-        const filePromises = Object.entries(data).map(async ([key, value]) => {
-          const fileName = `${key}.snap.txt`;
-          const newFile = new File([value], fileName, { type: "text/plain" });
-          const fileUpload = await FilePicker.upload("data", snapDir, newFile);
-          return {
-            batch: batchKey,
-            file: fileName,
-            status:
-              typeof fileUpload === "object" && "status" in fileUpload
-                ? fileUpload.status
-                : "error",
-          };
-        });
-        const dirPromise = await Promise.all(filePromises);
-        return { batch: batchKey, dir: snapDir, files: dirPromise };
+        // Get the batch's snapshot data from the cache, or create a new object to store this test in TODO: Fix comment
+        // key = hash, value = data
+        const fileName = `${hash}.snap.txt`;
+        const newFile = new File([data], fileName, { type: "text/plain" });
+        const fileUpload = await FilePicker.upload("data", snapDir, newFile);
+        return {
+          batch: batchKey,
+          file: fileName,
+          status:
+            typeof fileUpload === "object" && "status" in fileUpload ? fileUpload.status : "error",
+        };
       });
-      const resp = await Promise.all(uploadPromises);
-      const numberOfBatches = resp.length;
-      const numberOfFiles = resp.map((batch) => batch.files).flat().length;
+      const responses = await Promise.all(uploadPromises);
+      const respData = responses.reduce(
+        (acc: Record<string, { batch: string; file: string; status: string | number }[]>, resp) => {
+          (acc[resp.batch] || (acc[resp.batch] = [])).push(resp);
+          return acc;
+        },
+        {},
+      );
+
+      const numberOfBatches = [...new Set(responses.map((r) => r.batch))].length;
+      const numberOfFiles = responses.filter((r) => r.status === "success").length;
 
       // Create detailed upload report in console
       console.group(
-        `${this._logPrefix}UPLOADED SNAPSHOTS (${numberOfBatches} batches, ${numberOfFiles} files)`,
+        `${logPrefix}UPLOADED SNAPSHOTS (${numberOfBatches} batches, ${numberOfFiles} files)`,
       );
-      resp.forEach((batch) => {
-        console.groupCollapsed(`Batch: ${batch.batch}, directory: ${batch.dir}`);
-        console.table(batch.files, ["file", "status"]);
+      Object.entries(respData).forEach(([batch, files]) => {
+        console.groupCollapsed(`Batch: ${batch}, directory: ${this.getSnapDir(batch)}`);
+        console.table(files, ["file", "status"]);
         console.groupEnd();
       });
       console.groupEnd();
@@ -364,11 +372,18 @@ export class QuenchSnapshotManager {
           }),
         );
       }
-      return resp;
+      return responses;
     } catch (error) {
       // Ensure ui.notifications.info patch is reverted
       if (ui.notifications && _info) ui.notifications.info = _info;
       throw error;
     }
   }
+}
+
+interface SnapshotUpdateData {
+  batchKey: string;
+  fullTitle: string;
+  hash: string;
+  data: string;
 }

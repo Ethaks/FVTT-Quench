@@ -5,6 +5,8 @@ import QuenchReporter from "./quench-reporter";
 import { QuenchSnapshotManager } from "./quench-snapshot";
 import { quenchUtils } from "./utils/quench-utils";
 
+const { getBatchNameParts } = quenchUtils._internal;
+
 /**
  * The `Quench` class is the "hub" of the Quench module. It contains the primary public API for Quench, as well as references to the global
  * mocha and chai objects.
@@ -69,7 +71,7 @@ export default class Quench {
     context: QuenchBatchRegistrationOptions = {},
   ) {
     const { displayName, snapBaseDir } = context;
-    const [packageName] = this.utils._internal.getBatchNameParts(key);
+    const [packageName] = getBatchNameParts(key);
     if (![...game.modules, [game.system.id]].map(([pName]) => pName).includes(packageName)) {
       ui?.notifications?.error(
         game?.i18n?.format("QUENCH.ERROR.InvalidPackageName", { key, packageName }),

@@ -31,6 +31,10 @@ declare global {
       /** Compares equality of a test's serialised object and previously stored snapshot */
       matchSnapshot: () => void;
     }
+
+    interface AssertionError {
+      snapshotError?: boolean;
+    }
   }
 
   namespace Mocha {
