@@ -244,7 +244,10 @@ export class QuenchSnapshotManager {
    * @returns A Promise that is resolved when all snapshot files are loaded
    */
   async loadBatchSnaps(batchKeys: string[]): Promise<Record<string, Record<string, string>>> {
+    // Reset cache to guarantee current state from freshly fetched files
     this.resetCache();
+    // Reset queue to limit entries to a single run's queue
+    this.updateQueue.clear();
     const batchPromises = batchKeys.map(async (batchKey: string) => {
       const snapDir = this.getSnapDir(batchKey);
       try {
