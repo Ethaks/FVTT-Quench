@@ -24,7 +24,7 @@
     "build:watch": "gulp watch",
     "clean": "gulp clean",
     "bump-version": "gulp bumpVersion",
-    "release": "gulp build && standard-version"
+    "release": "gulp build && tsc --emitDeclarationOnly false --noEmit && standard-version"
   },
   "repository": {
     "type": "git",
