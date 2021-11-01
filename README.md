@@ -88,6 +88,7 @@ Hooks.on("quenchReady", (quench) => {
 
 Quench supports snapshot testing, allowing for Chai's comparisons to work with data previously serialised using [pretty-format](https://www.npmjs.com/package/pretty-format) – this includes support for regular JS objects, as well as e.g. DOM elements.
 To compare an object to a snapshot, you can use `matchSnapshot()` as assertion.
+
 If a test run includes failed tests using snapshots, Quench will show a button in its UI that allows to update the snapshots of those tests.
 Alternatively, setting `quench.snapshots.enableUpdates = true` will pass all snapshot tests and store the actual value as new expected value, updating all files belonging to tests where the actual value did not match the expected one.
 
