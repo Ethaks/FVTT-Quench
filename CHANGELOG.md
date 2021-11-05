@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.2](https://github.com/Ethaks/FVTT-Quench/compare/v0.5.1...v0.5.2) (2021-11-05)
+
+
+### Features
+
+* improve snapshot upload performance, allow updating after runs ([223c270](https://github.com/Ethaks/FVTT-Quench/commit/223c270118b20f0411f8e3693bec65b044970cbf))
+* provide detailed overview for uploaded files in console ([528194e](https://github.com/Ethaks/FVTT-Quench/commit/528194ea51cb830572bc2ba138c678cec6aaed1b))
+
+
+### Bug Fixes
+
+* prevent snapshot updates from accumulating with runs ([f617bb5](https://github.com/Ethaks/FVTT-Quench/commit/f617bb557f265077dbd1752e5740cc9cd9962a5b))
+
 ### 0.5.1 (2021-10-27)
 
 
