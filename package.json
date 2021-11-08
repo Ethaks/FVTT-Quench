@@ -39,7 +39,7 @@
   "homepage": "https://github.com/Ethaks/FVTT-Quench#readme",
   "devDependencies": {
     "@commitlint/cli": "^14.1.0",
-    "@commitlint/config-conventional": "^13.2.0",
+    "@commitlint/config-conventional": "^14.1.0",
     "@league-of-foundry-developers/foundry-vtt-types": "^0.8.9-7",
     "@sindresorhus/fnv1a": "^3.0.0",
     "@types/chai": "^4.2.22",
