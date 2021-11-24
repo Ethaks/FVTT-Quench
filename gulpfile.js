@@ -9,6 +9,7 @@ const esbuild = require("esbuild");
 
 const name = "quench";
 const sourceDirectory = "./src";
+const entryFile = `${sourceDirectory}/module/quench-init.ts`;
 const distDirectory = "./dist";
 const stylesDirectory = `${sourceDirectory}/styles`;
 const stylesExtension = "css";
@@ -34,7 +35,7 @@ let buildResult = null;
 async function _buildCode(prod = false) {
   if (!buildResult)
     buildResult = await esbuild.build({
-      entryPoints: [`${sourceDirectory}/module/quench-init.ts`],
+      entryPoints: [entryFile],
       bundle: true,
       sourcemap: true,
       outfile: `${distDirectory}/${name}.js`,

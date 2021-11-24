@@ -31,14 +31,14 @@ const RUNNABLE_STATES = {
   SUCCESS: "success",
   FAILURE: "failure",
 } as const;
-export type RUNNABLE_STATE = ValueOf<typeof RUNNABLE_STATES>;
+export type RUNNABLE_STATE = typeof RUNNABLE_STATES[keyof typeof RUNNABLE_STATES];
 
 /**
  * Gets the STATE of a Test instance
  * @param test - the mocha Test instance to determine the state of
  * @returns the state of the test
  */
-function getTestState(test: Mocha.Test) {
+function getTestState(test: Mocha.Test): RUNNABLE_STATE {
   if (test.pending) {
     return RUNNABLE_STATES.PENDING;
   } else if (test.state === undefined) {
@@ -82,11 +82,30 @@ function getBatchNameParts(batchKey: string): [string, string] {
 
 const logPrefix = "QUENCH | " as const;
 
+/** Ensures {@link game} is initialized, either returning the {@link Game} instance or throwing an error. */
+function getGame(): Game {
+  if (!(game instanceof Game)) throw new Error("Game is not initialized yet!");
+  return game;
+}
+
+/**
+ * Localizes a string including variable formatting, using {@link Localization.format}.
+ *
+ * @param key - The ID of the string to be translated
+ * @param [data] - Additional data
+ * @returns The localized string
+ */
+function localize(key: string, data?: Record<string, unknown>): string {
+  return getGame().i18n.format(`QUENCH.${key}`, data);
+}
+
 export const internalUtils = {
   RUNNABLE_STATES,
-  getTestState,
-  getSuiteState,
   getBatchNameParts,
+  getGame,
+  getSuiteState,
+  getTestState,
+  localize,
   logPrefix,
 };
 

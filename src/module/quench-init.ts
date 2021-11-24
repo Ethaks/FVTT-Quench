@@ -1,10 +1,35 @@
 import * as chai from "chai";
 import "mocha/mocha.js";
+import "chai"; // To force-load types for npm package
 
 import { QuenchSnapshotManager } from "./quench-snapshot";
 import { registerExampleTests } from "./quench-tests/nonsense-tests";
 import Quench from "./quench";
 import { quenchUtils } from "./utils/quench-utils";
+
+const { getGame, localize } = quenchUtils._internal;
+
+declare global {
+  /**
+   * The singleton instance of the {@link Quench} class, containing the primary public API.
+   * Initialized in the Quench module's {@link Hooks.StaticCallbacks.init|"init"} hook.
+   */
+  /* eslint-disable-next-line no-var */ // Necessary for globalThis addition
+  var quench: Quench;
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Hooks {
+    interface StaticCallbacks {
+      /**
+       * A hook event that fires when Quench is ready to register batches.
+       *
+       * @deprecated
+       * @param quench - The global {@link Quench} instance
+       * @remarks This is called by {@link Hooks.callAll}
+       */
+      quenchReady: (quench: Quench) => void;
+    }
+  }
+}
 
 /**
  * Sets up Quench and its dependencies
@@ -14,9 +39,11 @@ Hooks.on("init", function quenchInit() {
   const quench = new Quench();
   globalThis.quench = quench;
 
+  const game = getGame();
+
   game.settings.register("quench", "logTestDetails", {
-    name: game.i18n.localize("QUENCH.LogTestDetailsLabel"),
-    hint: game.i18n.localize("QUENCH.LogTestDetailsHint"),
+    name: "QUENCH.LogTestDetailsLabel",
+    hint: "QUENCH.LogTestDetailsHint",
     scope: "client",
     config: true,
     type: Boolean,
@@ -24,8 +51,8 @@ Hooks.on("init", function quenchInit() {
   });
 
   game.settings.register("quench", "exampleTests", {
-    name: game.i18n.localize("QUENCH.ExampleTestsLabel"),
-    hint: game.i18n.localize("QUENCH.ExampleTestsHint"),
+    name: "QUENCH.ExampleTestsLabel",
+    hint: "QUENCH.ExampleTestsHint",
     scope: "client",
     config: true,
     type: Boolean,
@@ -36,8 +63,8 @@ Hooks.on("init", function quenchInit() {
   });
 
   game.settings.register("quench", "collapseSuccessful", {
-    name: game.i18n.localize("QUENCH.CollapseSuccessfulLabel"),
-    hint: game.i18n.localize("QUENCH.CollapseSuccessfulHint"),
+    name: "QUENCH.CollapseSuccessfulLabel",
+    hint: "QUENCH.CollapseSuccessfulHint",
     scope: "client",
     config: true,
     type: Boolean,
@@ -45,8 +72,8 @@ Hooks.on("init", function quenchInit() {
   });
 
   game.settings.register("quench", "autoShowQuenchWindow", {
-    name: game.i18n.localize("QUENCH.AutoShowQuenchWindowLabel"),
-    hint: game.i18n.localize("QUENCH.AutoShowQuenchWindowHint"),
+    name: "QUENCH.AutoShowQuenchWindowLabel",
+    hint: "QUENCH.AutoShowQuenchWindowHint",
     scope: "client",
     config: true,
     type: Boolean,
@@ -54,8 +81,8 @@ Hooks.on("init", function quenchInit() {
   });
 
   game.settings.register("quench", "autoRun", {
-    name: game.i18n.localize("QUENCH.AutoRunLabel"),
-    hint: game.i18n.localize("QUENCH.AutoRunHint"),
+    name: "QUENCH.AutoRunLabel",
+    hint: "QUENCH.AutoRunHint",
     scope: "client",
     config: true,
     type: Boolean,
@@ -71,9 +98,7 @@ Hooks.on("setup", function () {
  * Inject QUENCH button in sidebar
  */
 Hooks.on("renderSidebar", function (_sidebar: Application, html: JQuery<HTMLElement>) {
-  const $quenchButton = $(
-    `<button class="quench-button"><b>${game.i18n.localize("QUENCH.Title")}</b></button>`,
-  );
+  const $quenchButton = $(`<button class="quench-button"><b>${localize("Title")}</b></button>`);
 
   $quenchButton.on("click", function onClick() {
     quench.app.render(true);
@@ -86,14 +111,14 @@ Hooks.on("renderSidebar", function (_sidebar: Application, html: JQuery<HTMLElem
  * Show quench window on load if enabled and register example tests if enabled
  */
 Hooks.on("ready", async () => {
-  if (game.settings.get("quench", "exampleTests")) {
+  if (getGame().settings.get("quench", "exampleTests")) {
     registerExampleTests(quench);
   }
 
-  const shouldRender = game.settings.get("quench", "autoShowQuenchWindow");
+  const shouldRender = getGame().settings.get("quench", "autoShowQuenchWindow");
   if (shouldRender) quench.app.render(true);
 
-  if (game.settings.get("quench", "autoRun")) {
+  if (getGame().settings.get("quench", "autoRun")) {
     if (shouldRender) await quenchUtils.pause(1000);
     quench.runAllBatches();
   }

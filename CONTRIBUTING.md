@@ -11,7 +11,8 @@ Before submitting a pull request, opening an issue regarding the planned develop
 ### Setup
 
 Building the module requires a recent version of `node` to be installed.
-Dependencies can be installed by running 
+Dependencies can be installed by running
+
 ```bash
 npm ci
 ```
@@ -20,11 +21,13 @@ npm ci
 
 Building the module will create a `dist` directory whose contents can be read and used by Foundry.
 A one-off build, which will create a minified and production ready result, can be created with
+
 ```bash
-npm run build:watch
+npm run build
 ```
 
-While developing the build process can also be started as a watch job waiting for file changes and re-building the module as necessary by running
+While developing, the build process can also be started as a watch job waiting for file changes and re-building the module as necessary by running
+
 ```bash
 npm run build:watch
 ```
@@ -38,8 +41,9 @@ The name of the directory is important, as diverging from the module's name will
 
 The regular build process does not check the TypeScript code the way the regular compiler does.
 To still receive the benefits of type checking, you can run
+
 ```bash
-npm run compile
+npm run lint
 ```
 
-This type checking – as well as the build process – will also run when code is committed, so that pushes containing erroneous code can be prevented.
+This will lint all files using ESLint and run TypeScript's `tsc`.

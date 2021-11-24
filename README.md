@@ -57,7 +57,7 @@ You can register a Quench test batch to be executed with Quench by calling `quen
   - Mocha – `describe`, `it`, `after`, `afterEach`, `before`, `beforeEach`, and `utils`.
   - Chai – `assert`, `expect`, and `should`. `should` is also made available by it extending `Object.prototype`.
 - `options` -
-  - `displayName` – the name for this batch that will be shown in the ui and in the detailed test results.
+  - `displayName` – the name for this batch that will be shown in the UI and in the detailed test results.
     This is optional, Quench will fall back to the batch key if omitted.
   - `snapBaseDir` – the directory from which snapshots for this batch will be read, and where snapshots will be stored.
     This is optional, Quench will fall back to `Data/__snapshots__/<package name>/`, with each batch having its own directory there.
@@ -116,6 +116,25 @@ quench.registerBatch(
   },
   { displayName: "QUENCH: Snapshot Test", snapBaseDir: "__snapshots__/quench-with-a-twist" },
 );
+```
+
+### Typescript
+
+Quench offers a package on npm containing its types, allowing Typescript to check for correct API usage and provide autocompletion.
+The package can be installed with
+
+```bash
+npm install --save-dev @ethaks/fvtt-quench
+```
+
+The types can then be used by adding them to the `types` section of your `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "types": ["@ethaks/fvtt-quench"]
+  }
+}
 ```
 
 ### Conventions

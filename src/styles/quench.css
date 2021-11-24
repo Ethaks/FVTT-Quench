@@ -89,6 +89,7 @@
   font-family: monospace;
   font-size: 0.7rem;
   user-select: text;
+  white-space: pre-wrap;
 }
 
 #quench-results .type-icon {

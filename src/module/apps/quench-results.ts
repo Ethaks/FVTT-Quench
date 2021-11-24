@@ -2,7 +2,7 @@ import Quench from "../quench";
 import { SnapshotError } from "../utils/quench-SnapshotError";
 import { quenchUtils, RUNNABLE_STATE } from "../utils/quench-utils";
 
-const { RUNNABLE_STATES, getTestState, getSuiteState } = quenchUtils._internal;
+const { RUNNABLE_STATES, getTestState, getSuiteState, getGame, localize } = quenchUtils._internal;
 
 /**
  * The visual UI for representing Quench test batches and the tests results thereof.
@@ -23,7 +23,7 @@ export default class QuenchResults extends Application {
     this.quench = quench;
   }
 
-  static override get defaultOptions() {
+  static override get defaultOptions(): Application.Options {
     const width = 550;
     const sidebarWidth = 300;
     const margin = 10;
@@ -212,7 +212,7 @@ export default class QuenchResults extends Application {
     $icon.addClass(`status-icon ${style} ${icon}`);
 
     if (
-      game.settings.get("quench", "collapseSuccessful") &&
+      getGame().settings.get("quench", "collapseSuccessful") &&
       state === RUNNABLE_STATES.SUCCESS &&
       !isTest
     ) {
@@ -304,9 +304,12 @@ export default class QuenchResults extends Application {
   handleTestFail(test: Mocha.Test, err: Chai.AssertionError | SnapshotError) {
     const $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
     // Allow possibly long paths from `SnapshotError`s to be line wrapped sanely
-    const message =
-      err instanceof SnapshotError ? err.message.replaceAll("/", "/<wbr>") : err.message;
-    $testLi.find("> .expandable").append(`<div class="error-message">${message}</div>`);
+    const errorElement = $testLi
+      .find("> .expandable")
+      .append(`<div class="error-message"></div>`)
+      .children(".error-message");
+    if (err instanceof SnapshotError) errorElement.html(err.message.replaceAll("/", "/<wbr>"));
+    else errorElement.text(err.message);
     this._updateLineItemStatus($testLi, RUNNABLE_STATES.FAILURE);
     if (("snapshotError" in err && err.snapshotError) || err instanceof SnapshotError)
       this._enableSnapshotUpdates = true;
@@ -334,11 +337,13 @@ export default class QuenchResults extends Application {
     const style = stats.failures ? "stats-fail" : "stats-pass";
     const $stats = $(`
             <div class="stats">
-                <div>${game.i18n.format("QUENCH.StatsSummary", {
+                <div>${localize("StatsSummary", {
                   quantity: stats.tests,
                   duration: stats.duration,
                 })}</div>
-                <div class="${style}">${game.i18n.format("QUENCH.StatsResults", { ...stats })}</div>
+                <div class="${style}">${localize("StatsResults", {
+      ...stats,
+    })}</div>
             </div>
         `);
     const $container = this.element.find("#quench-results-stats");

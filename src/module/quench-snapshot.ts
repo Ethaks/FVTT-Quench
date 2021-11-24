@@ -2,9 +2,29 @@ import fnv1a from "@sindresorhus/fnv1a";
 import { format as prettyFormat, plugins as formatPlugins } from "pretty-format";
 import Quench from "./quench";
 import { SnapshotError } from "./utils/quench-SnapshotError";
-import { internalUtils, quenchUtils } from "./utils/quench-utils";
+import { quenchUtils } from "./utils/quench-utils";
 
-const { logPrefix } = quenchUtils._internal;
+const { logPrefix, localize, getBatchNameParts } = quenchUtils._internal;
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Chai {
+    interface AssertStatic {
+      /**
+       * Asserts equality of serialised argument (actual) and previously stored snapshot (expected)
+       *
+       * @param obj - The actual value to be compared to the snapshot
+       */
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // This function is meant to consume anything
+      matchSnapshot: (obj: unknown) => void;
+    }
+
+    interface Assertion {
+      /** Asserts equality of a test's serialised value (actual) and previously stored snapshot (expected) */
+      matchSnapshot: () => void;
+    }
+  }
+}
 
 /**
  * The `QuenchSnapshotManager` class is a helper class, meant to be instantiated alongside a `Quench` class.
@@ -52,7 +72,7 @@ export class QuenchSnapshotManager {
    * @returns The default directory path
    */
   static getDefaultSnapDir(batchKey: string): string {
-    const [packageName] = internalUtils.getBatchNameParts(batchKey);
+    const [packageName] = getBatchNameParts(batchKey);
     return `__snapshots__/${packageName}`;
   }
 
@@ -157,41 +177,51 @@ export class QuenchSnapshotManager {
     };
 
     // Add `matchSnapshot` to chai to enable assertions
-    utils.addMethod(chai.Assertion.prototype, "matchSnapshot", function () {
-      // Get flag for expect style, or paramter for assert style
-      // @ts-expect-error `this` is determined through Chai
-      const actual = QuenchSnapshotManager.serialize(utils.flag(this, "object"));
-      const updateSnapshot = quench.snapshots.enableUpdates;
-      const currentRunnable = quench._currentRunner?.currentRunnable;
-      if (!currentRunnable) throw new Error("No Runner found");
-      const quenchBatch = currentRunnable._quench_parentBatch;
-      const [, ...titleParts] = currentRunnable.titlePath();
-      // Slugify non-Quench batch test name (describe and it parts)
-      const fullTitle = titleParts.join("-").trim().slugify();
+    utils.addMethod(
+      chai.Assertion.prototype,
+      "matchSnapshot",
+      function (this: Chai.AssertionPrototype) {
+        // Get flag for expect style, or paramter for assert style
+        const actual = QuenchSnapshotManager.serialize(utils.flag(this, "object"));
+        const updateSnapshot = quench.snapshots.enableUpdates;
+        const currentRunnable = quench._currentRunner?.currentRunnable;
+        if (!currentRunnable) throw new Error("No Runner found");
+        const quenchBatch = currentRunnable._quench_parentBatch;
+        const [, ...titleParts] = currentRunnable.titlePath();
+        // Slugify non-Quench batch test name (describe and it parts)
+        const fullTitle = titleParts.join("-").trim().slugify();
 
-      let expected;
-      try {
-        expected = quench.snapshots.readSnap(quenchBatch, fullTitle);
-      } catch (e) {
-        if (!updateSnapshot) {
-          quench.snapshots.queueSnapUpdate(quenchBatch, fullTitle, actual);
-          throw e;
+        let expected;
+        try {
+          expected = quench.snapshots.readSnap(quenchBatch, fullTitle);
+        } catch (e) {
+          if (!updateSnapshot) {
+            quench.snapshots.queueSnapUpdate(quenchBatch, fullTitle, actual);
+            throw e;
+          }
         }
-      }
-      // Use equal assertion to compare strings, throwing default chai error on mismatch
-      try {
-        chai.assert.equal(actual, expected);
-      } catch (error) {
-        if (error instanceof chai.AssertionError) {
-          error.snapshotError = true;
-          // Always queue update – either enableSnapshots was set preemptively and this snapshot did not match
-          // (and this snapshot should be updated), or the actual is queued for a potential UI-triggered update
-          quench.snapshots.queueSnapUpdate(quenchBatch, fullTitle, actual);
-          if (updateSnapshot) chai.assert(true);
-          else throw error;
+        // Use equal assertion to compare strings, throwing default chai error on mismatch
+        try {
+          this.assert(
+            expected == actual,
+            "expected\n" + actual + "\nto equal\n" + expected,
+            "expected\n" + actual + "\nto not equal\n" + expected,
+            actual,
+            expected,
+            true,
+          );
+        } catch (error) {
+          if (error instanceof chai.AssertionError) {
+            error.snapshotError = true;
+            // Always queue update – either enableSnapshots was set preemptively and this snapshot did not match
+            // (and this snapshot should be updated), or the actual is queued for a potential UI-triggered update
+            quench.snapshots.queueSnapUpdate(quenchBatch, fullTitle, actual);
+            if (updateSnapshot) chai.assert(true);
+            else throw error;
+          }
         }
-      }
-    });
+      },
+    );
   }
 
   /**
@@ -221,11 +251,11 @@ export class QuenchSnapshotManager {
   }
 
   /**
-   * Returns a snapshot matching a filename from the server's `Data/systems/pf1/__snapshots__` directory.
+   * Returns a batch's snapshot from the cache.
    *
    * @param batchKey - A batch key belonging to a quench test batch
    * @param fullTitle - The name of a specific snapshot data object belonging to a test
-   * @throws {Error} Throws an error if the requested snapshot cannot be found
+   * @throws {SnapshotError} Throws an error if the requested snapshot cannot be found
    * @returns A snapshot string
    */
   readSnap(batchKey: string, fullTitle: string): string {
@@ -324,12 +354,11 @@ export class QuenchSnapshotManager {
         else _info.call(this, ...args);
       };
 
+    // Upload all snapshot strings into their respective files
     try {
       const uploadPromises = Array.from(this.updateQueue).map(async ({ batchKey, data, hash }) => {
         const snapDir = this.getSnapDir(batchKey);
 
-        // Get the batch's snapshot data from the cache, or create a new object to store this test in TODO: Fix comment
-        // key = hash, value = data
         const fileName = `${hash}.snap.txt`;
         const newFile = new File([data], fileName, { type: "text/plain" });
         const fileUpload = await FilePicker.upload("data", snapDir, newFile);
@@ -369,7 +398,7 @@ export class QuenchSnapshotManager {
         // Restore original info method and create one notification for the upload
         ui.notifications.info = _info;
         ui.notifications.info(
-          game.i18n.format("QUENCH.UploadedSnapshots", {
+          localize("UploadedSnapshots", {
             batches: numberOfBatches,
             files: numberOfFiles,
           }),

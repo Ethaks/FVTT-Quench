@@ -1,4 +1,7 @@
 import Quench from "../quench";
+import { quenchUtils } from "../utils/quench-utils";
+
+const { getGame } = quenchUtils._internal;
 
 /**
  * Registers all example tests, which also serves as a quick self-test.
@@ -53,11 +56,14 @@ function registerBasicFailingTestBatch(quench: Quench) {
   quench.registerBatch(
     "quench.examples.basic-fail",
     (context) => {
-      const { describe, it, assert } = context;
+      const { describe, it, assert, expect } = context;
 
       describe("Failing Suite", function () {
         it("Failing Test", function () {
           assert.fail();
+        });
+        it("Another Failing Test", function () {
+          expect({ foo: "bar" }).to.equal({ foo: { bar: "baz" } });
         });
       });
     },
@@ -83,7 +89,7 @@ function registerNestedTestBatch(quench: Quench) {
         });
 
         describe("level 1 B", function () {
-          it("times out", async function (this: Mocha.Test) {
+          it("times out", async function (this: Mocha.Context) {
             this.timeout(200);
             await quench.utils.pause(300);
             assert.ok(true);
@@ -143,8 +149,8 @@ function registerSnapshotTestBatch(quench: Quench) {
       const { describe, it, assert, expect } = context;
       describe("Snapshot Testing", function () {
         it("Passing Test using DOM element and expect", function () {
-          // @ts-expect-error Element is private, but this is a quick test using some available element
-          expect(game.actors?.apps[0]._element).to.matchSnapshot();
+          // @ts-expect-error Element is protected, but this is a quick test using some available element
+          expect(getGame().actors?.apps[0]._element).to.matchSnapshot();
         });
         it("Passing Test using simple object and assert", function () {
           assert.matchSnapshot({ foo: "bar" });

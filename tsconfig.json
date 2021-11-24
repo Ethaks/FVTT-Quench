@@ -8,9 +8,7 @@
     "strictNullChecks": true,
     "strict": true,
     "lib": ["DOM", "ES2021"],
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "outDir": "dist/types"
+    "noEmit": true
   },
   "exclude": ["dist", "foundry"],
   "include": ["src/**/*.ts"]

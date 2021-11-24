@@ -33,6 +33,3 @@ jobs:
 
       - name: Lint
         run: npm run lint
-
-      - name: Run tsc
-        run: tsc --emitDeclarationOnly false --noEmit

@@ -5,7 +5,7 @@ import QuenchReporter from "./quench-reporter";
 import { QuenchSnapshotManager } from "./quench-snapshot";
 import { quenchUtils } from "./utils/quench-utils";
 
-const { getBatchNameParts } = quenchUtils._internal;
+const { getBatchNameParts, getGame, localize } = quenchUtils._internal;
 
 /**
  * The `Quench` class is the "hub" of the Quench module. It contains the primary public API for Quench, as well as references to the global
@@ -20,16 +20,22 @@ export default class Quench {
   /** Various utility functions */
   utils = quenchUtils;
 
-  /** A map of registered test batches */
-  _testBatches = new Map();
+  /**
+   * A map of registered test batches
+   * @internal
+   */
+  readonly _testBatches: Map<string, BatchData> = new Map();
 
-  /** The singleton instance of `QuenchResults` that this `Quench` instance uses */
-  app = new QuenchResults(this);
+  /** The singleton instance of {@link QuenchResults} that this `Quench` instance uses */
+  readonly app = new QuenchResults(this);
 
-  /** The `QuenchSnapshotManager` instance that this `Quench` instance uses */
-  snapshots = new QuenchSnapshotManager(this);
+  /** The {@link QuenchSnapshotManager} instance that this `Quench` instance uses */
+  readonly snapshots = new QuenchSnapshotManager(this);
 
-  /** The current Mocha runner, if any */
+  /**
+   * The current Mocha runner, if any
+   * @internal
+   */
   _currentRunner: Mocha.Runner | null = null;
 
   constructor() {
@@ -61,9 +67,7 @@ export default class Quench {
    * @param key - The test batch's unique string key. Only one test batch with a given key can exist at one time.
    *     If you register a test batch with a pre-existing key, it will overwrite the previous test batch.
    * @param fn - The function which will be called to register the suites and tests within your test batch.
-   * @param [options]
-   * @param [options.displayName] - A user-friendly name to show in the Quench UI and detailed results.
-   * @param [options.snapBaseDir] - The directory in which snapshots for this batch are stored.
+   * @param [context] - Additional options affecting Quench's handling of this batch.
    */
   registerBatch(
     key: string,
@@ -72,13 +76,13 @@ export default class Quench {
   ) {
     const { displayName, snapBaseDir } = context;
     const [packageName] = getBatchNameParts(key);
-    if (![...game.modules, [game.system.id]].map(([pName]) => pName).includes(packageName)) {
-      ui?.notifications?.error(
-        game?.i18n?.format("QUENCH.ERROR.InvalidPackageName", { key, packageName }),
-      );
+    if (
+      ![...getGame().modules, [getGame().system.id]].map(([pName]) => pName).includes(packageName)
+    ) {
+      ui?.notifications?.error(localize("ERROR.InvalidPackageName", { key, packageName }));
     }
     if (this._testBatches.has(key)) {
-      ui?.notifications?.warn(game.i18n.format("QUENCH.WARN.BatchAlreadyExists", { key }));
+      ui?.notifications?.warn(localize("QUENCH.WARN.BatchAlreadyExists", { key }));
     }
     this._testBatches.set(key, {
       displayName: displayName ?? key,
@@ -124,7 +128,7 @@ export default class Quench {
     { updateSnapshots = null }: { updateSnapshots?: boolean | null } = {},
   ) {
     // Cleanup - create a new root suite and clear the state of the results application
-    // @ts-expect-error Types are missing `isRoot` argument
+    // @ts-expect-error Types are missing `isRoot` argument TODO: PR for DefinitelyTyped?
     mocha.suite = new Mocha.Suite("__root", new Mocha.Context(), true);
     await this.app.clear();
 
@@ -156,25 +160,29 @@ export default class Quench {
     // Explicit flag > flag set before this run > default flag
     updateSnapshots = updateSnapshots ?? this.snapshots.enableUpdates ?? false;
 
+    const quenchify = <Fn extends Mocha.TestFunction | Mocha.SuiteFunction>(
+      fn: Fn,
+      key: string,
+    ): Fn => {
+      const quenchFn = function quenchFn(...args: Parameters<Fn>) {
+        // @ts-expect-error Args are passed through as-is
+        const result = fn(...args);
+        result._quench_parentBatch = key;
+        return result;
+      };
+      quenchFn.only = fn.only;
+      quenchFn.skip = fn.skip;
+      if ("retries" in fn) quenchFn.retries = fn.retries;
+      return quenchFn as Fn;
+    };
+
     // Register suites and tests for provided batches
     for (const key of batchKeys) {
-      // Override `describe` to add a property to the resulting suite indicating which quench batch the suite belongs to.
-      const quenchDescribe = function quenchDescribe(...args: any[]) {
-        // @ts-expect-error Rest args
-        const suite = describe(...args);
-        suite._quench_parentBatch = key;
-        return suite;
+      const context: QuenchTestContext = {
+        ...baseContext,
+        describe: quenchify(describe, key),
+        it: quenchify(it, key),
       };
-
-      // Override `it` to add a property to the resulting test indicating which quench batch the test belongs to.
-      const quenchIt = function quenchIt(...args: any[]) {
-        // @ts-expect-error Rest args
-        const test = it(...args);
-        test._quench_parentBatch = key;
-        return test;
-      };
-
-      const context: QuenchTestContext = { ...baseContext, describe: quenchDescribe, it: quenchIt };
 
       // Create a wrapper suite to contain this test batch
       const testBatchRoot = context.describe(`${key}_root`, async () => {
@@ -204,29 +212,38 @@ export default class Quench {
   }
 }
 
-export interface QuenchBatchRegistrationOptions {
+interface QuenchBatchRegistrationOptions {
+  /** A user-friendly name to show in the Quench UI and detailed results. */
   displayName?: string;
+  /** The directory in which snapshots for this batch are stored. */
   snapBaseDir?: string;
 }
 
-export type QuenchRegisterSuiteFunction = (context: QuenchTestContext) => void;
+/**
+ * A function containing this batch's suites and tests.
+ * Before each Quench run including this batch, this function will be called by Quench.
+ *
+ * @param context - Various Mocha and Chai functions
+ */
+type QuenchRegisterSuiteFunction = (context: QuenchTestContext) => void | Promise<void>;
 
-export interface BatchData {
-  fn: QuenchRegisterSuiteFunction;
-  displayName: string;
-  snapBaseDir: string;
-}
-
-export interface QuenchTestContext {
+/** Mocha and Chai functions passed by Quench */
+interface QuenchTestContext {
   after: Mocha.HookFunction;
   afterEach: Mocha.HookFunction;
   before: Mocha.HookFunction;
   beforeEach: Mocha.HookFunction;
-  utils: Mocha.utils;
+  utils: typeof Mocha.utils;
   assert: Chai.AssertStatic;
   expect: Chai.ExpectStatic;
   should: Chai.Should;
 
-  describe: (...args: any[]) => Mocha.Suite;
-  it: (...args: any[]) => Mocha.Test;
+  describe: Mocha.SuiteFunction;
+  it: Mocha.TestFunction;
+}
+
+interface BatchData {
+  fn: QuenchRegisterSuiteFunction;
+  displayName: string;
+  snapBaseDir: string;
 }

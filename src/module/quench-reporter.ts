@@ -1,6 +1,6 @@
 import { quenchUtils } from "./utils/quench-utils";
 
-const { RUNNABLE_STATES, getTestState, logPrefix } = quenchUtils._internal;
+const { RUNNABLE_STATES, getTestState, logPrefix, getGame } = quenchUtils._internal;
 
 /**
  * Given a mocha Runner, reports test results to the singleton instance of {@link QuenchResults} and in the console if enabled
@@ -114,7 +114,7 @@ export default class QuenchReporter extends Mocha.reporters.Base {
    * Determines whether the setting to show detailed log results is enabled
    */
   private static _shouldLogTestDetails(): boolean {
-    return game.settings.get("quench", "logTestDetails");
+    return getGame().settings.get("quench", "logTestDetails");
   }
 }
 
