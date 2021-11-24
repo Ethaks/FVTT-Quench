@@ -7,7 +7,7 @@
         <ul id="quench-batches-list">
             {{#each batches}}
                 <li class="test-batch" data-batch="{{this.name}}">
-                    <label><input type="checkbox" checked />{{this.displayName}}</label>
+                <label><input type="checkbox" {{checked this.selected}} />{{this.displayName}}</label>
                     <div class="expandable expanded"></div>
                 </li>
             {{/each}}

@@ -74,7 +74,7 @@ export default class Quench {
     fn: QuenchRegisterSuiteFunction,
     context: QuenchBatchRegistrationOptions = {},
   ) {
-    const { displayName, snapBaseDir } = context;
+    const { displayName, snapBaseDir, preSelected } = context;
     const [packageName] = getBatchNameParts(key);
     if (
       ![...getGame().modules, [getGame().system.id]].map(([pName]) => pName).includes(packageName)
@@ -88,6 +88,7 @@ export default class Quench {
       displayName: displayName ?? key,
       fn,
       snapBaseDir: snapBaseDir ?? QuenchSnapshotManager.getDefaultSnapDir(key),
+      preSelected: preSelected ?? true,
     });
     this.app.clear();
   }
@@ -217,6 +218,11 @@ interface QuenchBatchRegistrationOptions {
   displayName?: string;
   /** The directory in which snapshots for this batch are stored. */
   snapBaseDir?: string;
+  /**
+   * Whether this batch should be checked when added to the UI
+   * @defaultValue true
+   */
+  preSelected?: boolean;
 }
 
 /**
@@ -246,4 +252,5 @@ interface BatchData {
   fn: QuenchRegisterSuiteFunction;
   displayName: string;
   snapBaseDir: string;
+  preSelected: boolean;
 }

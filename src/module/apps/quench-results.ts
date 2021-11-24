@@ -48,6 +48,7 @@ export default class QuenchResults extends Application {
         return {
           name: key,
           displayName: value.displayName,
+          selected: value.preSelected,
         };
       }),
     };
