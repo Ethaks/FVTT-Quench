@@ -70,7 +70,7 @@
     "husky": "^7.0.4",
     "lint-staged": "^12.1.2",
     "mocha": "^9.1.2",
-    "prettier": "^2.4.1",
+    "prettier": "^2.5.0",
     "pretty-format": "^27.3.1",
     "semver": "^7.3.5",
     "standard-version": "^9.3.2",
