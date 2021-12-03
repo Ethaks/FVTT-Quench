@@ -1,4 +1,3 @@
-const chalk = require("chalk");
 const fs = require("fs-extra");
 const gulp = require("gulp");
 const esbuild = require("esbuild");
@@ -113,8 +112,8 @@ async function clean() {
     files.push("styles");
   }
 
-  console.log(" ", chalk.yellow("Files to clean:"));
-  console.log("   ", chalk.blueBright(files.join("\n    ")));
+  console.log(" ", "Files to clean:");
+  console.log("   ", files.join("\n    "));
 
   for (const filePath of files) {
     await fs.remove(`${distDirectory}/${filePath}`);
