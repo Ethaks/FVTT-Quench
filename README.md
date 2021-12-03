@@ -20,7 +20,7 @@
 </p>
 
 Harden your Foundry module or system code with end-to-end UI tests directly within Foundry.
-Powered by [Mocha](https://mochajs.org/) and also includes [Chai](https://www.chaijs.com/).
+Powered by [Mocha](https://mochajs.org/) and also includes [Chai](https://www.chaijs.com/) and [fast-check](https://github.com/dubzzz/fast-check).
 
 Quench adds a test runner UI as a native Foundry `Application`.
 You can register test suites with quench and view them in the test runner, then run them and view the results.
@@ -53,9 +53,10 @@ You can register a Quench test batch to be executed with Quench by calling `quen
 - `key` – a unique batch key that identifies this test batch.
   If multiple test batches are registered with the same key, the latest registration will overwrite previous registrations.
 - `registrationFunction` – this function will be executed to register the suites and tests within this batch.
-  It takes a `context` argument, which contains the following Mocha and Chai functions necessary for defining a suite of tests:
+  It takes a `context` argument, which contains the following functions necessary for defining a suite of tests:
   - Mocha – `describe`, `it`, `after`, `afterEach`, `before`, `beforeEach`, and `utils`.
   - Chai – `assert`, `expect`, and `should`. `should` is also made available by it extending `Object.prototype`.
+  - fast-check – `fc`.
 - `options` -
   - `displayName` – the name for this batch that will be shown in the UI and in the detailed test results.
     This is optional, Quench will fall back to the batch key if omitted.

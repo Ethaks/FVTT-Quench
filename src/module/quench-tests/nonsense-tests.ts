@@ -16,6 +16,7 @@ export function registerExampleTests(quench: Quench) {
     registerNestedTestBatch,
     registerOtherTestBatch,
     registerSnapshotTestBatch,
+    registerPropertyTestBatch,
   ]) {
     batchFunction(quench);
   }
@@ -176,6 +177,50 @@ function registerSnapshotTestBatch(quench: Quench) {
     {
       displayName: "QUENCH: Snapshots Test",
       snapBaseDir: "__snapshots__/quench/some/other/weird/path",
+      preSelected: false,
     },
+  );
+}
+
+function registerPropertyTestBatch(quench: Quench) {
+  quench.registerBatch(
+    "quench.examples.property",
+    (context) => {
+      const { describe, it, fc, expect, assert } = context;
+
+      // Code under test
+      // eslint-disable-next-line unicorn/consistent-function-scoping
+      const contains = (text: string, pattern: string) => text.includes(pattern);
+
+      describe("Basic Property Based Test", function () {
+        it("should always contain itself", function () {
+          fc.assert(
+            fc.property(fc.string(), (text) => {
+              assert(contains(text, text));
+            }),
+          );
+        });
+
+        it("should always contain its substrings", function () {
+          fc.assert(
+            fc.property(fc.string(), fc.string(), fc.string(), (a, b, c) => {
+              // Regular assertions can be used (beware of longer error messages though)
+              expect(a + b + c).to.contain(b);
+              // Or return statements (failing on falsy values)
+              return contains(a + b + c, b);
+            }),
+          );
+        });
+
+        it("should fail", function () {
+          fc.assert(
+            // Returning false instead of throwing can improve error readability
+            fc.property(fc.string(), (text) => text.length < 5),
+            { verbose: 1 },
+          );
+        });
+      });
+    },
+    { displayName: "QUENCH: Property Test" },
   );
 }

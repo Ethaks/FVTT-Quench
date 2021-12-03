@@ -1,7 +1,7 @@
 {
   "name": "@ethaks/fvtt-quench",
   "version": "0.5.2",
-  "description": "Types for a module for Foundry VTT enabling tests using Mocha and Chai",
+  "description": "Types for a Foundry VTT module enabling tests using Mocha and Chai",
   "author": "Ethaks",
   "contributors": [
     {
@@ -51,7 +51,8 @@
   "dependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "^0.8.9-7",
     "@types/chai": "^4.2.22",
-    "@types/mocha": "^9.0.0"
+    "@types/mocha": "^9.0.0",
+    "fast-check": "^2.20.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^15.0.0",

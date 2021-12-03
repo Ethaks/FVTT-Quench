@@ -1,4 +1,5 @@
 import * as chai from "chai";
+import fc from "fast-check";
 
 import { QuenchResults } from "./apps/quench-results";
 import { QuenchReporter } from "./quench-reporter";
@@ -35,6 +36,8 @@ export class Quench {
   mocha: BrowserMocha = mocha;
   /** Chai's static object */
   chai: Chai.ChaiStatic = chai;
+  /** fast-check for property based testing */
+  fc = fc;
 
   /** Various utility functions */
   utils = quenchUtils;
@@ -67,6 +70,7 @@ export class Quench {
    * The registration function is passed a `context` argument, which contains the mocha and chai methods necessary for defining a test.
    * - Mocha - `describe`, `it`, `after`, `afterEach`, `before`, `beforeEach`, and `utils`.
    * - Chai - `assert`, `expect`, and `should`; the last one is also made available by extending `Object.prototype`.
+   * - fast-check - `fc`
    *
    * @example
    * ```js
@@ -169,6 +173,7 @@ export class Quench {
       assert,
       expect,
       should,
+      fc: fc,
     };
 
     // Fetch all snapshot files for the batches to be run
@@ -271,6 +276,8 @@ export interface QuenchBatchContext {
 
   describe: Mocha.SuiteFunction;
   it: Mocha.TestFunction;
+
+  fc: typeof fc;
 }
 
 /**
