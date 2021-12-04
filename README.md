@@ -61,6 +61,8 @@ You can register a Quench test batch to be executed with Quench by calling `quen
     This is optional, Quench will fall back to the batch key if omitted.
   - `snapBaseDir` – the directory from which snapshots for this batch will be read, and where snapshots will be stored.
     This is optional, Quench will fall back to `Data/__snapshots__/<package name>/`, with each batch having its own directory there.
+  - `preSelected` – whether this batch will appear as checked when added to the UI.
+    This is optional, Quench will fall back to `true`.
 
 Example:
 
