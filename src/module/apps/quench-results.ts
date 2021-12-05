@@ -1,4 +1,4 @@
-import Quench from "../quench";
+import { Quench } from "../quench";
 import { SnapshotError } from "../utils/quench-SnapshotError";
 import { quenchUtils, RUNNABLE_STATE } from "../utils/quench-utils";
 
@@ -7,7 +7,7 @@ const { RUNNABLE_STATES, getTestState, getSuiteState, getGame, localize } = quen
 /**
  * The visual UI for representing Quench test batches and the tests results thereof.
  */
-export default class QuenchResults extends Application {
+export class QuenchResults extends Application {
   /** The `Quench` instance this `Application` is used by */
   quench: Quench;
 

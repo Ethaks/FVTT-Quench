@@ -3,9 +3,8 @@
   "compilerOptions": {
     "noEmit": false,
     "declaration": true,
-    "declarationMap": true,
     "emitDeclarationOnly": true,
-    "outFile": "index.d.ts",
+    "outDir": "lib",
     "stripInternal": true
   }
 }

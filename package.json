@@ -43,9 +43,9 @@
     "foundryvtt",
     "foundry"
   ],
-  "types": "index.d.ts",
+  "types": "lib/index.d.ts",
   "files": [
-    "index.d.ts"
+    "lib"
   ],
   "homepage": "https://github.com/Ethaks/FVTT-Quench#readme",
   "dependencies": {

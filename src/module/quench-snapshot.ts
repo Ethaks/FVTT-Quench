@@ -1,6 +1,6 @@
 import fnv1a from "@sindresorhus/fnv1a";
 import { format as prettyFormat, plugins as formatPlugins } from "pretty-format";
-import Quench from "./quench";
+import { Quench } from "./quench";
 import { SnapshotError } from "./utils/quench-SnapshotError";
 import { quenchUtils } from "./utils/quench-utils";
 

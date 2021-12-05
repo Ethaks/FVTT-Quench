@@ -1,10 +1,9 @@
-import * as chai from "chai";
 import "mocha/mocha.js";
-import "chai"; // To force-load types for npm package
+import * as chai from "chai";
 
 import { QuenchSnapshotManager } from "./quench-snapshot";
 import { registerExampleTests } from "./quench-tests/nonsense-tests";
-import Quench from "./quench";
+import { Quench } from "./quench";
 import { quenchUtils } from "./utils/quench-utils";
 
 const { getGame, localize } = quenchUtils._internal;
@@ -38,6 +37,8 @@ Hooks.on("init", function quenchInit() {
   chai.use(QuenchSnapshotManager.enableSnapshots);
   const quench = new Quench();
   globalThis.quench = quench;
+  // @ts-expect-error Match runtime (ESM import) to types (declared global `chai`)
+  globalThis.chai = chai;
 
   const game = getGame();
 

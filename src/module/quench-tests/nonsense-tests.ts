@@ -1,4 +1,4 @@
-import Quench from "../quench";
+import { Quench } from "../quench";
 import { quenchUtils } from "../utils/quench-utils";
 
 const { getGame } = quenchUtils._internal;

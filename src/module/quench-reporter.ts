@@ -5,7 +5,7 @@ const { RUNNABLE_STATES, getTestState, logPrefix, getGame } = quenchUtils._inter
 /**
  * Given a mocha Runner, reports test results to the singleton instance of {@link QuenchResults} and in the console if enabled
  */
-export default class QuenchReporter extends Mocha.reporters.Base {
+export class QuenchReporter extends Mocha.reporters.Base {
   /**
    * @param {Mocha.Runner} runner
    */

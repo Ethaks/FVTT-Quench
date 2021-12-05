@@ -99,7 +99,7 @@ function localize(key: string, data?: Record<string, unknown>): string {
   return getGame().i18n.format(`QUENCH.${key}`, data);
 }
 
-export const internalUtils = {
+const internalUtils = {
   RUNNABLE_STATES,
   getBatchNameParts,
   getGame,

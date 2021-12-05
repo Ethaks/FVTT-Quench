@@ -1,7 +1,7 @@
 import * as chai from "chai";
 
-import QuenchResults from "./apps/quench-results";
-import QuenchReporter from "./quench-reporter";
+import { QuenchResults } from "./apps/quench-results";
+import { QuenchReporter } from "./quench-reporter";
 import { QuenchSnapshotManager } from "./quench-snapshot";
 import { quenchUtils } from "./utils/quench-utils";
 
@@ -11,7 +11,7 @@ const { getBatchNameParts, getGame, localize } = quenchUtils._internal;
  * The `Quench` class is the "hub" of the Quench module. It contains the primary public API for Quench, as well as references to the global
  * mocha and chai objects.
  */
-export default class Quench {
+export class Quench {
   /** Mocha's browser global */
   mocha: BrowserMocha = mocha;
   /** Chai's static object */
@@ -213,7 +213,7 @@ export default class Quench {
   }
 }
 
-interface QuenchBatchRegistrationOptions {
+export interface QuenchBatchRegistrationOptions {
   /** A user-friendly name to show in the Quench UI and detailed results. */
   displayName?: string;
   /** The directory in which snapshots for this batch are stored. */
@@ -231,10 +231,12 @@ interface QuenchBatchRegistrationOptions {
  *
  * @param context - Various Mocha and Chai functions
  */
-type QuenchRegisterSuiteFunction = (context: QuenchTestContext) => void | Promise<void>;
+export type QuenchRegisterSuiteFunction = (context: QuenchTestContext) => void | Promise<void>;
 
-/** Mocha and Chai functions passed by Quench */
-interface QuenchTestContext {
+/**
+ * Mocha and Chai functions passed by Quench
+ */
+export interface QuenchTestContext {
   after: Mocha.HookFunction;
   afterEach: Mocha.HookFunction;
   before: Mocha.HookFunction;
