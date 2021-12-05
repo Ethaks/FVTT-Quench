@@ -1,6 +1,9 @@
 export {};
 
 declare global {
+  interface LenientGlobalVariableTypes {
+    quench: never;
+  }
   namespace ClientSettings {
     interface Values {
       "quench.logTestDetails": boolean;

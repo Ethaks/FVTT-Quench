@@ -15,7 +15,7 @@ declare global {
    * Initialized in the Quench module's {@link Hooks.StaticCallbacks.init|"init"} hook.
    */
   /* eslint-disable-next-line no-var */ // Necessary for globalThis addition
-  var quench: Quench;
+  var quench: "quench" extends keyof LenientGlobalVariableTypes ? Quench : Quench | undefined;
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Hooks {
     interface StaticCallbacks {

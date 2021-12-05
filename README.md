@@ -66,7 +66,7 @@ You can register a Quench test batch to be executed with Quench by calling `quen
 
 Example:
 
-```js
+```javascript
 Hooks.on("quenchReady", (quench) => {
   quench.registerBatch(
     "quench.examples.basic-pass",
@@ -84,6 +84,8 @@ Hooks.on("quenchReady", (quench) => {
 });
 ```
 
+Additional examples can be found in this repository's [`nonsense-tests.ts` file](./src/module/quench-tests/nonsense-tests.ts)
+
 ### Snapshots
 
 **Snapshot handling is currently in alpha! The current API is not final and subject to change – all input is welcome!**
@@ -100,7 +102,7 @@ When registering a batch, that batch's base directory can be overwritten by prov
 
 Example:
 
-```js
+```javascript
 quench.registerBatch(
   "quench.examples.snapshot-test",
   (context) => {
@@ -138,6 +140,9 @@ The types can then be used by adding them to the `types` section of your `tsconf
   }
 }
 ```
+
+By default, the `quench` global is typed as `Quench | undefined`.
+To access it, you have to use a type guard or explicitly type it as initialized and present by adding a `quench` property to the global `LenientGlobalVariableTypes` interface (see [foundry-vtt-type's FAQ](https://github.com/League-of-Foundry-Developers/foundry-vtt-types/wiki/%5B0.8.x%5D-FAQ#why-cant-i-access-any-properties-on-game--canvas))
 
 ### Conventions
 
