@@ -92,3 +92,10 @@ jobs:
           artifacts: "./dist/module.json, ./module.zip"
           tag: ${{ github.event.release.tag_name }}
           body: ${{ github.event.release.body }}
+
+      # Publish types to npm
+      - name: Publish
+        run: npm publish
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }
