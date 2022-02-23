@@ -10,5 +10,5 @@ const packageJson = {
 
 module.exports = {
   packageFiles: [manifest],
-  bumpFiles: [packageJson],
+  bumpFiles: [packageJson, manifest],
 };
