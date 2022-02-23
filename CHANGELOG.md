@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.6.0](https://github.com/Ethaks/FVTT-Quench/compare/v0.5.2...v0.6.0) (2022-02-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* Export types as ES module
+
+### Features
+
+* allow setting initial checked status at batch registration ([11c47b3](https://github.com/Ethaks/FVTT-Quench/commit/11c47b3121ed9522eaab9d8ef601272ac93bfd91))
+* display diffs for errors containing actual and expected values ([044f7af](https://github.com/Ethaks/FVTT-Quench/commit/044f7afa492544130ec4b4d500b248cef48b1d8b))
+* introduce fast-check for property based testing ([d834d33](https://github.com/Ethaks/FVTT-Quench/commit/d834d33119296126c35967d97942bfc48270e76c))
+
+
+* add additional linting rules ([0668ae2](https://github.com/Ethaks/FVTT-Quench/commit/0668ae2df77f59c720a9ec58289eaf0b3779d126))
+
 ### [0.5.2](https://github.com/Ethaks/FVTT-Quench/compare/v0.5.1...v0.5.2) (2021-11-05)
 
 

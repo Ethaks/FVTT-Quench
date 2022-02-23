@@ -1,6 +1,6 @@
 {
   "name": "@ethaks/fvtt-quench",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "description": "Types for a Foundry VTT module enabling tests using Mocha and Chai",
   "author": "Ethaks",
   "contributors": [
