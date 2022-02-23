@@ -24,13 +24,13 @@ export class QuenchResults extends Application {
    * @param quench - The `Quench` instance this `Application` belongs to
    * @param options - Additional options
    */
-  constructor(quench: Quench, options?: Application.Options) {
+  constructor(quench: Quench, options?: ApplicationOptions) {
     super(options);
     this.quench = quench;
   }
 
   /** @inheritdoc */
-  static override get defaultOptions(): Application.Options {
+  static override get defaultOptions(): ApplicationOptions {
     const width = 550;
     const sidebarWidth = 300;
     const margin = 10;
