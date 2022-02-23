@@ -177,8 +177,7 @@ function registerSnapshotTestBatch(quench: Quench) {
     {
       displayName: "QUENCH: Snapshots Test",
       snapBaseDir: "__snapshots__/quench/some/other/weird/path",
-      // TODO: set to false for release
-      preSelected: true,
+      preSelected: false,
     },
   );
 }
@@ -190,7 +189,7 @@ function registerPropertyTestBatch(quench: Quench) {
       const { describe, it, fc, expect, assert } = context;
 
       // Code under test
-      // eslint-disable-next-line unicorn/consistent-function-scoping
+      // eslint-disable-next-line unicorn/consistent-function-scoping -- keep test contents together
       const contains = (text: string, pattern: string) => text.includes(pattern);
 
       describe("Basic Property Based Test", function () {
@@ -212,14 +211,14 @@ function registerPropertyTestBatch(quench: Quench) {
             }),
           );
         });
+      });
 
-        it("should fail", function () {
-          fc.assert(
-            // Returning false instead of throwing can improve error readability
-            fc.property(fc.string(), (text) => text.length < 5),
-            { verbose: 1 },
-          );
-        });
+      it("Failing Property Based Test", function () {
+        fc.assert(
+          // Returning false instead of throwing can improve error readability
+          fc.property(fc.string(), (text) => text.length < 5),
+          { verbose: 1 },
+        );
       });
     },
     { displayName: "QUENCH: Property Test" },
