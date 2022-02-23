@@ -21,7 +21,6 @@
     "build": "gulp build",
     "build:watch": "gulp watch",
     "clean": "gulp clean",
-    "bump-version": "gulp bumpVersion",
     "release": "gulp build && npm run lint && standard-version",
     "declaration": "tsc --project tsconfig.declaration.json",
     "prepack": "npm run declaration"
