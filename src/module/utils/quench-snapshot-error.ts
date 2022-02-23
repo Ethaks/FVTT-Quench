@@ -8,7 +8,7 @@ const { getQuench } = quenchUtils._internal;
  *
  * @internal
  */
-export class SnapshotError extends Error {
+export class MissingSnapshotError extends Error {
   constructor(context: { batchKey: string; hash: string }) {
     const { batchKey, hash } = context;
     const message = `Snapshot not found: ${getQuench().snapshots.getSnapDir(

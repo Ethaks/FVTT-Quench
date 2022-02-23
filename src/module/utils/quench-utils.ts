@@ -106,6 +106,18 @@ function localize(key: string, data?: Record<string, unknown>): string {
   return getGame().i18n.format(`QUENCH.${key}`, data);
 }
 
+/**
+ * Returns a string after truncating it to a fixed length.
+ *
+ * @param string - The string to be truncated
+ * @param length - New maximum length
+ * @returns The truncated string
+ */
+function truncate(string: string, length = 18): string {
+  const dots = string.length > length ? "..." : "";
+  return `${string.slice(0, Math.max(0, length)).replaceAll(/\r?\n|\r/g, " ")}${dots}`;
+}
+
 const internalUtils = {
   RUNNABLE_STATES,
   getBatchNameParts,
@@ -115,6 +127,7 @@ const internalUtils = {
   getTestState,
   localize,
   logPrefix,
+  truncate,
 };
 
 export const quenchUtils = {

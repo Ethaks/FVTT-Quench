@@ -67,7 +67,7 @@ function registerBasicFailingTestBatch(quench: Quench) {
           assert.fail();
         });
         it("Another Failing Test", function () {
-          expect({ foo: "bar" }).to.equal({ foo: { bar: "baz" } });
+          expect({ foo: "bar", baz: "bam", kel: { tok: "zam" } }).to.equal({ foo: { bar: "baz" } });
         });
       });
     },
@@ -177,7 +177,8 @@ function registerSnapshotTestBatch(quench: Quench) {
     {
       displayName: "QUENCH: Snapshots Test",
       snapBaseDir: "__snapshots__/quench/some/other/weird/path",
-      preSelected: false,
+      // TODO: set to false for release
+      preSelected: true,
     },
   );
 }

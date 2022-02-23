@@ -1,4 +1,6 @@
-import { SnapshotError } from "../utils/quench-snapshot-error";
+import * as Diff from "diff";
+
+import { MissingSnapshotError } from "../utils/quench-snapshot-error";
 import { quenchUtils } from "../utils/quench-utils";
 
 import type { Quench } from "../quench";
@@ -309,17 +311,53 @@ export class QuenchResults extends Application {
    * @param test - The failed test
    * @param err - The error thrown by the test
    */
-  handleTestFail(test: Mocha.Test, error: Chai.AssertionError | SnapshotError) {
+  handleTestFail(test: Mocha.Test, error: Chai.AssertionError | MissingSnapshotError) {
     const $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
     // Allow possibly long paths from `SnapshotError`s to be line wrapped sanely
     const errorElement = $testLi
       .find("> .expandable")
-      .append(`<div class="error-message"></div>`)
-      .children(".error-message");
-    if (error instanceof SnapshotError) errorElement.html(error.message.replaceAll("/", "/<wbr>"));
-    else errorElement.text(error.message);
+      .append(`<div class="error"></div>`)
+      .children(".error");
+
+    if (error instanceof MissingSnapshotError)
+      // Allow possibly long paths from `SnapshotError`s to be line wrapped sanely
+      errorElement.html(error.message.replaceAll("/", "/<wbr>"));
+
+    errorElement.append(`<span class="error-message">${error.message}\n</span>`);
+
+    // When possible, create a diff and render it into the error element
+    if (
+      "actual" in error &&
+      typeof error.actual === "string" &&
+      "expected" in error &&
+      typeof error.expected === "string"
+    ) {
+      errorElement[0].insertAdjacentHTML(
+        "beforeend",
+        '<div class="diff-header"><span class="expected">+ ' +
+          localize("Expected") +
+          ' </span><span class="actual">- ' +
+          localize("Actual") +
+          "</span></div>",
+      );
+      const diff = Diff.diffLines(error.actual, error.expected);
+      const fragment = diff
+        .map((part) => {
+          const span = document.createElement("span");
+          span.classList.add(part.added ? "expected" : part.removed ? "actual" : "unchanged");
+          span.append(document.createTextNode(part.value));
+          return span;
+        })
+        // eslint-disable-next-line unicorn/no-array-reduce -- "summing" of fragments as simple operation
+        .reduce((fragment, span) => {
+          fragment.append(span);
+          return fragment;
+        }, document.createDocumentFragment());
+      errorElement[0].append(fragment);
+    }
+
     this._updateLineItemStatus($testLi, RUNNABLE_STATES.FAILURE);
-    if (("snapshotError" in error && error.snapshotError) || error instanceof SnapshotError)
+    if (("snapshotError" in error && error.snapshotError) || error instanceof MissingSnapshotError)
       this._enableSnapshotUpdates = true;
   }
 

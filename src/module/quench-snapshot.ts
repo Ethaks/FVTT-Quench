@@ -1,11 +1,11 @@
 import fnv1a from "@sindresorhus/fnv1a";
 import { format as prettyFormat, plugins as formatPlugins } from "pretty-format";
-import { SnapshotError } from "./utils/quench-snapshot-error";
+import { MissingSnapshotError } from "./utils/quench-snapshot-error";
 import { quenchUtils } from "./utils/quench-utils";
 
 import type { Quench } from "./quench";
 
-const { logPrefix, localize, getBatchNameParts, getQuench } = quenchUtils._internal;
+const { logPrefix, localize, getBatchNameParts, getQuench, truncate } = quenchUtils._internal;
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -26,6 +26,9 @@ declare global {
     }
     interface AssertionError {
       snapshotError?: boolean;
+
+      actual?: string;
+      expected?: string;
     }
   }
 }
@@ -205,7 +208,7 @@ export class QuenchSnapshotManager {
         // Slugify non-Quench batch test name (describe and it parts)
         const fullTitle = titleParts.join("-").trim().slugify();
 
-        let expected;
+        let expected = "";
         try {
           expected = quench.snapshots.readSnap(quenchBatch, fullTitle);
         } catch (error) {
@@ -218,10 +221,10 @@ export class QuenchSnapshotManager {
         try {
           this.assert(
             expected == actual,
-            "expected\n" + actual + "\nto equal\n" + expected,
-            "expected\n" + actual + "\nto not equal\n" + expected,
-            actual,
+            "expected\n" + truncate(actual) + "\nto equal\n" + truncate(expected),
+            "expected\n" + truncate(actual) + "\nto not equal\n" + truncate(expected),
             expected,
+            actual,
             true,
           );
         } catch (error) {
@@ -275,7 +278,7 @@ export class QuenchSnapshotManager {
   readSnap(batchKey: string, fullTitle: string): string {
     const name = QuenchSnapshotManager.hash(fullTitle);
     if (!this.fileCache[batchKey] || !(name in this.fileCache[batchKey])) {
-      throw new SnapshotError({ batchKey, hash: name });
+      throw new MissingSnapshotError({ batchKey, hash: name });
     }
     return this.fileCache[batchKey][name];
   }

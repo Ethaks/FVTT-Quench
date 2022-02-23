@@ -80,7 +80,7 @@
   white-space: normal;
 }
 
-#quench-results li > .expandable > .error-message {
+#quench-results li > .expandable > .error {
   margin: 0.4em;
   background-color: #99000033;
   padding: 10px;
@@ -90,6 +90,17 @@
   font-size: 0.7rem;
   user-select: text;
   white-space: pre-wrap;
+}
+
+#quench-results li > .expandable > .error .actual {
+  color: red;
+}
+#quench-results li > .expandable > .error .expected {
+  color: green;
+}
+
+#quench-results li > .expandable > .error > * {
+  user-select: text;
 }
 
 #quench-results .type-icon {
