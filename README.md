@@ -143,7 +143,7 @@ The types can then be used by adding them to the `types` section of your `tsconf
 ```
 
 By default, the `quench` global is typed as `Quench | undefined`.
-To access it, you have to use a type guard or explicitly type it as initialized and present by adding a `quench` property to the global `LenientGlobalVariableTypes` interface (see [foundry-vtt-type's FAQ](https://github.com/League-of-Foundry-Developers/foundry-vtt-types/wiki/%5B0.8.x%5D-FAQ#why-cant-i-access-any-properties-on-game--canvas))
+To access it, you have to use a type guard or explicitly type it as initialized and present by adding a `quench` property to the global `LenientGlobalVariableTypes` interface (see [foundry-vtt-type's FAQ](https://github.com/League-of-Foundry-Developers/foundry-vtt-types/wiki/FAQ#why-cant-i-access-any-properties-on-game--canvas))
 
 ### Conventions
 
