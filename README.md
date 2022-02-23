@@ -39,8 +39,6 @@ Enabling or disabling batches allows you to pick and choose only a subset of sui
 
 ### `quenchReady` Hook
 
-**Usage of the `"quenchReady"` hook has been deprecated with Quench 0.5, but the hook is still fired for backwards compatibility.**
-
 Quench provides a `"quenchReady"` hook, which indicates when Quench is ready for you to start registering batches.
 `"quenchReady"` is guaranteed to occur after the core `"init"` hook, as it is fired in Quench's `"setup"` hook.
 `"quenchReady"` receives the current `Quench` instance as an argument.

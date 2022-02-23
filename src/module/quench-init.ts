@@ -23,7 +23,6 @@ declare global {
       /**
        * A hook event that fires when Quench is ready to register batches.
        *
-       * @deprecated
        * @param quench - The global {@link Quench} instance
        * @remarks This is called by {@link Hooks.callAll}
        */
