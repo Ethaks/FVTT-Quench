@@ -4,7 +4,6 @@
     "noEmit": false,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outDir": "lib",
-    "stripInternal": true
+    "outDir": "lib"
   }
 }

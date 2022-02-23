@@ -1,3 +1,5 @@
+import type { Quench } from "../quench";
+
 /**
  * Pauses execution for the given number of milliseconds
  * @param millis - duration to pause for in milliseconds
@@ -12,13 +14,13 @@ async function pause(millis: number): Promise<void> {
  * WARNING: This will permanently delete every entity in your world (scenes, actors, items, macros, roll tables, journal entries, playlists, chat messages, folders, etc.)
  */
 async function clearWorld(): Promise<void> {
-  const exclude = [User].map((e) => e.metadata.name);
+  const exclude = new Set([User].map((element) => element.metadata.name));
   for (const collection of Object.values(game)) {
-    if (!(collection instanceof DocumentCollection) || exclude.includes(collection.documentName))
+    if (!(collection instanceof DocumentCollection) || exclude.has(collection.documentName))
       continue;
-    if (!collection.size) continue;
+    if (collection.size === 0) continue;
 
-    await collection.documentClass.deleteDocuments(collection.map((e) => e.id));
+    await collection.documentClass.deleteDocuments(collection.map((document_) => document_.id));
   }
 }
 
@@ -59,12 +61,12 @@ function getSuiteState(suite: Mocha.Suite): RUNNABLE_STATE {
   if (suite.pending) return RUNNABLE_STATES.PENDING;
 
   // Check child tests
-  const testStates = suite.tests.map(getTestState);
+  const testStates = suite.tests.map((element) => getTestState(element));
   const allTestSucceed = testStates.every((t) => t !== RUNNABLE_STATES.FAILURE);
   if (!allTestSucceed) return RUNNABLE_STATES.FAILURE;
 
   // Check child suites
-  const suiteStates = suite.suites.map(getSuiteState);
+  const suiteStates = suite.suites.map((element) => getSuiteState(element));
   const allSuitesSucceed = suiteStates.every((t) => t !== RUNNABLE_STATES.FAILURE);
   return allSuitesSucceed ? RUNNABLE_STATES.SUCCESS : RUNNABLE_STATES.FAILURE;
 }
@@ -88,6 +90,11 @@ function getGame(): Game {
   return game;
 }
 
+function getQuench(): Quench {
+  if (!quench) throw new Error("Quench is not initialized yet!");
+  return quench;
+}
+
 /**
  * Localizes a string including variable formatting, using {@link Localization.format}.
  *
@@ -103,6 +110,7 @@ const internalUtils = {
   RUNNABLE_STATES,
   getBatchNameParts,
   getGame,
+  getQuench,
   getSuiteState,
   getTestState,
   localize,

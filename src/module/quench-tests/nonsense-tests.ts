@@ -1,5 +1,6 @@
-import { Quench } from "../quench";
 import { quenchUtils } from "../utils/quench-utils";
+
+import type { Quench } from "../quench";
 
 const { getGame } = quenchUtils._internal;
 
@@ -9,13 +10,15 @@ const { getGame } = quenchUtils._internal;
  * @param quench - the quench instance the tests are registered with
  */
 export function registerExampleTests(quench: Quench) {
-  [
+  for (const batchFunction of [
     registerBasicPassingTestBatch,
     registerBasicFailingTestBatch,
     registerNestedTestBatch,
     registerOtherTestBatch,
     registerSnapshotTestBatch,
-  ].forEach((f) => f(quench));
+  ]) {
+    batchFunction(quench);
+  }
 }
 
 function registerBasicPassingTestBatch(quench: Quench) {

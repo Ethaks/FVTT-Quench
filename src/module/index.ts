@@ -6,17 +6,18 @@ import "./quench-init";
 // Expected API
 export type {
   Quench,
-  QuenchTestContext,
-  QuenchBatchRegistrationOptions,
-  QuenchRegisterSuiteFunction,
+  QuenchBatchContext,
+  QuenchRegisterBatchOptions,
+  QuenchRegisterBatchFunction,
+  QuenchRunBatchOptions,
 } from "./quench";
 
 // Snapshots
 export type { QuenchSnapshotManager } from "./quench-snapshot";
-export type { SnapshotError } from "./utils/quench-SnapshotError";
+export type { SnapshotError } from "./utils/quench-snapshot-error";
 
 // Utils
 export type { quenchUtils } from "./utils/quench-utils";
 
-//export type { QuenchReporter } from "./quench-reporter";
-//export type { QuenchResults } from "./apps/quench-results";
+export type { QuenchReporter } from "./quench-reporter";
+export type { QuenchResults } from "./apps/quench-results";

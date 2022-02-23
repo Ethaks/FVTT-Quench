@@ -1,11 +1,15 @@
-import { Quench } from "../quench";
-import { SnapshotError } from "../utils/quench-SnapshotError";
-import { quenchUtils, RUNNABLE_STATE } from "../utils/quench-utils";
+import { SnapshotError } from "../utils/quench-snapshot-error";
+import { quenchUtils } from "../utils/quench-utils";
+
+import type { Quench } from "../quench";
+import type { RUNNABLE_STATE } from "../utils/quench-utils";
 
 const { RUNNABLE_STATES, getTestState, getSuiteState, getGame, localize } = quenchUtils._internal;
 
 /**
  * The visual UI for representing Quench test batches and the tests results thereof.
+ *
+ * @internal
  */
 export class QuenchResults extends Application {
   /** The `Quench` instance this `Application` is used by */
@@ -16,13 +20,14 @@ export class QuenchResults extends Application {
 
   /**
    * @param quench - The `Quench` instance this `Application` belongs to
-   * @param [options]
+   * @param options - Additional options
    */
   constructor(quench: Quench, options?: Application.Options) {
     super(options);
     this.quench = quench;
   }
 
+  /** @inheritdoc */
   static override get defaultOptions(): Application.Options {
     const width = 550;
     const sidebarWidth = 300;
@@ -40,10 +45,11 @@ export class QuenchResults extends Application {
     });
   }
 
+  /** @inheritdoc */
   override getData() {
     return {
       anyBatches: this.quench._testBatches.size > 0,
-      batches: Array.from(this.quench._testBatches.entries()).map((entry) => {
+      batches: [...this.quench._testBatches.entries()].map((entry) => {
         const [key, value] = entry;
         return {
           name: key,
@@ -73,9 +79,9 @@ export class QuenchResults extends Application {
 
     // Run Button
     $html.find("#quench-run").on("click", async () => {
-      const enabledBatches = this._getCheckedBatches().reduce((acc: string[], next) => {
-        return next.enabled ? [...acc, next.key] : acc;
-      }, []);
+      const enabledBatches = this._getCheckedBatches()
+        .filter((batch) => batch.enabled)
+        .map((batch) => batch.key);
       await this.quench.runSelectedBatches(enabledBatches);
     });
 
@@ -99,10 +105,10 @@ export class QuenchResults extends Application {
 
     try {
       await this._render(false);
-    } catch (err) {
-      if (err instanceof Error)
-        err.message = `An error occurred while rendering ${this.constructor.name} ${this.appId}: ${err.message}`;
-      console.error(err);
+    } catch (error) {
+      if (error instanceof Error)
+        error.message = `An error occurred while rendering ${this.constructor.name} ${this.appId}: ${error.message}`;
+      console.error(error);
       this._state = Application.RENDER_STATES.ERROR;
     }
 
@@ -121,9 +127,9 @@ export class QuenchResults extends Application {
   private _getCheckedBatches(): { key: string; enabled: boolean }[] {
     const $batchEls = this.element.find("#quench-batches-list li");
     return $batchEls
-      .map((_, el) => {
-        const enabled = !!$(el).find("input[type=checkbox]").prop("checked");
-        return { key: el.dataset.batch ?? "", enabled };
+      .map((_, element) => {
+        const enabled = !!$(element).find("input[type=checkbox]").prop("checked");
+        return { key: element.dataset.batch ?? "", enabled };
       })
       .get();
   }
@@ -133,10 +139,10 @@ export class QuenchResults extends Application {
    * @param $parentListEl - The <li> of the parent test batch or suite
    * @returns The <ul> into which child runnables can be inserted.
    */
-  private _findOrMakeChildList($parentListEl: JQuery<HTMLElement>): JQuery<HTMLElement> {
-    const $expandable = $parentListEl.find(`> div.expandable`);
+  private _findOrMakeChildList($parentListElement: JQuery<HTMLElement>): JQuery<HTMLElement> {
+    const $expandable = $parentListElement.find(`> div.expandable`);
     let $childList = $expandable.find(`> ul.runnable-list`);
-    if (!$childList.length) {
+    if ($childList.length === 0) {
       $childList = $(`<ul class="runnable-list">`);
       $expandable.append($childList);
     }
@@ -188,14 +194,14 @@ export class QuenchResults extends Application {
    * Updates the given existing <li> representing a runnable based on the given state
    * @param $listEl - The list element representing the runnable
    * @param state - the state of the runnable
-   * @param [isTest] - whether the item is a test
+   * @param isTest - whether the item is a test
    */
   private _updateLineItemStatus(
-    $listEl: JQuery<HTMLElement>,
+    $listElement: JQuery<HTMLElement>,
     state: RUNNABLE_STATE,
     isTest?: boolean,
   ) {
-    const $icon = $listEl.find("> .summary > i.status-icon");
+    const $icon = $listElement.find("> .summary > i.status-icon");
     let icon = "fa-sync";
     const style = "fas";
     switch (state) {
@@ -217,11 +223,11 @@ export class QuenchResults extends Application {
       state === RUNNABLE_STATES.SUCCESS &&
       !isTest
     ) {
-      $listEl
+      $listElement
         .find("> .summary > .expander")
         .removeClass("fa-caret-down")
         .addClass("fa-caret-right");
-      $listEl.find("> .expandable").hide();
+      $listElement.find("> .expandable").hide();
     }
   }
 
@@ -231,7 +237,7 @@ export class QuenchResults extends Application {
 
   /**
    * Called by {@link QuenchReporter} when a mocha suite begins running
-   * @param suite
+   * @param suite - The starting Mocha suite
    */
   handleSuiteBegin(suite: Mocha.Suite) {
     const batchkey = suite._quench_parentBatch;
@@ -244,7 +250,7 @@ export class QuenchResults extends Application {
     const parentId = suite.parent?.id;
     const $batchLi = this.element.find(`li.test-batch[data-batch="${batchkey}"]`);
     let $parentLi = $batchLi.find(`li.suite[data-suite-id="${parentId}"]`);
-    if (!$parentLi.length) $parentLi = $batchLi;
+    if ($parentLi.length === 0) $parentLi = $batchLi;
 
     // Add a li for this test batch
     const $childSuiteList = this._findOrMakeChildList($parentLi);
@@ -253,7 +259,7 @@ export class QuenchResults extends Application {
 
   /**
    * Called by {@link QuenchReporter} when a mocha suite finishes running
-   * @param suite
+   * @param suite - The finished Mocha suite
    */
   handleSuiteEnd(suite: Mocha.Suite) {
     const isBatchRoot = suite._quench_batchRoot;
@@ -265,7 +271,7 @@ export class QuenchResults extends Application {
 
   /**
    * Called by {@link QuenchReporter} when a mocha test begins running
-   * @param test
+   * @param test - The starting test
    */
   handleTestBegin(test: Mocha.Test) {
     const batchKey = test._quench_parentBatch;
@@ -273,7 +279,7 @@ export class QuenchResults extends Application {
 
     const $batchLi = this.element.find(`li.test-batch[data-batch="${batchKey}"]`);
     let $parentLi = $batchLi.find(`li.suite[data-suite-id="${parentId}"]`);
-    if (!$parentLi.length) $parentLi = $batchLi;
+    if ($parentLi.length === 0) $parentLi = $batchLi;
 
     const $childTestList = this._findOrMakeChildList($parentLi);
     $childTestList.append(this._makeRunnableLineItem(test.title, test.id, true));
@@ -281,14 +287,15 @@ export class QuenchResults extends Application {
 
   /**
    * Called by {@link QuenchReporter} when a mocha test finishes running
-   * @param test
+   *
+   * @param test - The finished test
    */
   handleTestEnd(test: Mocha.Test) {
     let $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
 
     // If there is not already a list item for this test, create a new one. This is necessary because `handleTestBegin` is not called
     // automatically for "pending" tests
-    if (!$testLi.length) {
+    if ($testLi.length === 0) {
       this.handleTestBegin(test);
       $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
     }
@@ -299,20 +306,20 @@ export class QuenchResults extends Application {
 
   /**
    * Called by {@link QuenchReporter} when a mocha test finishes running and fails
-   * @param test
-   * @param err
+   * @param test - The failed test
+   * @param err - The error thrown by the test
    */
-  handleTestFail(test: Mocha.Test, err: Chai.AssertionError | SnapshotError) {
+  handleTestFail(test: Mocha.Test, error: Chai.AssertionError | SnapshotError) {
     const $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
     // Allow possibly long paths from `SnapshotError`s to be line wrapped sanely
     const errorElement = $testLi
       .find("> .expandable")
       .append(`<div class="error-message"></div>`)
       .children(".error-message");
-    if (err instanceof SnapshotError) errorElement.html(err.message.replaceAll("/", "/<wbr>"));
-    else errorElement.text(err.message);
+    if (error instanceof SnapshotError) errorElement.html(error.message.replaceAll("/", "/<wbr>"));
+    else errorElement.text(error.message);
     this._updateLineItemStatus($testLi, RUNNABLE_STATES.FAILURE);
-    if (("snapshotError" in err && err.snapshotError) || err instanceof SnapshotError)
+    if (("snapshotError" in error && error.snapshotError) || error instanceof SnapshotError)
       this._enableSnapshotUpdates = true;
   }
 

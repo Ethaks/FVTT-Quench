@@ -1,16 +1,19 @@
 import { quenchUtils } from "./utils/quench-utils";
 
-const { RUNNABLE_STATES, getTestState, logPrefix, getGame } = quenchUtils._internal;
+const { RUNNABLE_STATES, getTestState, logPrefix, getGame, getQuench } = quenchUtils._internal;
 
 /**
  * Given a mocha Runner, reports test results to the singleton instance of {@link QuenchResults} and in the console if enabled
+ *
+ * @internal
  */
 export class QuenchReporter extends Mocha.reporters.Base {
   /**
-   * @param {Mocha.Runner} runner
+   * @param runner - The runner this reporter should work with
    */
   constructor(runner: Mocha.Runner) {
     super(runner);
+    const quench = getQuench();
     const app = quench.app;
 
     const {
@@ -86,16 +89,16 @@ export class QuenchReporter extends Mocha.reporters.Base {
           });
         }
       })
-      .on(EVENT_TEST_FAIL, (test, err) => {
-        app.handleTestFail(test, err);
+      .on(EVENT_TEST_FAIL, (test, error) => {
+        app.handleTestFail(test, error);
 
         if (QuenchReporter._shouldLogTestDetails()) {
           console.groupCollapsed(
             `%c(FAIL) Test Complete: ${test.title}`,
             `color: ${CONSOLE_COLORS.fail}`,
-            { test, err },
+            { test, err: error },
           );
-          console.error(err.stack);
+          console.error(error.stack);
           console.groupEnd();
         }
       })

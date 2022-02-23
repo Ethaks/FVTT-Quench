@@ -6,6 +6,7 @@
     "esModuleInterop": true,
     "moduleResolution": "node",
     "strictNullChecks": true,
+    "exactOptionalPropertyTypes": true,
     "strict": true,
     "lib": ["DOM", "ES2021"],
     "noEmit": true

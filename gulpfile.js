@@ -24,41 +24,37 @@ const distFiles = ["LICENSE"];
  * ESBuild's previous result for incremental builds
  * @type {esbuild.BuildResult|null}
  */
-let buildResult = null;
+let buildResult;
 /**
  * Build the distributable JavaScript code
  *
  * @param {boolean} prod - Whether this build is meant for production
  * @returns {Promise<esbuild.BuildResult>}
  */
-async function _buildCode(prod = false) {
-  if (!buildResult)
-    buildResult = await esbuild.build({
-      entryPoints: [entryFile],
-      bundle: true,
-      sourcemap: true,
-      outfile: `${distDirectory}/${name}.js`,
-      sourceRoot: name,
-      format: "iife",
-      legalComments: "none",
-      minify: prod,
-      keepNames: true,
-      incremental: !prod,
-    });
-  else {
-    buildResult = await buildResult.rebuild();
-  }
-
-  return buildResult;
+async function _buildCode(isProductionBuild = false) {
+  return buildResult === undefined
+    ? (buildResult = await esbuild.build({
+        entryPoints: [entryFile],
+        bundle: true,
+        sourcemap: true,
+        outfile: `${distDirectory}/${name}.js`,
+        sourceRoot: name,
+        format: "iife",
+        legalComments: "none",
+        minify: isProductionBuild,
+        keepNames: true,
+        incremental: !isProductionBuild,
+      }))
+    : buildResult.rebuild();
 }
 
 /** Build JS for development */
-function buildDev() {
+function buildDevelopment() {
   return _buildCode(false);
 }
 
 /** Build JS for production */
-function buildProd() {
+function buildProduction() {
   return _buildCode(true);
 }
 
@@ -89,8 +85,12 @@ async function copyFiles() {
  * Watch for changes for each build step
  */
 function buildWatch() {
-  gulp.watch(`${sourceDirectory}/**/*.${sourceFileExtension}`, { ignoreInitial: false }, buildDev);
-  gulp.watch(`${stylesDirectory}/**/*.${stylesExtension}`, { ignoreInitial: false }, buildStyles);
+  gulp.watch(
+    `${sourceDirectory}/**/*.${sourceFileExtension}`,
+    { ignoreInitial: false },
+    buildDevelopment,
+  );
+  //gulp.watch(`${stylesDirectory}/**/*.${stylesExtension}`, { ignoreInitial: false }, buildStyles);
   gulp.watch(
     staticFiles.map((file) => `${sourceDirectory}/${file}`),
     { ignoreInitial: false },
@@ -120,7 +120,7 @@ async function clean() {
   }
 }
 
-const execBuild = gulp.parallel(buildProd, buildStyles, copyFiles);
+const execBuild = gulp.parallel(buildProduction, buildStyles, copyFiles);
 
 exports.build = gulp.series(clean, execBuild);
 exports.watch = buildWatch;

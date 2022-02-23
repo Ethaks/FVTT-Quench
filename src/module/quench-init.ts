@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 import "mocha/mocha.js";
 import * as chai from "chai";
 
@@ -6,7 +7,9 @@ import { registerExampleTests } from "./quench-tests/nonsense-tests";
 import { Quench } from "./quench";
 import { quenchUtils } from "./utils/quench-utils";
 
-const { getGame, localize } = quenchUtils._internal;
+import "../styles/quench.css";
+
+const { getGame, localize, getQuench } = quenchUtils._internal;
 
 declare global {
   /**
@@ -15,7 +18,6 @@ declare global {
    */
   /* eslint-disable-next-line no-var */ // Necessary for globalThis addition
   var quench: "quench" extends keyof LenientGlobalVariableTypes ? Quench : Quench | undefined;
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Hooks {
     interface StaticCallbacks {
       /**
@@ -28,18 +30,26 @@ declare global {
       quenchReady: (quench: Quench) => void;
     }
   }
+  interface BrowserMocha {
+    _cleanReferencesAfterRun: boolean;
+  }
 }
+
+// Initialize Quench
+globalThis.quench = new Quench();
+
+// Initialize Chai and snapshots
+// @ts-expect-error Match runtime (ESM import) to types (declared global `chai`)
+globalThis.chai = chai;
+chai.use(QuenchSnapshotManager.enableSnapshots);
+
+// Allow re-running of tests
+mocha._cleanReferencesAfterRun = false;
 
 /**
  * Sets up Quench and its dependencies
  */
 Hooks.on("init", function quenchInit() {
-  chai.use(QuenchSnapshotManager.enableSnapshots);
-  const quench = new Quench();
-  globalThis.quench = quench;
-  // @ts-expect-error Match runtime (ESM import) to types (declared global `chai`)
-  globalThis.chai = chai;
-
   const game = getGame();
 
   game.settings.register("quench", "logTestDetails", {
@@ -102,7 +112,7 @@ Hooks.on("renderSidebar", function (_sidebar: Application, html: JQuery<HTMLElem
   const $quenchButton = $(`<button class="quench-button"><b>${localize("Title")}</b></button>`);
 
   $quenchButton.on("click", function onClick() {
-    quench.app.render(true);
+    getQuench().app.render(true);
   });
 
   html.append($quenchButton);
@@ -112,6 +122,8 @@ Hooks.on("renderSidebar", function (_sidebar: Application, html: JQuery<HTMLElem
  * Show quench window on load if enabled and register example tests if enabled
  */
 Hooks.on("ready", async () => {
+  const quench = getQuench();
+
   if (getGame().settings.get("quench", "exampleTests")) {
     registerExampleTests(quench);
   }

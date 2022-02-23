@@ -1,10 +1,11 @@
 import fnv1a from "@sindresorhus/fnv1a";
 import { format as prettyFormat, plugins as formatPlugins } from "pretty-format";
-import { Quench } from "./quench";
-import { SnapshotError } from "./utils/quench-SnapshotError";
+import { SnapshotError } from "./utils/quench-snapshot-error";
 import { quenchUtils } from "./utils/quench-utils";
 
-const { logPrefix, localize, getBatchNameParts } = quenchUtils._internal;
+import type { Quench } from "./quench";
+
+const { logPrefix, localize, getBatchNameParts, getQuench } = quenchUtils._internal;
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -23,12 +24,17 @@ declare global {
       /** Asserts equality of a test's serialised value (actual) and previously stored snapshot (expected) */
       matchSnapshot: () => void;
     }
+    interface AssertionError {
+      snapshotError?: boolean;
+    }
   }
 }
 
 /**
  * The `QuenchSnapshotManager` class is a helper class, meant to be instantiated alongside a `Quench` class.
  * It provides various methods enabling the fetching, caching, managing, and updating of snapshots.
+ *
+ * @beta
  */
 export class QuenchSnapshotManager {
   /**
@@ -51,7 +57,7 @@ export class QuenchSnapshotManager {
   private updateQueue: Set<SnapshotUpdateData> = new Set();
 
   /** A boolean that determines whether snapshots should be updated after the next run. */
-  enableUpdates: boolean | null = null;
+  enableUpdates: boolean | undefined = undefined;
 
   /**
    * Serializes a given data object using the "pretty-format" package.
@@ -80,14 +86,14 @@ export class QuenchSnapshotManager {
    * Ensures a directory exists and optionally walks the full path,
    * creating missing directories therein, to ensure a directory's existence.
    *
-   * @static
-   * @async
    * @param fullPath - The full path of the directory to be created
-   * @param [options] - Optional parameters to affect the directory's creation
-   * @param [options.recursive] - Whether missing directories in the path should also be created
+   * @param options - Additional options affecting how a directory is created
    * @returns Whether the directory exists now
    */
-  static async createDirectory(fullPath: string, { recursive = true } = {}): Promise<boolean> {
+  static async createDirectory(
+    fullPath: string,
+    options: CreateDirectoryOptions = {},
+  ): Promise<boolean> {
     /**
      * Inner directory creation function; checks whether a directory exists
      * and either confirms existence or tries to create the directory.
@@ -96,37 +102,38 @@ export class QuenchSnapshotManager {
      * @param path - The directory's full path
      * @returns Whether the directory exists now
      */
-    const _createDir = async (path: string): Promise<boolean> => {
-      let dirExists = false;
+    const _createDirectory = async (path: string): Promise<boolean> => {
+      let directoryExists = false;
       try {
         // Attempt directory creation
         const resp = await FilePicker.createDirectory("data", path);
-        if (resp) dirExists = true;
+        if (resp) directoryExists = true;
       } catch (error) {
         // Confirm directory existence with expected EEXIST error, throw unexpected errors
         if (typeof error === "string" && error.startsWith("EEXIST")) {
-          dirExists = true;
+          directoryExists = true;
         } else throw error;
       }
-      return dirExists;
+      return directoryExists;
     };
 
+    const { recursive = true } = options;
     if (recursive) {
       // Split path into single directories to allow checking each of them
-      const dirs = fullPath.split("/");
+      const directories = fullPath.split("/");
       // Paths whose existence was already verified
       const present: string[] = [];
-      for (const dir of dirs) {
-        const currentDir = [...present, dir].join("/");
-        const dirExists = await _createDir(currentDir);
+      for (const directory of directories) {
+        const currentDirectory = [...present, directory].join("/");
+        const directoryExists = await _createDirectory(currentDirectory);
         // Either continue with directory creation, or return on error
-        if (dirExists) present.push(dir);
+        if (directoryExists) present.push(directory);
         else return false;
       }
       // Complete path's existence was confirmed
       return true;
     } else {
-      return _createDir(fullPath);
+      return _createDirectory(fullPath);
     }
   }
 
@@ -135,27 +142,31 @@ export class QuenchSnapshotManager {
    * Defined as function to enable recursive usage.
    *
    * @param obj - The object used as blueprint for the directory tree
-   * @param [prev] - String accumulator for already created directories, needed to get a full path
+   * @param prev - String accumulator for already created directories, needed to get a full path
    */
-  static async createDirectoryTree(obj: object, prev = "") {
+  static async createDirectoryTree(obj: object, previous = "") {
     // Create all dirs of current tree layer, don't need to await individual non-interfering requests
-    const currentLayerDirs = await Promise.all(
-      Object.entries(obj).map(async ([dirKey, valObj]) => {
-        const dirExists = await this.createDirectory(`${prev}${dirKey}`, {
+    const currentLayerDirectories = await Promise.all(
+      Object.entries(obj).map(async ([directoryKey, valueObj]) => {
+        const directoryExists = await this.createDirectory(`${previous}${directoryKey}`, {
           recursive: false,
         });
         // Return data necessary for the next level creation workflow
-        return [dirExists, dirKey, valObj];
+        return [directoryExists, directoryKey, valueObj];
       }),
     );
     // Only continue in directories that exists
-    const nextLayerPromises = currentLayerDirs
-      .filter(([dirExists]) => dirExists === true)
-      .reduce((promises, [dirExists, prevDir, newDirObj]) => {
+    const nextLayerPromises = currentLayerDirectories
+      .filter(([directoryExists]) => directoryExists === true)
+      // eslint-disable-next-line unicorn/no-array-reduce
+      .reduce((promises, [directoryExists, previousDirectory, newDirectoryObj]) => {
         // Push next layer creation request
-        if (dirExists) promises.push(this.createDirectoryTree(newDirObj, `${prev}${prevDir}/`));
+        if (directoryExists)
+          promises.push(
+            this.createDirectoryTree(newDirectoryObj, `${previous}${previousDirectory}/`),
+          );
         else {
-          console.error(`Could not create directory ${prev}${prevDir}`);
+          console.error(`Could not create directory ${previous}${previousDirectory}`);
         }
         return promises;
       }, []);
@@ -170,6 +181,9 @@ export class QuenchSnapshotManager {
    * @param utils - Chai utils
    */
   static enableSnapshots(chai: Chai.ChaiStatic, utils: Chai.ChaiUtils): void {
+    // Ensure Quench initialization
+    const quench = getQuench();
+
     // Enable `matchSnapshot` for assert style
     // Create a wrapper around `matchSnapshot`, providing the actual object
     chai.assert.matchSnapshot = function (obj) {
@@ -180,7 +194,7 @@ export class QuenchSnapshotManager {
     utils.addMethod(
       chai.Assertion.prototype,
       "matchSnapshot",
-      function (this: Chai.AssertionPrototype) {
+      function (this: Chai.AssertionPrototype): void {
         // Get flag for expect style, or paramter for assert style
         const actual = QuenchSnapshotManager.serialize(utils.flag(this, "object"));
         const updateSnapshot = quench.snapshots.enableUpdates;
@@ -194,10 +208,10 @@ export class QuenchSnapshotManager {
         let expected;
         try {
           expected = quench.snapshots.readSnap(quenchBatch, fullTitle);
-        } catch (e) {
+        } catch (error) {
           if (!updateSnapshot) {
             quench.snapshots.queueSnapUpdate(quenchBatch, fullTitle, actual);
-            throw e;
+            throw error;
           }
         }
         // Use equal assertion to compare strings, throwing default chai error on mismatch
@@ -255,7 +269,7 @@ export class QuenchSnapshotManager {
    *
    * @param batchKey - A batch key belonging to a quench test batch
    * @param fullTitle - The name of a specific snapshot data object belonging to a test
-   * @throws {SnapshotError} Throws an error if the requested snapshot cannot be found
+   * @throws {@link SnapshotError} Throws an error if the requested snapshot cannot be found
    * @returns A snapshot string
    */
   readSnap(batchKey: string, fullTitle: string): string {
@@ -269,7 +283,6 @@ export class QuenchSnapshotManager {
   /**
    * Loads all snaps for a Quench run
    *
-   * @async
    * @param batchKeys - The array of batch keys to be run
    * @returns A Promise that is resolved when all snapshot files are loaded
    */
@@ -279,9 +292,10 @@ export class QuenchSnapshotManager {
     // Reset queue to limit entries to a single run's queue
     this.updateQueue.clear();
     const batchPromises = batchKeys.map(async (batchKey: string) => {
-      const snapDir = this.getSnapDir(batchKey);
+      const snapDirectory = this.getSnapDir(batchKey);
       try {
-        const files = (await FilePicker.browse("data", snapDir))?.files;
+        const browseResponse = await FilePicker.browse("data", snapDirectory);
+        const files = browseResponse?.files;
         if (!files) return;
 
         // Fetch all ".snap.txt" files in a batch's snapDir
@@ -302,7 +316,7 @@ export class QuenchSnapshotManager {
         // Every batch without snapshots will throw an error due to a missing directory
         if (
           error !==
-          `Directory ${snapDir} does not exist or is not accessible in this storage location`
+          `Directory ${snapDirectory} does not exist or is not accessible in this storage location`
         )
           throw error;
       }
@@ -333,18 +347,19 @@ export class QuenchSnapshotManager {
    */
   async updateSnapshots(): Promise<{ batch: string; file: string; status: string | number }[]> {
     // Get all snapshot directories
-    const snapDirs = [...this.updateQueue].map(({ batchKey }) => this.getSnapDir(batchKey));
-    const dirTree: object = snapDirs.reduce((acc, dir) => {
-      let cur = acc;
-      for (const part of dir.split("/")) {
+    const snapDirectories = [...this.updateQueue].map(({ batchKey }) => this.getSnapDir(batchKey));
+    // eslint-disable-next-line unicorn/no-array-reduce, unicorn/prefer-object-from-entries
+    const directoryTree: object = snapDirectories.reduce((accumulator, directory) => {
+      let current = accumulator;
+      for (const part of directory.split("/")) {
         // @ts-expect-error Evil accessing/setting of arbitrary keys to create tree
-        cur = cur[part] ?? (cur[part] = {});
+        current = current[part] ?? (current[part] = {});
       }
-      return acc;
+      return accumulator;
     }, {});
 
     // Ensure that all all snapshot directories are created so that files can be stored
-    await QuenchSnapshotManager.createDirectoryTree(dirTree);
+    await QuenchSnapshotManager.createDirectoryTree(directoryTree);
 
     // Temporarily patch `ui.notifications.info` to prevent every single upload generating a notification
     const _info = ui.notifications?.info;
@@ -356,12 +371,12 @@ export class QuenchSnapshotManager {
 
     // Upload all snapshot strings into their respective files
     try {
-      const uploadPromises = Array.from(this.updateQueue).map(async ({ batchKey, data, hash }) => {
-        const snapDir = this.getSnapDir(batchKey);
+      const uploadPromises = [...this.updateQueue].map(async ({ batchKey, data, hash }) => {
+        const snapDirectory = this.getSnapDir(batchKey);
 
         const fileName = `${hash}.snap.txt`;
         const newFile = new File([data], fileName, { type: "text/plain" });
-        const fileUpload = await FilePicker.upload("data", snapDir, newFile);
+        const fileUpload = await FilePicker.upload("data", snapDirectory, newFile);
         return {
           batch: batchKey,
           file: fileName,
@@ -370,10 +385,14 @@ export class QuenchSnapshotManager {
         };
       });
       const responses = await Promise.all(uploadPromises);
+      // eslint-disable-next-line unicorn/prefer-object-from-entries, unicorn/no-array-reduce -- groupBy
       const respData = responses.reduce(
-        (acc: Record<string, { batch: string; file: string; status: string | number }[]>, resp) => {
-          (acc[resp.batch] || (acc[resp.batch] = [])).push(resp);
-          return acc;
+        (
+          accumulator: Record<string, { batch: string; file: string; status: string | number }[]>,
+          resp,
+        ) => {
+          (accumulator[resp.batch] || (accumulator[resp.batch] = [])).push(resp);
+          return accumulator;
         },
         {},
       );
@@ -385,11 +404,11 @@ export class QuenchSnapshotManager {
       console.group(
         `${logPrefix}UPLOADED SNAPSHOTS (${numberOfBatches} batches, ${numberOfFiles} files)`,
       );
-      Object.entries(respData).forEach(([batch, files]) => {
+      for (const [batch, files] of Object.entries(respData)) {
         console.groupCollapsed(`Batch: ${batch}, directory: ${this.getSnapDir(batch)}`);
         console.table(files, ["file", "status"]);
         console.groupEnd();
-      });
+      }
       console.groupEnd();
 
       this.updateQueue.clear();
@@ -418,4 +437,15 @@ interface SnapshotUpdateData {
   fullTitle: string;
   hash: string;
   data: string;
+}
+
+/**
+ * Additional options affecting how directories are created
+ */
+interface CreateDirectoryOptions {
+  /**
+   * Whether missing directories in the path should also be created
+   * @defaultValue true
+   */
+  recursive?: boolean;
 }
