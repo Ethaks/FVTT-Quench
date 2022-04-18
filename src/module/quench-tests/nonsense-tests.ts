@@ -196,7 +196,7 @@ function registerPropertyTestBatch(quench: Quench) {
         it("should always contain itself", function () {
           fc.assert(
             fc.property(fc.string(), (text) => {
-              assert(contains(text, text));
+              assert.ok(contains(text, text));
             }),
           );
         });
