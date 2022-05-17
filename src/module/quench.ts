@@ -97,9 +97,7 @@ export class Quench {
   ): void {
     const { displayName, snapBaseDir, preSelected } = context;
     const [packageName] = getBatchNameParts(key);
-    if (
-      ![...getGame().modules, [getGame().system.id]].map(([pName]) => pName).includes(packageName)
-    ) {
+    if (![...getGame().modules.keys(), getGame().system.id].includes(packageName)) {
       ui?.notifications?.error(localize("ERROR.InvalidPackageName", { key, packageName }));
     }
     if (this._testBatches.has(key)) {
