@@ -264,7 +264,13 @@ export interface QuenchRegisterBatchOptions {
 export type QuenchRegisterBatchFunction = (context: QuenchBatchContext) => void | Promise<void>;
 
 /**
- * Mocha and Chai functions passed by Quench
+ * A context object passed to batch registration functions, containing functions usually
+ * imported or globally available in regular Node testing.
+ * Includes Mocha, Chai, and fast-check.
+ *
+ * @see https://mochajs.org/
+ * @see https://www.chaijs.com/
+ * @see https://dubzzz.github.io/fast-check.github.com/
  *
  * @public
  */
