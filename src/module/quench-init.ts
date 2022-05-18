@@ -5,11 +5,11 @@ import * as chai from "chai";
 import { QuenchSnapshotManager } from "./quench-snapshot";
 import { registerExampleTests } from "./quench-tests/nonsense-tests";
 import { Quench } from "./quench";
-import { quenchUtils } from "./utils/quench-utils";
+import { quenchInternalUtils, quenchUtils } from "./utils/quench-utils";
 
 import "../styles/quench.css";
 
-const { getGame, localize, getQuench } = quenchUtils._internal;
+const { getGame, localize, getQuench } = quenchInternalUtils;
 
 declare global {
   /**

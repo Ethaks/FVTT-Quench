@@ -4,9 +4,9 @@ import fc from "fast-check";
 import { QuenchResults } from "./apps/quench-results";
 import { QuenchReporter } from "./quench-reporter";
 import { QuenchSnapshotManager } from "./quench-snapshot";
-import { quenchUtils } from "./utils/quench-utils";
+import { quenchInternalUtils, quenchUtils } from "./utils/quench-utils";
 
-const { getBatchNameParts, getGame, localize } = quenchUtils._internal;
+const { getBatchNameParts, getGame, localize } = quenchInternalUtils;
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -43,10 +43,16 @@ export class Quench {
   utils = quenchUtils;
 
   /**
+   * Various internal utility functions
+   * @internal
+   */
+  readonly _internalUtils = quenchInternalUtils;
+
+  /**
    * A map of registered test batches
    * @internal
    */
-  readonly _testBatches: Map<string, BatchData> = new Map();
+  readonly _testBatches: Map<string, QuenchBatchData> = new Map();
 
   /** The singleton instance of {@link QuenchResults} that this `Quench` instance uses */
   readonly app = new QuenchResults(this);
@@ -118,7 +124,7 @@ export class Quench {
    * @param key - The batch key
    * @returns Batch data
    */
-  getBatch(key: string): BatchData | undefined {
+  getBatch(key: string): QuenchBatchData | undefined {
     return this._testBatches.get(key);
   }
 
@@ -291,7 +297,13 @@ export interface QuenchRunBatchOptions {
   updateSnapshots?: boolean | null;
 }
 
-interface BatchData {
+/**
+ * Data belonging to a single batch, including its registration function and any
+ * additional options.
+ *
+ * @public
+ */
+export interface QuenchBatchData {
   fn: QuenchRegisterBatchFunction;
   displayName: string;
   snapBaseDir: string;

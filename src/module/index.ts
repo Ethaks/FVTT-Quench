@@ -10,6 +10,7 @@ export type {
   QuenchRegisterBatchOptions,
   QuenchRegisterBatchFunction,
   QuenchRunBatchOptions,
+  QuenchBatchData,
 } from "./quench";
 
 // Snapshots

@@ -1,12 +1,12 @@
 import * as Diff from "diff";
 
 import { MissingSnapshotError } from "../utils/quench-snapshot-error";
-import { quenchUtils } from "../utils/quench-utils";
+import { quenchInternalUtils } from "../utils/quench-utils";
 
 import type { Quench } from "../quench";
 import type { RUNNABLE_STATE } from "../utils/quench-utils";
 
-const { RUNNABLE_STATES, getTestState, getSuiteState, getGame, localize } = quenchUtils._internal;
+const { RUNNABLE_STATES, getTestState, getSuiteState, getGame, localize } = quenchInternalUtils;
 
 /**
  * The visual UI for representing Quench test batches and the tests results thereof.
@@ -138,7 +138,7 @@ export class QuenchResults extends Application {
 
   /**
    * Finds or creates an unordered list to contain items for each child runnable (test or suite) of the given parent
-   * @param $parentListEl - The <li> of the parent test batch or suite
+   * @param $parentListElement - The <li> of the parent test batch or suite
    * @returns The <ul> into which child runnables can be inserted.
    */
   private _findOrMakeChildList($parentListElement: JQuery<HTMLElement>): JQuery<HTMLElement> {
@@ -194,7 +194,7 @@ export class QuenchResults extends Application {
 
   /**
    * Updates the given existing <li> representing a runnable based on the given state
-   * @param $listEl - The list element representing the runnable
+   * @param $listElement - The list element representing the runnable
    * @param state - the state of the runnable
    * @param isTest - whether the item is a test
    */
@@ -309,7 +309,7 @@ export class QuenchResults extends Application {
   /**
    * Called by {@link QuenchReporter} when a mocha test finishes running and fails
    * @param test - The failed test
-   * @param err - The error thrown by the test
+   * @param error - The error thrown by the test
    */
   handleTestFail(test: Mocha.Test, error: Chai.AssertionError | MissingSnapshotError) {
     const $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);

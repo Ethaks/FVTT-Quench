@@ -1,11 +1,11 @@
 import fnv1a from "@sindresorhus/fnv1a";
 import { format as prettyFormat, plugins as formatPlugins } from "pretty-format";
 import { MissingSnapshotError } from "./utils/quench-snapshot-error";
-import { quenchUtils } from "./utils/quench-utils";
+import { quenchInternalUtils } from "./utils/quench-utils";
 
 import type { Quench } from "./quench";
 
-const { logPrefix, localize, getBatchNameParts, getQuench, truncate } = quenchUtils._internal;
+const { logPrefix, localize, getBatchNameParts, getQuench, truncate } = quenchInternalUtils;
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -145,7 +145,7 @@ export class QuenchSnapshotManager {
    * Defined as function to enable recursive usage.
    *
    * @param obj - The object used as blueprint for the directory tree
-   * @param prev - String accumulator for already created directories, needed to get a full path
+   * @param previous - String accumulator for already created directories, needed to get a full path
    */
   static async createDirectoryTree(obj: object, previous = "") {
     // Create all dirs of current tree layer, don't need to await individual non-interfering requests

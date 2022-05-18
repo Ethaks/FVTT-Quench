@@ -1,6 +1,6 @@
-import { quenchUtils } from "./utils/quench-utils";
+import { quenchInternalUtils } from "./utils/quench-utils";
 
-const { RUNNABLE_STATES, getTestState, logPrefix, getGame, getQuench } = quenchUtils._internal;
+const { RUNNABLE_STATES, getTestState, logPrefix, getGame, getQuench } = quenchInternalUtils;
 
 /**
  * Given a mocha Runner, reports test results to the singleton instance of {@link QuenchResults} and in the console if enabled

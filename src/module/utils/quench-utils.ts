@@ -33,6 +33,7 @@ const RUNNABLE_STATES = {
   SUCCESS: "success",
   FAILURE: "failure",
 } as const;
+/** The current state of a runnable element */
 export type RUNNABLE_STATE = typeof RUNNABLE_STATES[keyof typeof RUNNABLE_STATES];
 
 /**
@@ -82,6 +83,10 @@ function getBatchNameParts(batchKey: string): [string, string] {
   return [batchKey.slice(0, index), batchKey.slice(index + 1)];
 }
 
+/**
+ * The module's prefix used for console logging
+ * @internal
+ */
 const logPrefix = "QUENCH | " as const;
 
 /** Ensures {@link game} is initialized, either returning the {@link Game} instance or throwing an error. */
@@ -118,7 +123,11 @@ function truncate(string: string, length = 18): string {
   return `${string.slice(0, Math.max(0, length)).replaceAll(/\r?\n|\r/g, " ")}${dots}`;
 }
 
-const internalUtils = {
+/**
+ * Various internal utils
+ * @internal
+ */
+export const quenchInternalUtils = {
   RUNNABLE_STATES,
   getBatchNameParts,
   getGame,
@@ -130,8 +139,8 @@ const internalUtils = {
   truncate,
 };
 
+/** Various utility funcions */
 export const quenchUtils = {
   pause,
   clearWorld,
-  _internal: internalUtils,
 };

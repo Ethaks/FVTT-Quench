@@ -1,6 +1,6 @@
-import { quenchUtils } from "./quench-utils";
+import { quenchInternalUtils } from "./quench-utils";
 
-const { getQuench } = quenchUtils._internal;
+const { getQuench } = quenchInternalUtils;
 
 /**
  * An error thrown when a test's snapshot cannot be read from the cache,

@@ -3,3 +3,6 @@ node_modules/
 .eslintcache
 dist/
 lib/
+docs/
+.vscode/
+ethaks-fvtt-quench-*.tgz
