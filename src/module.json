@@ -29,27 +29,27 @@
   "media": [
     {
       "type": "icon",
-      "url": "https://raw.githubusercontent.com/Ethaks/FVTT-Quench/master/docs/quench-logo.webp",
+      "url": "https://raw.githubusercontent.com/Ethaks/FVTT-Quench/master/assets/quench-logo.webp",
       "caption": "Quench"
     },
     {
       "type": "cover",
-      "url": "https://raw.githubusercontent.com/Ethaks/FVTT-Quench/master/docs/quench-banner.webp",
+      "url": "https://raw.githubusercontent.com/Ethaks/FVTT-Quench/master/assets/quench-banner.webp",
       "caption": "Quench"
     },
     {
       "type": "screenshot",
-      "url": "https://raw.githubusercontent.com/Ethaks/FVTT-Quench/master/docs/example-tests.webp",
+      "url": "https://raw.githubusercontent.com/Ethaks/FVTT-Quench/master/assets/example-tests.webp",
       "caption": "Quench displaying test results within Foundry"
     },
     {
       "type": "screenshot",
-      "url": "https://raw.githubusercontent.com/Ethaks/FVTT-Quench/master/docs/example-test-fail.webp",
+      "url": "https://raw.githubusercontent.com/Ethaks/FVTT-Quench/master/assets/example-test-fail.webp",
       "caption": "Quench displaying a failed test's output"
     },
     {
       "type": "screenshot",
-      "url": "https://raw.githubusercontent.com/Ethaks/FVTT-Quench/master/docs/example-console-output.webp",
+      "url": "https://raw.githubusercontent.com/Ethaks/FVTT-Quench/master/assets/example-console-output.webp",
       "caption": "Quench's detailed output in Chrome's console"
     }
   ]

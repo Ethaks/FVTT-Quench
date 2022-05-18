@@ -1,5 +1,5 @@
 <h1 align=center>
-    <img alt="Quench Logo" src="docs/quench-logo.webp" width=256 height=256>
+    <img alt="Quench Logo" src="assets/quench-logo.webp" width=256 height=256>
   <br>
   Quench
 </h1>
@@ -25,7 +25,7 @@ Powered by [Mocha](https://mochajs.org/) and also includes [Chai](https://www.ch
 Quench adds a test runner UI as a native Foundry `Application`.
 You can register test suites with quench and view them in the test runner, then run them and view the results.
 
-![Example Tests](docs/example-tests.webp)
+![Example Tests](assets/example-tests.webp)
 
 ## Usage
 
