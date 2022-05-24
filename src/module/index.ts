@@ -17,8 +17,5 @@ export type {
 export type { QuenchSnapshotManager } from "./quench-snapshot";
 export type { MissingSnapshotError } from "./utils/quench-snapshot-error";
 
-// Utils
-export type { quenchUtils } from "./utils/quench-utils";
-
 export type { QuenchReporter } from "./quench-reporter";
 export type { QuenchResults } from "./apps/quench-results";

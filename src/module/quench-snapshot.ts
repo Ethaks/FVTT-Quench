@@ -1,11 +1,9 @@
 import fnv1a from "@sindresorhus/fnv1a";
 import { format as prettyFormat, plugins as formatPlugins } from "pretty-format";
 import { MissingSnapshotError } from "./utils/quench-snapshot-error";
-import { quenchInternalUtils } from "./utils/quench-utils";
+import { logPrefix, localize, getBatchNameParts, truncate, enforce } from "./utils/quench-utils";
 
 import type { Quench } from "./quench";
-
-const { logPrefix, localize, getBatchNameParts, getQuench, truncate } = quenchInternalUtils;
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -38,6 +36,7 @@ declare global {
  * It provides various methods enabling the fetching, caching, managing, and updating of snapshots.
  *
  * @beta
+ * @internal
  */
 export class QuenchSnapshotManager {
   /**
@@ -185,7 +184,8 @@ export class QuenchSnapshotManager {
    */
   static enableSnapshots(chai: Chai.ChaiStatic, utils: Chai.ChaiUtils): void {
     // Ensure Quench initialization
-    const quench = getQuench();
+    enforce(globalThis.quench);
+    const quench = globalThis.quench;
 
     // Enable `matchSnapshot` for assert style
     // Create a wrapper around `matchSnapshot`, providing the actual object

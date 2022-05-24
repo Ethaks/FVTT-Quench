@@ -1,8 +1,5 @@
-import { quenchInternalUtils } from "../utils/quench-utils";
-
 import type { Quench } from "../quench";
-
-const { getGame } = quenchInternalUtils;
+import { getGame } from "../utils/quench-utils";
 
 /**
  * Registers all example tests, which also serves as a quick self-test.

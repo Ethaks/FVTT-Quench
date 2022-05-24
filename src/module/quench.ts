@@ -4,7 +4,8 @@ import fc from "fast-check";
 import { QuenchResults } from "./apps/quench-results";
 import { QuenchReporter } from "./quench-reporter";
 import { QuenchSnapshotManager } from "./quench-snapshot";
-import { quenchInternalUtils, quenchUtils } from "./utils/quench-utils";
+import * as quenchInternalUtils from "./utils/quench-utils";
+import * as quenchUtils from "./utils/user-utils";
 
 const { getBatchNameParts, getGame, localize } = quenchInternalUtils;
 
@@ -40,13 +41,13 @@ export class Quench {
   fc = fc;
 
   /** Various utility functions */
-  utils = quenchUtils;
+  utils = { ...quenchUtils };
 
   /**
    * Various internal utility functions
    * @internal
    */
-  readonly _internalUtils = quenchInternalUtils;
+  readonly _internalUtils = { ...quenchInternalUtils };
 
   /**
    * A map of registered test batches
@@ -57,7 +58,11 @@ export class Quench {
   /** The singleton instance of {@link QuenchResults} that this `Quench` instance uses */
   readonly app = new QuenchResults(this);
 
-  /** The {@link QuenchSnapshotManager} instance that this `Quench` instance uses */
+  /**
+   * The {@link QuenchSnapshotManager} instance that this `Quench` instance uses
+   *
+   * @internal
+   */
   readonly snapshots = new QuenchSnapshotManager(this);
 
   /**
@@ -298,6 +303,7 @@ export interface QuenchBatchContext {
 export interface QuenchRunBatchOptions {
   /**
    * Whether snapshots generated in this run should be saved
+   *
    * @defaultValue null
    */
   updateSnapshots?: boolean | null;

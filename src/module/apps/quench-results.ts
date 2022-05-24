@@ -1,12 +1,16 @@
 import * as Diff from "diff";
 
 import { MissingSnapshotError } from "../utils/quench-snapshot-error";
-import { quenchInternalUtils } from "../utils/quench-utils";
 
 import type { Quench } from "../quench";
 import type { RUNNABLE_STATE } from "../utils/quench-utils";
-
-const { RUNNABLE_STATES, getTestState, getSuiteState, getGame, localize } = quenchInternalUtils;
+import {
+  RUNNABLE_STATES,
+  getTestState,
+  getSuiteState,
+  getGame,
+  localize,
+} from "../utils/quench-utils";
 
 /**
  * The visual UI for representing Quench test batches and the tests results thereof.

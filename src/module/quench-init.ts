@@ -5,11 +5,11 @@ import * as chai from "chai";
 import { QuenchSnapshotManager } from "./quench-snapshot";
 import { registerExampleTests } from "./quench-tests/nonsense-tests";
 import { Quench } from "./quench";
-import { quenchInternalUtils, quenchUtils } from "./utils/quench-utils";
+import { enforce, getGame, localize } from "./utils/quench-utils";
+import { pause } from "./utils/user-utils";
 
 import "../styles/quench.css";
-
-const { getGame, localize, getQuench } = quenchInternalUtils;
+import { registerSettings } from "./settings";
 
 declare global {
   /**
@@ -49,55 +49,7 @@ mocha._cleanReferencesAfterRun = false;
  * Sets up Quench and its dependencies
  */
 Hooks.on("init", function quenchInit() {
-  const game = getGame();
-
-  game.settings.register("quench", "logTestDetails", {
-    name: "QUENCH.LogTestDetailsLabel",
-    hint: "QUENCH.LogTestDetailsHint",
-    scope: "client",
-    config: true,
-    type: Boolean,
-    default: true,
-  });
-
-  game.settings.register("quench", "exampleTests", {
-    name: "QUENCH.ExampleTestsLabel",
-    hint: "QUENCH.ExampleTestsHint",
-    scope: "client",
-    config: true,
-    type: Boolean,
-    default: false,
-    onChange: foundry.utils.debounce(() => {
-      location.reload();
-    }, 500),
-  });
-
-  game.settings.register("quench", "collapseSuccessful", {
-    name: "QUENCH.CollapseSuccessfulLabel",
-    hint: "QUENCH.CollapseSuccessfulHint",
-    scope: "client",
-    config: true,
-    type: Boolean,
-    default: false,
-  });
-
-  game.settings.register("quench", "autoShowQuenchWindow", {
-    name: "QUENCH.AutoShowQuenchWindowLabel",
-    hint: "QUENCH.AutoShowQuenchWindowHint",
-    scope: "client",
-    config: true,
-    type: Boolean,
-    default: false,
-  });
-
-  game.settings.register("quench", "autoRun", {
-    name: "QUENCH.AutoRunLabel",
-    hint: "QUENCH.AutoRunHint",
-    scope: "client",
-    config: true,
-    type: Boolean,
-    default: false,
-  });
+  registerSettings();
 });
 
 Hooks.on("setup", function () {
@@ -111,7 +63,8 @@ Hooks.on("renderSidebar", function (_sidebar: Application, html: JQuery<HTMLElem
   const $quenchButton = $(`<button class="quench-button"><b>${localize("Title")}</b></button>`);
 
   $quenchButton.on("click", function onClick() {
-    getQuench().app.render(true);
+    enforce(quench);
+    quench.app.render(true);
   });
 
   html.append($quenchButton);
@@ -121,7 +74,7 @@ Hooks.on("renderSidebar", function (_sidebar: Application, html: JQuery<HTMLElem
  * Show quench window on load if enabled and register example tests if enabled
  */
 Hooks.on("ready", async () => {
-  const quench = getQuench();
+  enforce(quench);
 
   if (getGame().settings.get("quench", "exampleTests")) {
     registerExampleTests(quench);
@@ -131,7 +84,7 @@ Hooks.on("ready", async () => {
   if (shouldRender) quench.app.render(true);
 
   if (getGame().settings.get("quench", "autoRun")) {
-    if (shouldRender) await quenchUtils.pause(1000);
-    quench.runAllBatches();
+    if (shouldRender) await pause(1000);
+    quench.runAllBatches({ preSelectedOnly: true });
   }
 });

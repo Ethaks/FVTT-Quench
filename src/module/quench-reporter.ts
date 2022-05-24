@@ -1,6 +1,4 @@
-import { quenchInternalUtils } from "./utils/quench-utils";
-
-const { RUNNABLE_STATES, getTestState, logPrefix, getGame, getQuench } = quenchInternalUtils;
+import { RUNNABLE_STATES, getTestState, logPrefix, getGame, enforce } from "./utils/quench-utils";
 
 /**
  * Given a mocha Runner, reports test results to the singleton instance of {@link QuenchResults} and in the console if enabled
@@ -13,7 +11,11 @@ export class QuenchReporter extends Mocha.reporters.Base {
    */
   constructor(runner: Mocha.Runner) {
     super(runner);
-    const quench = getQuench();
+
+    // Without this TS cannot be sure a `quench` global exists when callbacks are called
+    enforce(globalThis.quench);
+    const quench = globalThis.quench;
+
     const app = quench.app;
 
     const {
