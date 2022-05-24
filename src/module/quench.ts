@@ -141,8 +141,12 @@ export class Quench {
    * @param options - Additional options affecting this batch run
    * @returns Returns the mocha Runner object for this test run.
    */
-  async runAllBatches(options?: QuenchRunBatchOptions): Promise<Mocha.Runner> {
-    return this.runSelectedBatches([...this._testBatches.keys()], options);
+  async runAllBatches(options: QuenchRunAllBatchesOptions = {}): Promise<Mocha.Runner> {
+    const { preSelectedOnly = false, ...runOptions } = options;
+    const batches = preSelectedOnly
+      ? [...this._testBatches.keys()].filter((batchKey) => this.getBatch(batchKey)?.preSelected)
+      : [...this._testBatches.keys()];
+    return this.runSelectedBatches(batches, runOptions);
   }
 
   /**
@@ -307,6 +311,21 @@ export interface QuenchRunBatchOptions {
    * @defaultValue null
    */
   updateSnapshots?: boolean | null;
+}
+
+/**
+ * Options affecting the running of batches or criteria which batches are to be run
+ *
+ * @public
+ */
+export interface QuenchRunAllBatchesOptions extends QuenchRunBatchOptions {
+  /**
+   * Whether only batches registered with {@link QuenchRegisterBatchOptions.preSelected}
+   * set to `true` should be run.
+   *
+   * @defaultValue false
+   */
+  preSelectedOnly?: boolean;
 }
 
 /**
