@@ -1,6 +1,6 @@
 #quench-results #quench-batches {
   flex: 1 0 0;
-  font-size: 0.9rem;
+  font-size: var(--font-size-14, 0.9rem);
   overflow: auto;
   white-space: nowrap;
 }
@@ -86,8 +86,8 @@
   padding: 10px;
   border-radius: 4px;
   border: 1px #99000088 solid;
-  font-family: monospace;
-  font-size: 0.7rem;
+  font-family: var(--font-mono, monospace);
+  font-size: var(--font-size-11, 0.7rem);
   user-select: text;
   white-space: pre-wrap;
 }
@@ -97,6 +97,9 @@
 }
 #quench-results li > .expandable > .error .expected {
   color: green;
+}
+#quench-results li > .expandable > .error .unchanged {
+  color: var(--color-text-dark-secondary);
 }
 
 #quench-results li > .expandable > .error > * {

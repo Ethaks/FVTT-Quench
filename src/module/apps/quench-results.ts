@@ -332,7 +332,11 @@ export class QuenchResults extends Application {
       // Allow possibly long paths from `SnapshotError`s to be line wrapped sanely
       errorElement.html(error.message.replaceAll("/", "/<wbr>"));
 
-    errorElement.append(`<span class="error-message">${error.message}\n</span>`);
+    errorElement.append(
+      `<span class="error-message">${
+        error.name !== "Error" ? "<strong>" + error.name + ": </strong>" : ""
+      }${error.message}\n</span>`,
+    );
 
     // When possible, create a diff and render it into the error element
     if (
@@ -343,17 +347,26 @@ export class QuenchResults extends Application {
     ) {
       errorElement[0].insertAdjacentHTML(
         "beforeend",
-        '<div class="diff-header"><span class="expected">+ ' +
+        '<div class="diff-header">' +
+          '<span class="expected">- ' +
           localize("Expected") +
-          ' </span><span class="actual">- ' +
+          ' </span><span class="actual">+ ' +
           localize("Actual") +
-          "</span></div>",
+          "</span>" +
+          "</div>",
       );
-      const diff = Diff.diffLines(error.actual, error.expected);
+      const diff = Diff.diffLines(error.expected, error.actual);
       const fragment = diff
         .map((part) => {
+          // Trim down large blocks of unchanged content
+          if (part.count !== undefined && part.count > 14 && !(part.added || part.removed)) {
+            const startContext = part.value.split("\n").slice(0, 6);
+            const endContext = part.value.split("\n").slice(-6);
+            part.value = [...startContext, "...", ...endContext].join("\n");
+          }
+
           const span = document.createElement("span");
-          span.classList.add(part.added ? "expected" : part.removed ? "actual" : "unchanged");
+          span.classList.add(part.removed ? "expected" : part.added ? "actual" : "unchanged");
           span.append(document.createTextNode(part.value));
           return span;
         })
