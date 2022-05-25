@@ -60,7 +60,7 @@ export class QuenchResults extends Application {
         return {
           name: key,
           displayName: value.displayName,
-          selected: value.preSelected,
+          selected: this.quench.preSelectedBatches.includes(key),
         };
       }),
     };

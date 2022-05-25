@@ -17,9 +17,11 @@
     "AutoShowQuenchWindowLabel": "Show Quench Dialog on Startup",
     "AutoShowQuenchWindowHint": "Will automatically render the Quench window when the game is loaded or refreshed",
     "AutoRunLabel": "Run on Startup",
-    "AutoRunHint": "Will automatically run all Quench test batches when the game is loaded or refreshed",
+    "AutoRunHint": "Will automatically run all preselected Quench test batches when the game is loaded or refreshed",
     "CollapseSuccessfulLabel": "Collapse Passing Suites",
     "CollapseSuccessfulHint": "When enabled, suites for which all children suites and tests are passing will be collapsed by default",
+    "PreselectedPackagesLabel": "Exclusively Preselected Packages",
+    "PreselectedPackagesHint": "If this list of comma-separated package IDs it not empty, only batches belonging to these packages will effectively be preselected",
 
     "UploadedSnapshots": "Updated {files} snapshot files for {batches} batches",
 
@@ -27,7 +29,7 @@
       "BatchAlreadyExists": "QUENCH: Test batch \"{key}\" already exists. Overwriting... "
     },
     "ERROR": {
-      "InvalidPackageName": "QUENCH: Test batch \"{key}\" uses invalid package name \"{packageName}\". Batch names should begin with the registering package's name!"
+      "InvalidPackageName": "QUENCH: Test batch \"{key}\" uses invalid package ID \"{packageName}\". Batch names should begin with the registering package's ID!"
     }
   }
 }

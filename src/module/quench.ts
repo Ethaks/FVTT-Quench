@@ -7,7 +7,7 @@ import { QuenchSnapshotManager } from "./quench-snapshot";
 import * as quenchInternalUtils from "./utils/quench-utils";
 import * as quenchUtils from "./utils/user-utils";
 
-const { getBatchNameParts, getGame, localize } = quenchInternalUtils;
+const { getBatchNameParts, getGame, localize, MODULE_ID } = quenchInternalUtils;
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -70,6 +70,32 @@ export class Quench {
    * @internal
    */
   _currentRunner: Mocha.Runner | undefined = undefined;
+
+  /**
+   * Returns a list of batch keys that are effectively preselected {@link QuenchBatchData.preSelected} insofar as
+   * they are registered as `preSelected` *and* – if the user has entered a list of packages to be tested in
+   * {@link ClientSettings.Values["quench.preselectedPackages"]} – belong to a preselected package.
+   *
+   * @internal
+   */
+  get preSelectedBatches(): string[] {
+    const preselectedPackages = getGame().settings.get(MODULE_ID, "preselectedPackages");
+    const hasPreselectedPackages = preselectedPackages !== "";
+
+    return [...this._testBatches.entries()]
+      .filter(([batchKey, batchData]) => {
+        const [packageName] = getBatchNameParts(batchKey);
+        const isPreselectedPackage = preselectedPackages
+          .split(",")
+          .map((p) => p.trim())
+          .includes(packageName);
+        const preSelectResult = hasPreselectedPackages
+          ? isPreselectedPackage && batchData.preSelected
+          : batchData.preSelected;
+        return preSelectResult;
+      })
+      .map(([batchKey]) => batchKey);
+  }
 
   /**
    * Registers a new Quench test batch which will show up in the quench window to be enabled/disabled and run.
@@ -143,9 +169,7 @@ export class Quench {
    */
   async runAllBatches(options: QuenchRunAllBatchesOptions = {}): Promise<Mocha.Runner> {
     const { preSelectedOnly = false, ...runOptions } = options;
-    const batches = preSelectedOnly
-      ? [...this._testBatches.keys()].filter((batchKey) => this.getBatch(batchKey)?.preSelected)
-      : [...this._testBatches.keys()];
+    const batches = preSelectedOnly ? this.preSelectedBatches : [...this._testBatches.keys()];
     return this.runSelectedBatches(batches, runOptions);
   }
 
@@ -257,7 +281,8 @@ export interface QuenchRegisterBatchOptions {
   /** The directory in which snapshots for this batch are stored. */
   snapBaseDir?: string;
   /**
-   * Whether this batch should be checked when added to the UI
+   * Whether this batch should be checked when added to the UI, and possibly run on startup
+   * if that setting is enabled.
    * @defaultValue true
    */
   preSelected?: boolean;

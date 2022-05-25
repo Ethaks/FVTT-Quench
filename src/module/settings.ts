@@ -1,4 +1,4 @@
-import { getGame } from "./utils/quench-utils";
+import { getGame, MODULE_ID } from "./utils/quench-utils";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -9,6 +9,7 @@ declare global {
       "quench.collapseSuccessful": boolean;
       "quench.autoShowQuenchWindow": boolean;
       "quench.autoRun": boolean;
+      "quench.preselectedPackages": string;
     }
   }
 }
@@ -19,7 +20,7 @@ declare global {
 export function registerSettings(): void {
   const game = getGame();
 
-  game.settings.register("quench", "logTestDetails", {
+  game.settings.register(MODULE_ID, "logTestDetails", {
     name: "QUENCH.LogTestDetailsLabel",
     hint: "QUENCH.LogTestDetailsHint",
     scope: "client",
@@ -28,7 +29,7 @@ export function registerSettings(): void {
     default: true,
   });
 
-  game.settings.register("quench", "exampleTests", {
+  game.settings.register(MODULE_ID, "exampleTests", {
     name: "QUENCH.ExampleTestsLabel",
     hint: "QUENCH.ExampleTestsHint",
     scope: "client",
@@ -40,7 +41,7 @@ export function registerSettings(): void {
     }, 500),
   });
 
-  game.settings.register("quench", "collapseSuccessful", {
+  game.settings.register(MODULE_ID, "collapseSuccessful", {
     name: "QUENCH.CollapseSuccessfulLabel",
     hint: "QUENCH.CollapseSuccessfulHint",
     scope: "client",
@@ -49,7 +50,7 @@ export function registerSettings(): void {
     default: false,
   });
 
-  game.settings.register("quench", "autoShowQuenchWindow", {
+  game.settings.register(MODULE_ID, "autoShowQuenchWindow", {
     name: "QUENCH.AutoShowQuenchWindowLabel",
     hint: "QUENCH.AutoShowQuenchWindowHint",
     scope: "client",
@@ -58,12 +59,21 @@ export function registerSettings(): void {
     default: false,
   });
 
-  game.settings.register("quench", "autoRun", {
+  game.settings.register(MODULE_ID, "autoRun", {
     name: "QUENCH.AutoRunLabel",
     hint: "QUENCH.AutoRunHint",
     scope: "client",
     config: true,
     type: Boolean,
     default: false,
+  });
+
+  game.settings.register(MODULE_ID, "preselectedPackages", {
+    name: "QUENCH.PreselectedPackagesLabel",
+    hint: "QUENCH.PreselectedPackagesHint",
+    scope: "client",
+    config: true,
+    type: String,
+    default: "",
   });
 }
