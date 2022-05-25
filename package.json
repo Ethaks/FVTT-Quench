@@ -23,7 +23,8 @@
     "clean": "gulp clean",
     "release": "gulp build && npm run lint && standard-version",
     "declaration": "tsc --project tsconfig.declaration.json",
-    "docs": "typedoc --out docs ./src/module/index.ts --excludeInternal",
+    "docs": "typedoc",
+    "docs:watch": "typedoc --watch",
     "prepack": "npm run declaration"
   },
   "repository": {

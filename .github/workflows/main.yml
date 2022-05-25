@@ -67,6 +67,9 @@ jobs:
       - name: Create docs
         run: npm run docs
 
+      - name: Copy assets to docs
+        run: cp -r assets docs
+
       - name: Deploy docs
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
