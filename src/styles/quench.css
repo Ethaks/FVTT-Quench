@@ -138,6 +138,9 @@
   background: #00990033;
 }
 
+.quench-hidden {
+  visibility: hidden;
+}
 #quench-results .summary > i.status-icon.fa-times-circle {
   color: #990000;
 }

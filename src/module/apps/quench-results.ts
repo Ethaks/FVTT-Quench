@@ -235,6 +235,11 @@ export class QuenchResults extends Application {
         .addClass("fa-caret-right");
       $listElement.find("> .expandable").hide();
     }
+
+    // Hide expander for tests with results without info that could be expanded
+    if (isTest && (state === RUNNABLE_STATES.SUCCESS || state === RUNNABLE_STATES.PENDING)) {
+      $listElement.find("> .summary > .expander").addClass("quench-hidden");
+    }
   }
 
   /*--------------------------------*/
@@ -307,7 +312,7 @@ export class QuenchResults extends Application {
     }
 
     const state = getTestState(test);
-    this._updateLineItemStatus($testLi, state);
+    this._updateLineItemStatus($testLi, state, true);
   }
 
   /**
