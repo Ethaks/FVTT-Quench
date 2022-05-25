@@ -20,6 +20,23 @@
   margin: 5px;
   width: auto;
 }
+#sidebar.collapsed .quench-button {
+  flex: 0 0 24px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-light-highlight);
+  margin: 2px;
+}
+#sidebar.collapsed .quench-button .button-text {
+  display: none;
+}
+#sidebar.collapsed .quench-button:hover {
+  box-shadow: none;
+  text-shadow: 0 0 8px var(--color-shadow-primary);
+}
+#sidebar.collapsed .quench-button:focus {
+  box-shadow: none;
+}
 
 #quench-results .button-container {
   flex: 0;

@@ -60,7 +60,11 @@ Hooks.on("setup", function () {
  * Inject QUENCH button in sidebar
  */
 Hooks.on("renderSidebar", function (_sidebar: Application, html: JQuery<HTMLElement>) {
-  const $quenchButton = $(`<button class="quench-button"><b>${localize("Title")}</b></button>`);
+  const $quenchButton = $(
+    `<button class="quench-button"><i class="fas fa-flask"></i><b class="button-text">${localize(
+      "Title",
+    )}</b></button>`,
+  );
 
   $quenchButton.on("click", function onClick() {
     enforce(quench);
