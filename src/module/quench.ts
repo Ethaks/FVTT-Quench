@@ -33,11 +33,24 @@ declare global {
  * @public
  */
 export class Quench {
-  /** Mocha's browser global */
+  /**
+   * Mocha's browser global
+   *
+   * @see https://mochajs.org/
+   */
   mocha: BrowserMocha = mocha;
-  /** Chai's static object */
+  /**
+   * Chai's static object
+   *
+   * @see https://www.chaijs.com/
+   */
   chai: Chai.ChaiStatic = chai;
-  /** fast-check for property based testing */
+  /**
+   * fast-check for property based testing
+   *
+   * @see https://dubzzz.github.io/fast-check.github.com/
+   * @see https://dubzzz.github.io/fast-check/
+   */
   fc = fc;
 
   /** Various utility functions */
@@ -45,17 +58,23 @@ export class Quench {
 
   /**
    * Various internal utility functions
+   *
    * @internal
    */
   readonly _internalUtils = { ...quenchInternalUtils };
 
   /**
    * A map of registered test batches
+   *
    * @internal
    */
   readonly _testBatches: Map<string, QuenchBatchData> = new Map();
 
-  /** The singleton instance of {@link QuenchResults} that this `Quench` instance uses */
+  /**
+   * The singleton instance of {@link QuenchResults} that this `Quench` instance uses
+   *
+   * @internal
+   */
   readonly app = new QuenchResults(this);
 
   /**
@@ -67,6 +86,7 @@ export class Quench {
 
   /**
    * The current Mocha runner, if any
+   *
    * @internal
    */
   _currentRunner: Mocha.Runner | undefined = undefined;
@@ -134,11 +154,12 @@ export class Quench {
   ): void {
     const { displayName, snapBaseDir, preSelected } = context;
     const [packageName] = getBatchNameParts(key);
+
     if (![...getGame().modules.keys(), getGame().system.id].includes(packageName)) {
       ui?.notifications?.error(localize("ERROR.InvalidPackageName", { key, packageName }));
     }
     if (this._testBatches.has(key)) {
-      ui?.notifications?.warn(localize("QUENCH.WARN.BatchAlreadyExists", { key }));
+      ui?.notifications?.warn(localize("WARN.BatchAlreadyExists", { key }));
     }
     this._testBatches.set(key, {
       displayName: displayName ?? key,
@@ -153,7 +174,7 @@ export class Quench {
    * Returns a single batch's data.
    *
    * @param key - The batch key
-   * @returns Batch data
+   * @returns The batch's {@link QuenchBatchData | data}, or `undefined` if the batch could not be found
    */
   getBatch(key: string): QuenchBatchData | undefined {
     return this._testBatches.get(key);
@@ -174,7 +195,7 @@ export class Quench {
   }
 
   /**
-   * Runs the test batches defined by the keys in `batchKeys`.
+   * Runs the test batches defined by the keys in their {@link Quench.registerBatch | registration}.
    *
    * The contents of the test batches are registered with mocha when this function is executed.
    *
@@ -248,12 +269,17 @@ export class Quench {
   /**
    * Aborts the currently running tests, if tests are currently running. Does nothing if no tests are currently running.
    * This will not cancel an in progress test. The run will abort after the currently running test completes.
+   *
+   * @public
    */
   abort() {
     this._currentRunner?.abort();
   }
 }
 
+/**
+ * A helper function adding a reference to a test's Quench Batch to a given Mocha function's result
+ */
 const quenchify = <Fn extends Mocha.TestFunction | Mocha.SuiteFunction>(
   fn: Fn,
   key: string,

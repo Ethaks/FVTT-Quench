@@ -97,12 +97,15 @@ export function enforce(value: unknown, message?: string | Error): asserts value
       message =
         "There was an unexpected error in the Quench module. For more details, please take a look at the console (F12).";
     }
-    throw message instanceof Error ? message : new Error(message);
+    const error = message instanceof Error ? message : new Error(message);
+    ui.notifications?.error(error.message);
+    throw error;
   }
 }
 
 /**
- * Localizes a string including variable formatting, using {@link Localization.format}.
+ * Localizes a string including variable formatting, using {@link Localization.format},
+ * and prepending `QUENCH.` to the string's ID.
  *
  * @internal
  * @param key - The ID of the string to be translated
