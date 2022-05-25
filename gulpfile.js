@@ -9,12 +9,12 @@ const esbuild = require("esbuild");
 const name = "quench";
 const sourceDirectory = "./src";
 const entryFile = `${sourceDirectory}/module/quench-init.ts`;
-const distDirectory = "./dist";
+const distributionDirectory = "./dist";
 const stylesDirectory = `${sourceDirectory}/styles`;
 const stylesExtension = "css";
 const sourceFileExtension = "ts";
 const staticFiles = ["lang", "templates", "module.json"];
-const distFiles = ["LICENSE"];
+const distributionFiles = ["LICENSE"];
 
 /********************/
 /*      BUILD       */
@@ -37,7 +37,7 @@ async function _buildCode(isProductionBuild = false) {
         entryPoints: [entryFile],
         bundle: true,
         sourcemap: true,
-        outfile: `${distDirectory}/${name}.js`,
+        outfile: `${distributionDirectory}/${name}.js`,
         sourceRoot: name,
         format: "iife",
         legalComments: "none",
@@ -64,7 +64,7 @@ function buildProduction() {
 function buildStyles() {
   return gulp
     .src(`${stylesDirectory}/${name}.${stylesExtension}`)
-    .pipe(gulp.dest(`${distDirectory}/styles`));
+    .pipe(gulp.dest(`${distributionDirectory}/styles`));
 }
 
 /**
@@ -73,11 +73,11 @@ function buildStyles() {
 async function copyFiles() {
   for (const file of staticFiles) {
     if (fs.existsSync(`${sourceDirectory}/${file}`)) {
-      await fs.copy(`${sourceDirectory}/${file}`, `${distDirectory}/${file}`);
+      await fs.copy(`${sourceDirectory}/${file}`, `${distributionDirectory}/${file}`);
     }
   }
-  for (const file of distFiles) {
-    if (fs.existsSync(file)) await fs.copy(file, `${distDirectory}/${file}`);
+  for (const file of distributionFiles) {
+    if (fs.existsSync(file)) await fs.copy(file, `${distributionDirectory}/${file}`);
   }
 }
 
@@ -90,7 +90,11 @@ function buildWatch() {
     { ignoreInitial: false },
     buildDevelopment,
   );
-  //gulp.watch(`${stylesDirectory}/**/*.${stylesExtension}`, { ignoreInitial: false }, buildStyles);
+  gulp.watch(
+    `${stylesDirectory}/**/*.${stylesExtension}`,
+    { ignoreInitial: false },
+    buildDevelopment,
+  );
   gulp.watch(
     staticFiles.map((file) => `${sourceDirectory}/${file}`),
     { ignoreInitial: false },
@@ -116,7 +120,7 @@ async function clean() {
   console.log("   ", files.join("\n    "));
 
   for (const filePath of files) {
-    await fs.remove(`${distDirectory}/${filePath}`);
+    await fs.remove(`${distributionDirectory}/${filePath}`);
   }
 }
 
