@@ -129,7 +129,7 @@ export function truncate(string: string, length = 18): string {
   return `${string.slice(0, Math.max(0, length)).replaceAll(/\r?\n|\r/g, " ")}${dots}`;
 }
 
-interface CreateNodeOptions {
+export interface CreateNodeOptions {
   /** Attributes set for the HTMLElement via {@link HTMLElement.setAttribute} */
   attr?: Record<string, string>;
   /**
