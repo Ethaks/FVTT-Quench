@@ -14,7 +14,7 @@
     { "name": "Cole Schultz", "discord": "cole#9640" }
   ],
   "languages": [{ "lang": "en", "name": "English", "path": "lang/en.json" }],
-  "scripts": ["./quench.js"],
+  "esmodules": ["./quench.js"],
   "styles": ["quench.css"],
   "minimumCoreVersion": "0.8.5",
   "compatibleCoreVersion": "9.249",

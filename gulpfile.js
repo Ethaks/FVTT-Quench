@@ -39,7 +39,7 @@ async function _buildCode(isProductionBuild = false) {
         sourcemap: true,
         outfile: `${distributionDirectory}/${name}.js`,
         sourceRoot: name,
-        format: "iife",
+        format: "esm",
         legalComments: "none",
         minify: isProductionBuild,
         keepNames: true,
