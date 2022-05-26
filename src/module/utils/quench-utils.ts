@@ -128,3 +128,49 @@ export function truncate(string: string, length = 18): string {
   const dots = string.length > length ? "..." : "";
   return `${string.slice(0, Math.max(0, length)).replaceAll(/\r?\n|\r/g, " ")}${dots}`;
 }
+
+interface CreateNodeOptions {
+  /** Attributes set for the HTMLElement via {@link HTMLElement.setAttribute} */
+  attr?: Record<string, string>;
+  /**
+   * A string of HTML directly set as the element's {@link HTMLElement.innerHTML}
+   * before possible children are added
+   */
+  html?: string;
+  /* Additional children */
+  children?: string | HTMLElement | Array<string | HTMLElement>;
+  baseNode?: HTMLElement | undefined;
+}
+
+/**
+ * Creates an HTMLElement for a given `tag` and optionally sets attributes, innerHTML, children.
+ *
+ * @param tag - A valid HTML tag name, like "a" or "span"
+ * @param options - Additional options affecting the element's contents
+ * @returns The created HTML element
+ */
+export function createNode(tag: string, options: CreateNodeOptions) {
+  const element = document.createElement(tag);
+  if (options.attr !== undefined)
+    for (const a in options.attr) element.setAttribute(a, options.attr[a]);
+  if (options.html !== undefined) element.innerHTML = options.html;
+  const children = Array.isArray(options.children) ? options.children : [options.children];
+  // eslint-disable-next-line unicorn/no-array-callback-reference
+  for (const child of children.filter(nonNullable)) {
+    element.append(typeof child === "string" ? document.createTextNode(child) : child);
+  }
+
+  if (options.baseNode !== undefined) {
+    options.baseNode.append(element);
+  }
+  return element;
+}
+
+/**
+ * A utility function acting as a type guard, ensuring an element is not null or undefined.
+ *
+ * @param value - Value that could be null or undefined
+ */
+export function nonNullable<T>(value: T): value is NonNullable<T> {
+  return value !== null && value !== undefined;
+}

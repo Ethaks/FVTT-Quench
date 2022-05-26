@@ -99,7 +99,7 @@
 
 #quench-results li > .expandable > .error {
   margin: 0.4em;
-  background-color: #99000033;
+  background-color: #99000022;
   padding: 10px;
   border-radius: 4px;
   border: 1px #99000088 solid;
@@ -119,7 +119,8 @@
   color: var(--color-text-dark-secondary);
 }
 
-#quench-results li > .expandable > .error > * {
+#quench-results li > .expandable > .error > *,
+#quench-results li > .expandable > .error > .diff > * {
   user-select: text;
 }
 

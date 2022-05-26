@@ -4,6 +4,7 @@ import { MissingSnapshotError } from "../utils/quench-snapshot-error";
 
 import type { Quench } from "../quench";
 import type { RUNNABLE_STATE } from "../utils/quench-utils";
+import { createNode } from "../utils/quench-utils";
 import {
   RUNNABLE_STATES,
   getTestState,
@@ -242,6 +243,58 @@ export class QuenchResults extends Application {
     }
   }
 
+  private static _getErrorDiff(error: { actual: string; expected: string }): HTMLElement {
+    const diffNode = createNode("div", { attr: { class: "diff" } });
+
+    const diff = Diff.diffLines(error.expected, error.actual);
+
+    if (diff.length === 2) {
+      // Compact layout for single line values (e.g. comparing numbers)
+      diffNode.insertAdjacentHTML(
+        "beforeend",
+        '<span class="expected">- ' +
+          localize("Expected") +
+          ": " +
+          diff.find((change) => change.removed)?.value +
+          '<br></span><span class="actual">+ ' +
+          localize("Actual") +
+          ": " +
+          diff.find((change) => change.added)?.value,
+      );
+    } else {
+      // Full diff layout for longer diffs
+      diffNode.insertAdjacentHTML(
+        "beforeend",
+        '<span class="expected">- ' +
+          localize("Expected") +
+          ' </span><span class="actual">+ ' +
+          localize("Actual") +
+          "</span><br>",
+      );
+      const fragment = diff
+        .map((part) => {
+          // Trim down large blocks of unchanged content
+          if (part.count !== undefined && part.count > 14 && !(part.added || part.removed)) {
+            const startContext = part.value.split("\n").slice(0, 6);
+            const endContext = part.value.split("\n").slice(-6);
+            part.value = [...startContext, "...", ...endContext].join("\n");
+          }
+
+          return createNode("span", {
+            attr: { class: part.removed ? "expected" : part.added ? "actual" : "unchanged" },
+            children: part.value,
+          });
+        })
+        // eslint-disable-next-line unicorn/no-array-reduce -- "summing" of fragments as simple operation
+        .reduce((fragment, span) => {
+          fragment.append(span);
+          return fragment;
+        }, document.createDocumentFragment());
+      diffNode.append(fragment);
+    }
+    return diffNode;
+  }
+
   /*--------------------------------*/
   /* Handle incoming test reporting */
   /*--------------------------------*/
@@ -345,37 +398,10 @@ export class QuenchResults extends Application {
       "expected" in error &&
       typeof error.expected === "string"
     ) {
-      errorElement[0].insertAdjacentHTML(
-        "beforeend",
-        '<div class="diff-header">' +
-          '<span class="expected">- ' +
-          localize("Expected") +
-          ' </span><span class="actual">+ ' +
-          localize("Actual") +
-          "</span>" +
-          "</div>",
+      const diff = QuenchResults._getErrorDiff(
+        error as Chai.AssertionError & Pick<Required<Chai.AssertionError>, "actual" | "expected">,
       );
-      const diff = Diff.diffLines(error.expected, error.actual);
-      const fragment = diff
-        .map((part) => {
-          // Trim down large blocks of unchanged content
-          if (part.count !== undefined && part.count > 14 && !(part.added || part.removed)) {
-            const startContext = part.value.split("\n").slice(0, 6);
-            const endContext = part.value.split("\n").slice(-6);
-            part.value = [...startContext, "...", ...endContext].join("\n");
-          }
-
-          const span = document.createElement("span");
-          span.classList.add(part.removed ? "expected" : part.added ? "actual" : "unchanged");
-          span.append(document.createTextNode(part.value));
-          return span;
-        })
-        // eslint-disable-next-line unicorn/no-array-reduce -- "summing" of fragments as simple operation
-        .reduce((fragment, span) => {
-          fragment.append(span);
-          return fragment;
-        }, document.createDocumentFragment());
-      errorElement[0].append(fragment);
+      errorElement.append(diff);
     }
 
     this._updateLineItemStatus($testLi, RUNNABLE_STATES.FAILURE);
