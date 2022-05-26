@@ -61,7 +61,7 @@ Hooks.on("setup", function () {
  */
 Hooks.on("renderSidebar", function (_sidebar: Application, html: JQuery<HTMLElement>) {
   const $quenchButton = $(
-    `<button class="quench-button"><i class="fas fa-flask"></i><b class="button-text">${localize(
+    `<button class="quench-button" data-tooltip="QUENCH.Title"><i class="fas fa-flask"></i><b class="button-text">${localize(
       "Title",
     )}</b></button>`,
   );
