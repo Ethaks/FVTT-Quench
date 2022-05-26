@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.7.0](https://github.com/Ethaks/FVTT-Quench/compare/v0.6.0...v0.7.0) (2022-05-26)
+
+
+### Features
+
+* add option to only run preselected batches on startup ([18a59ec](https://github.com/Ethaks/FVTT-Quench/commit/18a59ec8ab9f44e5f866c880f6ab5349e7d02dbb)), closes [#117](https://github.com/Ethaks/FVTT-Quench/issues/117)
+* add preselected packages setting to limit test preselection ([582d37c](https://github.com/Ethaks/FVTT-Quench/commit/582d37c42ddc3ad60775221648d0712dc826dd5a)), closes [#117](https://github.com/Ethaks/FVTT-Quench/issues/117) [#133](https://github.com/Ethaks/FVTT-Quench/issues/133)
+
+
+### Bug Fixes
+
+* fix appearance of Quench button in collapsed sidebar ([1303d51](https://github.com/Ethaks/FVTT-Quench/commit/1303d51cf699f700f77f2fac25aeb852c72661f9))
+* fix registerBatch throwing an error in v10 ([#125](https://github.com/Ethaks/FVTT-Quench/issues/125)) ([45ca352](https://github.com/Ethaks/FVTT-Quench/commit/45ca3526ef783b640214c5bbbbb7fa2d47302f39))
+* improve diff layout, limit shown context, improve styling ([9d07b1b](https://github.com/Ethaks/FVTT-Quench/commit/9d07b1bbfb556127a0371e23004346c4f79dd6ca)), closes [#132](https://github.com/Ethaks/FVTT-Quench/issues/132)
+
 ## [0.6.0](https://github.com/Ethaks/FVTT-Quench/compare/v0.5.2...v0.6.0) (2022-02-23)
 
 
