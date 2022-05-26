@@ -21,7 +21,7 @@
     "CollapseSuccessfulLabel": "Collapse Passing Suites",
     "CollapseSuccessfulHint": "When enabled, suites for which all children suites and tests are passing will be collapsed by default",
     "PreselectedPackagesLabel": "Exclusively Preselected Packages",
-    "PreselectedPackagesHint": "If this list of comma-separated package IDs it not empty, only batches belonging to these packages will effectively be preselected",
+    "PreselectedPackagesHint": "If this list of comma-separated package IDs is not empty, only batches belonging to these packages will effectively be preselected",
 
     "UploadedSnapshots": "Updated {files} snapshot files for {batches} batches",
 
