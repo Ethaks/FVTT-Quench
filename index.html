@@ -1,0 +1,114 @@
+<!DOCTYPE html><html class="default"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>@ethaks/fvtt-quench</title><meta name="description" content="Documentation for @ethaks/fvtt-quench"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script async src="assets/search.js" id="search-script"></script></head><body><script>document.body.classList.add(localStorage.getItem("tsd-theme") || "os")</script><header><div class="tsd-page-toolbar"><div class="container"><div class="table-wrap"><div class="table-cell" id="tsd-search" data-base="."><div class="field"><label for="tsd-search-field" class="tsd-widget search no-caption">Search</label><input type="text" id="tsd-search-field"/></div><ul class="results"><li class="state loading">Preparing search index...</li><li class="state failure">The search index is not available</li></ul><a href="index.html" class="title">@ethaks/fvtt-quench</a></div><div class="table-cell" id="tsd-widgets"><div id="tsd-filter"><a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a><div class="tsd-filter-group"><div class="tsd-select" id="tsd-filter-visibility"><span class="tsd-select-label">All</span><ul class="tsd-select-list"><li data-value="public">Public</li><li data-value="protected">Public/Protected</li><li data-value="private" class="selected">All</li></ul></div> <input type="checkbox" id="tsd-filter-inherited" checked/><label class="tsd-widget" for="tsd-filter-inherited">Inherited</label><input type="checkbox" id="tsd-filter-externals" checked/><label class="tsd-widget" for="tsd-filter-externals">Externals</label></div></div><a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a></div></div></div></div><div class="tsd-page-title"><div class="container"><h1>@ethaks/fvtt-quench </h1></div></div></header><div class="container container-main"><div class="row"><div class="col-8 col-content"><div class="tsd-panel tsd-typography"><h1 align=center>
+    <img alt="Quench Logo" src="assets/quench-logo.webp" width=256 height=256>
+  <br>
+  Quench
+</h1>
+
+<p align=center>
+  <img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/Ethaks/FVTT-Quench/Checks?label=Checks&logo=github">
+  <a href="https://github.com/Ethaks/FVTT-Quench/releases/latest">
+    <img src="https://img.shields.io/github/downloads/Ethaks/FVTT-Quench/latest/module.zip" alt="Downloads" />
+  </a>
+  <a href="https://forge-vtt.com/bazaar#package=quench">
+    <img src="https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Fquench&colorB=4aa94a" alt="Forge Install %" />
+  </a>
+  <br />
+  <a href="https://www.foundryvtt-hub.com/package/quench/">
+    <img src="https://img.shields.io/endpoint?logoColor=white&url=https%3A%2F%2Fwww.foundryvtt-hub.com%2Fwp-json%2Fhubapi%2Fv1%2Fpackage%2Fquench%2Fshield%2Fendorsements" alt="Foundry Hub Endorsements" />
+  </a>
+  <img src="https://img.shields.io/endpoint?url=https://foundryshields.com/version?url=https://github.com/Ethaks/FVTT-Quench/releases/latest/download/module.json" alt="Supported Foundry Versions" />
+</p>
+
+<p>Harden your Foundry module or system code with end-to-end UI tests directly within Foundry.
+Powered by <a href="https://mochajs.org/">Mocha</a> and also includes <a href="https://www.chaijs.com/">Chai</a> and <a href="https://github.com/dubzzz/fast-check">fast-check</a>.</p>
+<p>Quench adds a test runner UI as a native Foundry <code>Application</code>.
+You can register test suites with quench and view them in the test runner, then run them and view the results.</p>
+<p><img src="assets/example-tests.webp" alt="Example Tests"></p>
+
+<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
+  <h2>Usage</h2>
+</a>
+<p>The primary public API is the <code>Quench</code> class.
+A global instance of <code>Quench</code> is available as a global called <code>quench</code>, guaranteed to be initialized after the core <code>&quot;init&quot;</code> hook.
+This class includes references to both the mocha and chai globals, as well as some methods to add new test batches and run the tests.</p>
+<p>Quench uses &quot;test batches&quot; as another layer of organization above the built-in mocha suites and tests.
+Test batches are at the top layer of the hierarchy, can contain suites and/or tests, and can be enabled or disabled through the Quench UI.
+Enabling or disabling batches allows you to pick and choose only a subset of suites and tests to execute in one test run.</p>
+
+<a href="#quenchready-hook" id="quenchready-hook" style="color: inherit; text-decoration: none;">
+  <h3><code>quenchReady</code> Hook</h3>
+</a>
+<p>Quench provides a <code>&quot;quenchReady&quot;</code> hook, which indicates when Quench is ready for you to start registering batches.
+<code>&quot;quenchReady&quot;</code> is guaranteed to occur after the core <code>&quot;init&quot;</code> hook, as it is fired in Quench&#39;s <code>&quot;setup&quot;</code> hook.
+<code>&quot;quenchReady&quot;</code> receives the current <code>Quench</code> instance as an argument.</p>
+
+<a href="#register-a-test-batch" id="register-a-test-batch" style="color: inherit; text-decoration: none;">
+  <h3>Register a test batch</h3>
+</a>
+<p>You can register a Quench test batch to be executed with Quench by calling <code>quench.registerBatch</code>.
+<code>registerBatch</code> takes the following arguments:</p>
+<ul>
+<li><code>key</code> – a unique batch key that identifies this test batch.
+If multiple test batches are registered with the same key, the latest registration will overwrite previous registrations.</li>
+<li><code>registrationFunction</code> – this function will be executed to register the suites and tests within this batch.
+It takes a <code>context</code> argument, which contains the following functions necessary for defining a suite of tests:<ul>
+<li>Mocha – <code>describe</code>, <code>it</code>, <code>after</code>, <code>afterEach</code>, <code>before</code>, <code>beforeEach</code>, and <code>utils</code>.</li>
+<li>Chai – <code>assert</code>, <code>expect</code>, and <code>should</code>. <code>should</code> is also made available by it extending <code>Object.prototype</code>.</li>
+<li>fast-check – <code>fc</code>.</li>
+</ul>
+</li>
+<li><code>options</code> -<ul>
+<li><code>displayName</code> – the name for this batch that will be shown in the UI and in the detailed test results.
+This is optional, Quench will fall back to the batch key if omitted.</li>
+<li><code>snapBaseDir</code> – the directory from which snapshots for this batch will be read, and where snapshots will be stored.
+This is optional, Quench will fall back to <code>Data/__snapshots__/&lt;package name&gt;/</code>, with each batch having its own directory there.</li>
+<li><code>preSelected</code> – whether this batch will appear as checked when added to the UI.
+This is optional, Quench will fall back to <code>true</code>.</li>
+</ul>
+</li>
+</ul>
+<p>Example:</p>
+<pre><code class="language-javascript"><span class="hl-0">Hooks</span><span class="hl-1">.</span><span class="hl-2">on</span><span class="hl-1">(</span><span class="hl-3">&quot;quenchReady&quot;</span><span class="hl-1">, (</span><span class="hl-0">quench</span><span class="hl-1">) </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-0">quench</span><span class="hl-1">.</span><span class="hl-2">registerBatch</span><span class="hl-1">(</span><br/><span class="hl-1">    </span><span class="hl-3">&quot;quench.examples.basic-pass&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">    (</span><span class="hl-0">context</span><span class="hl-1">) </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">      </span><span class="hl-4">const</span><span class="hl-1"> { </span><span class="hl-5">describe</span><span class="hl-1">, </span><span class="hl-5">it</span><span class="hl-1">, </span><span class="hl-5">assert</span><span class="hl-1"> } = </span><span class="hl-0">context</span><span class="hl-1">;</span><br/><br/><span class="hl-1">      </span><span class="hl-2">describe</span><span class="hl-1">(</span><span class="hl-3">&quot;Passing Suite&quot;</span><span class="hl-1">, </span><span class="hl-4">function</span><span class="hl-1"> () {</span><br/><span class="hl-1">        </span><span class="hl-2">it</span><span class="hl-1">(</span><span class="hl-3">&quot;Passing Test&quot;</span><span class="hl-1">, </span><span class="hl-4">function</span><span class="hl-1"> () {</span><br/><span class="hl-1">          </span><span class="hl-0">assert</span><span class="hl-1">.</span><span class="hl-2">ok</span><span class="hl-1">(</span><span class="hl-4">true</span><span class="hl-1">);</span><br/><span class="hl-1">        });</span><br/><span class="hl-1">      });</span><br/><span class="hl-1">    },</span><br/><span class="hl-1">    { </span><span class="hl-0">displayName:</span><span class="hl-1"> </span><span class="hl-3">&quot;QUENCH: Basic Passing Test&quot;</span><span class="hl-1"> },</span><br/><span class="hl-1">  );</span><br/><span class="hl-1">});</span>
+</code></pre>
+<p>Additional examples can be found in this repository&#39;s <a href="./src/module/quench-tests/nonsense-tests.ts"><code>nonsense-tests.ts</code> file</a></p>
+
+<a href="#snapshots" id="snapshots" style="color: inherit; text-decoration: none;">
+  <h3>Snapshots</h3>
+</a>
+<p><strong>Snapshot handling is currently in alpha! The current API is not final and subject to change – all input is welcome!</strong></p>
+<p>Quench supports snapshot testing, allowing for Chai&#39;s comparisons to work with data previously serialised using <a href="https://www.npmjs.com/package/pretty-format">pretty-format</a> – this includes support for regular JS objects, as well as e.g. DOM elements.
+To compare an object to a snapshot, you can use <code>matchSnapshot()</code> as assertion.</p>
+<p>If a test run includes failed tests using snapshots, Quench will show a button in its UI that allows to update the snapshots of those tests.
+Alternatively, setting <code>quench.snapshots.enableUpdates = true</code> will pass all snapshot tests and store the actual value as new expected value, updating all files belonging to tests where the actual value did not match the expected one.</p>
+<p>By default, each batch using snapshots gets its own directory in which each snapshot is stored in a <code>.snap.txt</code> file whose name is generated by hashing the test&#39;s full title.
+The base directory in which each batch&#39;s directory is created is <code>Data/__snapshots__/&lt;package name&gt;</code>.
+When registering a batch, that batch&#39;s base directory can be overwritten by providing a <code>snapBaseDir</code> option; the path is resolved using Foundry&#39;s <code>Data</code> directory as root.</p>
+<p>Example:</p>
+<pre><code class="language-javascript"><span class="hl-0">quench</span><span class="hl-1">.</span><span class="hl-2">registerBatch</span><span class="hl-1">(</span><br/><span class="hl-1">  </span><span class="hl-3">&quot;quench.examples.snapshot-test&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">  (</span><span class="hl-0">context</span><span class="hl-1">) </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> { </span><span class="hl-5">describe</span><span class="hl-1">, </span><span class="hl-5">it</span><span class="hl-1">, </span><span class="hl-5">assert</span><span class="hl-1">, </span><span class="hl-5">expect</span><span class="hl-1"> } = </span><span class="hl-0">context</span><span class="hl-1">;</span><br/><br/><span class="hl-1">    </span><span class="hl-2">describe</span><span class="hl-1">(</span><span class="hl-3">&quot;Snapshot Tests&quot;</span><span class="hl-1">, </span><span class="hl-4">function</span><span class="hl-1"> () {</span><br/><span class="hl-1">      </span><span class="hl-2">it</span><span class="hl-1">(</span><span class="hl-3">&quot;Uses assert to match against a snapshot&quot;</span><span class="hl-1">, </span><span class="hl-4">function</span><span class="hl-1"> () {</span><br/><span class="hl-1">        </span><span class="hl-0">assert</span><span class="hl-1">.</span><span class="hl-2">matchSnapshot</span><span class="hl-1">({ </span><span class="hl-0">foo:</span><span class="hl-1"> </span><span class="hl-3">&quot;bar&quot;</span><span class="hl-1"> });</span><br/><span class="hl-1">      });</span><br/><br/><span class="hl-1">      </span><span class="hl-2">it</span><span class="hl-1">(</span><span class="hl-3">&quot;Uses expect to match against a snapshot&quot;</span><span class="hl-1">, </span><span class="hl-4">function</span><span class="hl-1"> () {</span><br/><span class="hl-1">        </span><span class="hl-2">expect</span><span class="hl-1">({ </span><span class="hl-0">foo:</span><span class="hl-1"> </span><span class="hl-3">&quot;baz&quot;</span><span class="hl-1"> }).</span><span class="hl-0">to</span><span class="hl-1">.</span><span class="hl-2">matchSnapshot</span><span class="hl-1">();</span><br/><span class="hl-1">      });</span><br/><span class="hl-1">    });</span><br/><span class="hl-1">  },</span><br/><span class="hl-1">  { </span><span class="hl-0">displayName:</span><span class="hl-1"> </span><span class="hl-3">&quot;QUENCH: Snapshot Test&quot;</span><span class="hl-1">, </span><span class="hl-0">snapBaseDir:</span><span class="hl-1"> </span><span class="hl-3">&quot;__snapshots__/quench-with-a-twist&quot;</span><span class="hl-1"> },</span><br/><span class="hl-1">);</span>
+</code></pre>
+
+<a href="#typescript" id="typescript" style="color: inherit; text-decoration: none;">
+  <h3>Typescript</h3>
+</a>
+<p>Quench offers a package on npm containing its types, allowing Typescript to check for correct API usage and provide autocompletion.
+The package can be installed with</p>
+<pre><code class="language-bash"><span class="hl-1">npm install --save-dev @ethaks/fvtt-quench</span>
+</code></pre>
+<p>The types can then be used by adding them to the <code>types</code> section of your <code>tsconfig.json</code>:</p>
+<pre><code class="language-json"><span class="hl-1">{</span><br/><span class="hl-1">  </span><span class="hl-6">&quot;compilerOptions&quot;</span><span class="hl-1">: {</span><br/><span class="hl-1">    </span><span class="hl-6">&quot;types&quot;</span><span class="hl-1">: [</span><span class="hl-3">&quot;@ethaks/fvtt-quench&quot;</span><span class="hl-1">]</span><br/><span class="hl-1">  }</span><br/><span class="hl-1">}</span>
+</code></pre>
+<p>By default, the <code>quench</code> global is typed as <code>Quench | undefined</code>.
+To access it, you have to use a type guard or explicitly type it as initialized and present by adding a <code>quench</code> property to the global <code>LenientGlobalVariableTypes</code> interface (see <a href="https://github.com/League-of-Foundry-Developers/foundry-vtt-types/wiki/FAQ#why-cant-i-access-any-properties-on-game--canvas">foundry-vtt-type&#39;s FAQ</a>)</p>
+
+<a href="#conventions" id="conventions" style="color: inherit; text-decoration: none;">
+  <h3>Conventions</h3>
+</a>
+<p>By convention, batch keys should begin with the package short name, followed by a period and then a simple identifier for the batch.
+Batch display names should begin with the package name in caps, followed by a colon, and a short description of the tests included in the batch.</p>
+<p>Key: <code>&lt;package&gt;.batch.identifier</code><br>Display name: <code>&lt;PACKAGE&gt;: A description of the batch&#39;s contents</code></p>
+
+<a href="#license" id="license" style="color: inherit; text-decoration: none;">
+  <h2>License</h2>
+</a>
+<p>Licensed under the GPLv3 License (see <a href="LICENSE">LICENSE</a>).</p>
+</div></div><div class="col-4 col-menu menu-sticky-wrap menu-highlight"><nav class="tsd-navigation primary"><ul><li class="current"><a href="modules.html">Exports</a></li></ul></nav><nav class="tsd-navigation secondary menu-sticky"><ul><li class="tsd-kind-class"><a href="classes/Quench.html" class="tsd-kind-icon">Quench</a></li><li class="tsd-kind-interface"><a href="interfaces/QuenchBatchContext.html" class="tsd-kind-icon">Quench<wbr/>Batch<wbr/>Context</a></li><li class="tsd-kind-interface"><a href="interfaces/QuenchBatchData.html" class="tsd-kind-icon">Quench<wbr/>Batch<wbr/>Data</a></li><li class="tsd-kind-interface"><a href="interfaces/QuenchRegisterBatchOptions.html" class="tsd-kind-icon">Quench<wbr/>Register<wbr/>Batch<wbr/>Options</a></li><li class="tsd-kind-interface"><a href="interfaces/QuenchRunAllBatchesOptions.html" class="tsd-kind-icon">Quench<wbr/>Run<wbr/>All<wbr/>Batches<wbr/>Options</a></li><li class="tsd-kind-interface"><a href="interfaces/QuenchRunBatchOptions.html" class="tsd-kind-icon">Quench<wbr/>Run<wbr/>Batch<wbr/>Options</a></li><li class="tsd-kind-type-alias"><a href="modules.html#QuenchRegisterBatchFunction" class="tsd-kind-icon">Quench<wbr/>Register<wbr/>Batch<wbr/>Function</a></li></ul></nav></div></div></div><footer class="with-border-bottom"><div class="container"><h2>Legend</h2><div class="tsd-legend-group"><ul class="tsd-legend"><li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li><li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li><li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li></ul><ul class="tsd-legend"><li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li></ul></div><h2>Settings</h2><p>Theme <select id="theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></p></div></footer><div class="container tsd-generator"><p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div><div class="overlay"></div><script src="assets/main.js"></script></body></html>
