@@ -61,10 +61,13 @@ function registerBasicFailingTestBatch(quench: Quench) {
 
       describe("Failing Suite", function () {
         it("Failing Test", function () {
-          assert.fail();
+          expect(1).to.equal(2);
         });
         it("Another Failing Test", function () {
           expect({ foo: "bar", baz: "bam", kel: { tok: "zam" } }).to.equal({ foo: { bar: "baz" } });
+        });
+        it("A Failing Test Using Assert", function () {
+          assert.ok(false);
         });
       });
     },
