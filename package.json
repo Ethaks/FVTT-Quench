@@ -21,7 +21,7 @@
     "build": "gulp build",
     "build:watch": "gulp watch",
     "clean": "gulp clean",
-    "release": "gulp build && npm run lint && standard-version",
+    "release": "gulp build && npm run lint && npm run declaration && standard-version",
     "declaration": "tsc --project tsconfig.declaration.json",
     "docs": "typedoc",
     "docs:watch": "typedoc --watch",
