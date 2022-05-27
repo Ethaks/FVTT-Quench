@@ -272,11 +272,11 @@ export class QuenchResults extends Application {
           "</span><br>",
       );
       const fragment = diff
-        .map((part) => {
+        .map((part, index) => {
           // Trim down large blocks of unchanged content
           if (part.count !== undefined && part.count > 14 && !(part.added || part.removed)) {
-            const startContext = part.value.split("\n").slice(0, 6);
-            const endContext = part.value.split("\n").slice(-6);
+            const startContext = index !== 0 ? part.value.split("\n").slice(0, 6) : [];
+            const endContext = index === diff.length ? part.value.split("\n").slice(-6) : [];
             part.value = [...startContext, "...", ...endContext].join("\n");
           }
 
