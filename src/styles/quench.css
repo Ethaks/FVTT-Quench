@@ -119,6 +119,10 @@
   color: var(--color-text-dark-secondary);
 }
 
+#quench-results li > .expandable > .error > .diff {
+  padding-top: 0.5em;
+}
+
 #quench-results li > .expandable > .error > *,
 #quench-results li > .expandable > .error > .diff > * {
   user-select: text;
