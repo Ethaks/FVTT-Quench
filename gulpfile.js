@@ -22,13 +22,13 @@ const distributionFiles = ["LICENSE"];
 
 /**
  * ESBuild's previous result for incremental builds
- * @type {esbuild.BuildResult|null}
+ * @type {esbuild.BuildResult|undefined}
  */
 let buildResult;
 /**
  * Build the distributable JavaScript code
  *
- * @param {boolean} prod - Whether this build is meant for production
+ * @param {boolean} isProductionBuild - Whether this build is meant for production
  * @returns {Promise<esbuild.BuildResult>}
  */
 async function _buildCode(isProductionBuild = false) {
@@ -40,7 +40,6 @@ async function _buildCode(isProductionBuild = false) {
         outfile: `${distributionDirectory}/${name}.js`,
         sourceRoot: name,
         format: "esm",
-        legalComments: "none",
         minify: isProductionBuild,
         keepNames: true,
         incremental: !isProductionBuild,
