@@ -99,7 +99,7 @@
 
 #quench-results li > .expandable > .error {
   margin: 0.4em;
-  background-color: #99000022;
+  background-color: rgba(255, 190, 190, 0.25);
   padding: 10px;
   border-radius: 4px;
   border: 1px #99000088 solid;
@@ -110,10 +110,10 @@
 }
 
 #quench-results li > .expandable > .error .actual {
-  color: red;
+  color: #aa0200;
 }
 #quench-results li > .expandable > .error .expected {
-  color: green;
+  color: #006100;
 }
 #quench-results li > .expandable > .error .unchanged {
   color: var(--color-text-dark-secondary);
