@@ -47,7 +47,7 @@ export class QuenchReporter extends Mocha.reporters.Base {
           const batchKey = suite._quench_parentBatch;
           const isBatchRoot = suite._quench_batchRoot;
           if (isBatchRoot) {
-            console.group(quench.getBatch(batchKey)?.displayName);
+            console.group(quench._testBatches.get(batchKey)?.displayName);
           } else {
             console.group(`Suite: ${suite.title}`, { suite });
           }

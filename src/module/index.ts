@@ -12,6 +12,7 @@ export type {
   QuenchRunBatchOptions,
   QuenchRunAllBatchesOptions,
   QuenchBatchData,
+  QuenchBatchKey,
 } from "./quench";
 
 // Snapshots

@@ -3,7 +3,7 @@ import { format as prettyFormat, plugins as formatPlugins } from "pretty-format"
 import { MissingSnapshotError } from "./utils/quench-snapshot-error";
 import { logPrefix, localize, getBatchNameParts, truncate, enforce } from "./utils/quench-utils";
 
-import type { Quench } from "./quench";
+import type { Quench, QuenchBatchKey } from "./quench";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -79,7 +79,7 @@ export class QuenchSnapshotManager {
    * @param batchKey - The batchKey from which a path will be generated
    * @returns The default directory path
    */
-  static getDefaultSnapDir(batchKey: string): string {
+  static getDefaultSnapDir(batchKey: QuenchBatchKey): string {
     const [packageName] = getBatchNameParts(batchKey);
     return `__snapshots__/${packageName}`;
   }
@@ -159,7 +159,7 @@ export class QuenchSnapshotManager {
     );
     // Only continue in directories that exists
     const nextLayerPromises = currentLayerDirectories
-      .filter(([directoryExists]) => directoryExists === true)
+      .filter(([directoryExists]) => directoryExists)
       // eslint-disable-next-line unicorn/no-array-reduce
       .reduce((promises, [directoryExists, previousDirectory, newDirectoryObj]) => {
         // Push next layer creation request
@@ -264,7 +264,7 @@ export class QuenchSnapshotManager {
    * @returns The batch's snapshot directory
    */
   getSnapDir(batchKey: string): string {
-    return this.quench.getBatch(batchKey)?.snapBaseDir + `/${batchKey}`;
+    return this.quench._testBatches.get(batchKey)?.snapBaseDir + `/${batchKey}`;
   }
 
   /**
@@ -361,7 +361,7 @@ export class QuenchSnapshotManager {
       return accumulator;
     }, {});
 
-    // Ensure that all all snapshot directories are created so that files can be stored
+    // Ensure that all snapshot directories are created so that files can be stored
     await QuenchSnapshotManager.createDirectoryTree(directoryTree);
 
     // Temporarily patch `ui.notifications.info` to prevent every single upload generating a notification

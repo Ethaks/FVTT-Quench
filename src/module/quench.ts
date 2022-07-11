@@ -1,13 +1,11 @@
 import * as chai from "chai";
-import fc from "fast-check";
+import * as fc from "fast-check";
 
 import { QuenchResults } from "./apps/quench-results";
 import { QuenchReporter } from "./quench-reporter";
 import { QuenchSnapshotManager } from "./quench-snapshot";
-import * as quenchInternalUtils from "./utils/quench-utils";
-import * as quenchUtils from "./utils/user-utils";
-
-const { getBatchNameParts, getGame, localize, MODULE_ID } = quenchInternalUtils;
+import { getBatchNameParts, getGame, localize, MODULE_ID } from "./utils/quench-utils";
+import * as quenchUserUtils from "./utils/user-utils";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -38,51 +36,44 @@ export class Quench {
    *
    * @see https://mochajs.org/
    */
-  mocha: BrowserMocha = mocha;
+  declare readonly mocha: BrowserMocha;
   /**
    * Chai's static object
    *
    * @see https://www.chaijs.com/
    */
-  chai: Chai.ChaiStatic = chai;
+  declare readonly chai: Chai.ChaiStatic;
   /**
    * fast-check for property based testing
    *
    * @see https://dubzzz.github.io/fast-check.github.com/
    * @see https://dubzzz.github.io/fast-check/
    */
-  fc = fc;
+  declare readonly fc: typeof fc;
 
   /** Various utility functions */
-  utils = { ...quenchUtils };
-
-  /**
-   * Various internal utility functions
-   *
-   * @internal
-   */
-  readonly _internalUtils = { ...quenchInternalUtils };
-
-  /**
-   * A map of registered test batches
-   *
-   * @internal
-   */
-  readonly _testBatches: Map<string, QuenchBatchData> = new Map();
+  declare readonly utils: { [Util in keyof typeof quenchUserUtils]: typeof quenchUserUtils[Util] };
 
   /**
    * The singleton instance of {@link QuenchResults} that this `Quench` instance uses
    *
    * @internal
    */
-  readonly app = new QuenchResults(this);
+  declare readonly app: QuenchResults;
 
   /**
    * The {@link QuenchSnapshotManager} instance that this `Quench` instance uses
    *
    * @internal
    */
-  readonly snapshots = new QuenchSnapshotManager(this);
+  declare readonly snapshots: QuenchSnapshotManager;
+
+  /**
+   * A map of registered test batches
+   *
+   * @internal
+   */
+  declare readonly _testBatches: Collection<QuenchBatchData>;
 
   /**
    * The current Mocha runner, if any
@@ -91,6 +82,35 @@ export class Quench {
    */
   _currentRunner: Mocha.Runner | undefined = undefined;
 
+  /** @internal */
+  constructor() {
+    // Define properties not to be writable
+    Object.defineProperties(this, {
+      mocha: {
+        value: mocha,
+      },
+      chai: {
+        value: chai,
+      },
+      fc: {
+        value: fc,
+      },
+      utils: {
+        value: quenchUserUtils,
+      },
+      app: {
+        value: new QuenchResults(this),
+      },
+      snapshots: {
+        value: new QuenchSnapshotManager(this),
+      },
+      _testBatches: {
+        value: new Collection(),
+      },
+    });
+    return this;
+  }
+
   /**
    * Returns a list of batch keys that are effectively preselected {@link QuenchBatchData.preSelected} insofar as
    * they are registered as `preSelected` *and* – if the user has entered a list of packages to be tested in
@@ -98,30 +118,29 @@ export class Quench {
    *
    * @internal
    */
-  get preSelectedBatches(): string[] {
+  get preSelectedBatches(): QuenchBatchKey[] {
     const preselectedPackages = getGame().settings.get(MODULE_ID, "preselectedPackages");
     const hasPreselectedPackages = preselectedPackages !== "";
 
-    return [...this._testBatches.entries()]
-      .filter(([batchKey, batchData]) => {
-        const [packageName] = getBatchNameParts(batchKey);
+    return this._testBatches
+      .filter((batchData) => {
+        const [packageName] = getBatchNameParts(batchData.key);
         const isPreselectedPackage = preselectedPackages
           .split(",")
           .map((p) => p.trim())
           .includes(packageName);
-        const preSelectResult = hasPreselectedPackages
+        return hasPreselectedPackages
           ? isPreselectedPackage && batchData.preSelected
           : batchData.preSelected;
-        return preSelectResult;
       })
-      .map(([batchKey]) => batchKey);
+      .map(({ key }) => key);
   }
 
   /**
    * Registers a new Quench test batch which will show up in the quench window to be enabled/disabled and run.
    *
    * Suites and tests within a Quench test batch are not actually registered in the mocha runner until the user initiates the test run
-   * with {@link Quench#runSelectedBatches}. When `runSelectedBatches` is executed, the provided batches' registration functions
+   * with {@link runBatches}. When `runBatches` is executed, the provided batches' registration functions
    * are run and then the tests are executed.
    *
    * The registration function is passed a `context` argument, which contains the mocha and chai methods necessary for defining a test.
@@ -129,26 +148,32 @@ export class Quench {
    * - Chai - `assert`, `expect`, and `should`; the last one is also made available by extending `Object.prototype`.
    * - fast-check - `fc`
    *
-   * @example
-   * ```js
-   * quench.registerBatch("quench.examples.basic-pass", (context) => {
-   *     const { describe, it, assert } = context;
-   *
-   *     describe("Passing Suite", function() {
-   *         it("Passing Test", function() {
-   *             assert.ok(true);
-   *         });
-   *     });
-   * }, { displayName: "QUENCH: Basic Passing Test" });
-   * ```
-   *
    * @param key - The test batch's unique string key. Only one test batch with a given key can exist at one time.
    *     If you register a test batch with a pre-existing key, it will overwrite the previous test batch.
    * @param fn - The function which will be called to register the suites and tests within your test batch.
    * @param context - Additional options affecting Quench's handling of this batch.
+   * @example ```js
+   * quench.registerBatch(
+   *  "quench.examples.basic-pass",
+   *  (context) => {
+   *    const { describe, it, assert } = context;
+   *
+   *    describe("Passing Suite", function () {
+   *      it("Passing Test", function () {
+   *        assert.ok(true);
+   *      });
+   *    });
+   *  },
+   *  {
+   *    displayName: "QUENCH: Basic Passing Test",
+   *    preSelected: true,
+   *    snapBaseDir: "quench",
+   *  },
+   *);
+   * ```
    */
   registerBatch(
-    key: string,
+    key: QuenchBatchKey,
     fn: QuenchRegisterBatchFunction,
     context: QuenchRegisterBatchOptions = {},
   ): void {
@@ -162,22 +187,13 @@ export class Quench {
       ui?.notifications?.warn(localize("WARN.BatchAlreadyExists", { key }));
     }
     this._testBatches.set(key, {
+      key: key,
       displayName: displayName ?? key,
       fn,
       snapBaseDir: snapBaseDir ?? QuenchSnapshotManager.getDefaultSnapDir(key),
       preSelected: preSelected ?? true,
     });
     this.app.clear();
-  }
-
-  /**
-   * Returns a single batch's data.
-   *
-   * @param key - The batch key
-   * @returns The batch's {@link QuenchBatchData | data}, or `undefined` if the batch could not be found
-   */
-  getBatch(key: string): QuenchBatchData | undefined {
-    return this._testBatches.get(key);
   }
 
   /**
@@ -190,8 +206,10 @@ export class Quench {
    */
   async runAllBatches(options: QuenchRunAllBatchesOptions = {}): Promise<Mocha.Runner> {
     const { preSelectedOnly = false, ...runOptions } = options;
-    const batches = preSelectedOnly ? this.preSelectedBatches : [...this._testBatches.keys()];
-    return this.runSelectedBatches(batches, runOptions);
+    const batches = preSelectedOnly
+      ? this.preSelectedBatches
+      : ([...this._testBatches.keys()] as QuenchBatchKey[]);
+    return this.runBatches(batches, runOptions);
   }
 
   /**
@@ -203,14 +221,14 @@ export class Quench {
    * @param options - Additional options affecting this batch run
    * @returns Returns the mocha Runner object for this test run.
    */
-  async runSelectedBatches(batchKeys: string[], options: QuenchRunBatchOptions = {}) {
+  async runBatches(batchKeys: QuenchBatchKey[], options: QuenchRunBatchOptions = {}) {
     let { updateSnapshots } = options;
     // Cleanup - create a new root suite and clear the state of the results application
     // @ts-expect-error Types are missing `isRoot` argument TODO: PR for DefinitelyTyped?
     mocha.suite = new Mocha.Suite("__root", new Mocha.Context(), true);
     await this.app.clear();
 
-    // Initialize mocha with a quench reporter
+    // Initialize mocha with a QuenchReporter
     this.mocha.setup({
       ui: "bdd",
       reporter: QuenchReporter,
@@ -302,14 +320,20 @@ const quenchify = <Fn extends Mocha.TestFunction | Mocha.SuiteFunction>(
  * @public
  */
 export interface QuenchRegisterBatchOptions {
-  /** A user-friendly name to show in the Quench UI and detailed results. */
+  /**
+   * A user-friendly name to show in the Quench UI and detailed results.
+   * @defaultValue Defaults to the registration {@link QuenchBatchKey}
+   */
   displayName?: string;
-  /** The directory in which snapshots for this batch are stored. */
+  /**
+   * The directory in which snapshots for this batch are stored.
+   * @defaultValue `__snapshots__/${PACKAGE_NAME}`, where `PACKAGE_NAME` is taken from the `key` parameter
+   */
   snapBaseDir?: string;
   /**
    * Whether this batch should be checked when added to the UI, and possibly run on startup
    * if that setting is enabled.
-   * @defaultValue true
+   * @defaultValue `true`
    */
   preSelected?: boolean;
 }
@@ -328,25 +352,35 @@ export type QuenchRegisterBatchFunction = (context: QuenchBatchContext) => void 
  * imported or globally available in regular Node testing.
  * Includes Mocha, Chai, and fast-check.
  *
- * @see https://mochajs.org/
+ * @see https://mochajs.org/#bdd
  * @see https://www.chaijs.com/
  * @see https://dubzzz.github.io/fast-check.github.com/
  *
  * @public
  */
 export interface QuenchBatchContext {
+  /** @see https://mochajs.org/#hooks */
   after: Mocha.HookFunction;
+  /** @see https://mochajs.org/#hooks */
   afterEach: Mocha.HookFunction;
+  /** @see https://mochajs.org/#hooks */
   before: Mocha.HookFunction;
+  /** @see https://mochajs.org/#hooks */
   beforeEach: Mocha.HookFunction;
   utils: typeof Mocha.utils;
+  /** @see https://www.chaijs.com/api/assert/#method_assert */
   assert: Chai.AssertStatic;
+  /** @see https://www.chaijs.com/api/bdd/ */
   expect: Chai.ExpectStatic;
+  /** @see https://www.chaijs.com/api/bdd/ */
   should: Chai.Should;
 
+  /** @see https://mochajs.org/#bdd */
   describe: Mocha.SuiteFunction;
+  /** @see https://mochajs.org/#bdd */
   it: Mocha.TestFunction;
 
+  /** @see https://dubzzz.github.io/fast-check/ */
   fc: typeof fc;
 }
 
@@ -359,7 +393,7 @@ export interface QuenchRunBatchOptions {
   /**
    * Whether snapshots generated in this run should be saved
    *
-   * @defaultValue null
+   * @defaultValue `null`
    */
   updateSnapshots?: boolean | null;
 }
@@ -374,10 +408,19 @@ export interface QuenchRunAllBatchesOptions extends QuenchRunBatchOptions {
    * Whether only batches registered with {@link QuenchRegisterBatchOptions.preSelected}
    * set to `true` should be run.
    *
-   * @defaultValue false
+   * @defaultValue `false`
    */
   preSelectedOnly?: boolean;
 }
+
+/**
+ * The key by which a test batch is identified.
+ * The key should consist of the registering package's `id` from its manifest,
+ * followed by a `.`, and then the batch's individual identifier.
+ *
+ * @public
+ */
+export type QuenchBatchKey = `${string}.${string}`;
 
 /**
  * Data belonging to a single batch, including its registration function and any
@@ -386,6 +429,7 @@ export interface QuenchRunAllBatchesOptions extends QuenchRunBatchOptions {
  * @public
  */
 export interface QuenchBatchData {
+  key: QuenchBatchKey;
   fn: QuenchRegisterBatchFunction;
   displayName: string;
   snapBaseDir: string;

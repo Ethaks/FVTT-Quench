@@ -2,7 +2,7 @@ import * as Diff from "diff";
 
 import { MissingSnapshotError } from "../utils/quench-snapshot-error";
 
-import type { Quench } from "../quench";
+import type { Quench, QuenchBatchKey } from "../quench";
 import type { RUNNABLE_STATE } from "../utils/quench-utils";
 import { createNode } from "../utils/quench-utils";
 import {
@@ -34,7 +34,7 @@ export class QuenchResults extends Application {
     this.quench = quench;
   }
 
-  /** @inheritdoc */
+  /** @inheritDoc */
   static override get defaultOptions(): ApplicationOptions {
     const width = 550;
     const sidebarWidth = 300;
@@ -52,22 +52,21 @@ export class QuenchResults extends Application {
     });
   }
 
-  /** @inheritdoc */
+  /** @inheritDoc */
   override getData() {
     return {
       anyBatches: this.quench._testBatches.size > 0,
-      batches: [...this.quench._testBatches.entries()].map((entry) => {
-        const [key, value] = entry;
+      batches: this.quench._testBatches.map((batchData) => {
         return {
-          name: key,
-          displayName: value.displayName,
-          selected: this.quench.preSelectedBatches.includes(key),
+          name: batchData.key,
+          displayName: batchData.displayName,
+          selected: this.quench.preSelectedBatches.includes(batchData.key),
         };
       }),
     };
   }
 
-  override activateListeners($html: JQuery<HTMLElement>) {
+  override activateListeners($html: JQuery) {
     super.activateListeners($html);
 
     // Select All Button
@@ -86,10 +85,8 @@ export class QuenchResults extends Application {
 
     // Run Button
     $html.find("#quench-run").on("click", async () => {
-      const enabledBatches = this._getCheckedBatches()
-        .filter((batch) => batch.enabled)
-        .map((batch) => batch.key);
-      await this.quench.runSelectedBatches(enabledBatches);
+      const enabledBatches: QuenchBatchKey[] = this._getCheckedBatches();
+      await this.quench.runBatches(enabledBatches);
     });
 
     // Abort Button
@@ -120,25 +117,27 @@ export class QuenchResults extends Application {
     }
 
     this.element.find("#quench-batches-list li.test-batch").each(function () {
-      const batchChecked = checked.find((batch) => batch.key === this.dataset.batch);
+      const batchChecked = checked.includes(this.dataset.batch as QuenchBatchKey);
       if (batchChecked !== undefined) {
-        $(this).find("> label > input[type=checkbox]").prop("checked", batchChecked.enabled);
+        $(this).find("> label > input[type=checkbox]").prop("checked", batchChecked);
       }
     });
   }
 
   /**
    * Determines which test batch elements are checked in the UI
-   * @returns An array of objects indicating whether each test batch (defined by the batch's key) is enabled or not.
+   * @returns An array of {@link QuenchBatchKey}s belonging to batches checked in the UI
    */
-  private _getCheckedBatches(): { key: string; enabled: boolean }[] {
+  private _getCheckedBatches(): QuenchBatchKey[] {
     const $batchEls = this.element.find("#quench-batches-list li");
     return $batchEls
       .map((_, element) => {
         const enabled = !!$(element).find("input[type=checkbox]").prop("checked");
-        return { key: element.dataset.batch ?? "", enabled };
+        return { key: element.dataset.batch, enabled };
       })
-      .get();
+      .get()
+      .filter((batch) => batch.key && batch.enabled)
+      .map(({ key }) => key as QuenchBatchKey);
   }
 
   /**
@@ -164,7 +163,7 @@ export class QuenchResults extends Application {
    * @param isTest - Whether this runnable is a test (or a suite, if false)
    * @returns The <li> element representing this runnable.
    */
-  private _makeRunnableLineItem(title: string, id: string, isTest: boolean): JQuery<HTMLElement> {
+  private _makeRunnableLineItem(title: string, id: string, isTest: boolean): JQuery {
     const type = isTest ? "test" : "suite";
     const typeIcon = isTest ? "fa-flask" : "fa-folder";
     const expanderIcon = isTest ? "fa-caret-right" : "fa-caret-down";

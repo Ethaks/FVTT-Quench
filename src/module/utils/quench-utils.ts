@@ -1,6 +1,9 @@
+import type { QuenchBatchKey } from "../quench";
+
 /**
  * Represents the state of a test or suite
  *
+ * @enum
  * @internal
  */
 export const RUNNABLE_STATES = {
@@ -60,7 +63,9 @@ export function getSuiteState(suite: Mocha.Suite): RUNNABLE_STATE {
  * @param batchKey - The batch key
  * @returns A tuple of package name and batch identifier
  */
-export function getBatchNameParts(batchKey: string): [string, string] {
+export function getBatchNameParts(
+  batchKey: QuenchBatchKey,
+): [packageName: string, batchId: string] {
   const index = batchKey.indexOf(".");
   return [batchKey.slice(0, index), batchKey.slice(index + 1)];
 }
@@ -129,7 +134,7 @@ export function truncate(string: string, length = 18): string {
   return `${string.slice(0, Math.max(0, length)).replaceAll(/\r?\n|\r/g, " ")}${dots}`;
 }
 
-export interface CreateNodeOptions {
+interface CreateNodeOptions {
   /** Attributes set for the HTMLElement via {@link HTMLElement.setAttribute} */
   attr?: Record<string, string>;
   /**
@@ -145,6 +150,7 @@ export interface CreateNodeOptions {
 /**
  * Creates an HTMLElement for a given `tag` and optionally sets attributes, innerHTML, children.
  *
+ * @internal
  * @param tag - A valid HTML tag name, like "a" or "span"
  * @param options - Additional options affecting the element's contents
  * @returns The created HTML element
@@ -169,6 +175,7 @@ export function createNode(tag: string, options: CreateNodeOptions) {
 /**
  * A utility function acting as a type guard, ensuring an element is not null or undefined.
  *
+ * @internal
  * @param value - Value that could be null or undefined
  */
 export function nonNullable<T>(value: T): value is NonNullable<T> {
