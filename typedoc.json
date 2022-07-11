@@ -1,5 +1,6 @@
 {
   "out": "docs",
   "excludeInternal": true,
+  "media": "media",
   "entryPoints": ["./src/module/index.ts"]
 }

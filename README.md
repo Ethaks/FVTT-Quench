@@ -1,10 +1,10 @@
-<h1 align=center>
-    <img alt="Quench Logo" src="assets/quench-logo.webp" width=256 height=256>
+<h1 style="text-align: center">
+    <img alt="Quench Logo" src="media/quench-logo.webp" width=256 height=256>
   <br>
   Quench
 </h1>
 
-<p align=center>
+<p style="text-align: center">
   <img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/Ethaks/FVTT-Quench/Checks?label=Checks&logo=github">
   <a href="https://github.com/Ethaks/FVTT-Quench/releases/latest">
     <img src="https://img.shields.io/github/downloads/Ethaks/FVTT-Quench/latest/module.zip" alt="Downloads" />
@@ -25,7 +25,7 @@ Powered by [Mocha](https://mochajs.org/) and also includes [Chai](https://www.ch
 Quench adds a test runner UI as a native Foundry `Application`.
 You can register test suites with quench and view them in the test runner, then run them and view the results.
 
-![Example Tests](assets/example-tests.webp)
+![Example Tests](media/example-tests.webp)
 
 ## Usage
 
