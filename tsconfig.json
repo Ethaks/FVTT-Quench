@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "module": "es6",
-    "target": "es2021",
+    "module": "es2022",
+    "target": "es2022",
     "types": ["@league-of-foundry-developers/foundry-vtt-types", "@types/mocha"],
     "esModuleInterop": true,
     "moduleResolution": "node",

@@ -15,7 +15,7 @@
   ],
   "languages": [{ "lang": "en", "name": "English", "path": "lang/en.json" }],
   "esmodules": ["./quench.js"],
-  "styles": ["quench.css"],
+  "styles": ["style.css"],
   "minimumCoreVersion": "0.8.5",
   "compatibleCoreVersion": "10.265",
   "allowBugReporter": true,

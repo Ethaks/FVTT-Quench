@@ -1,0 +1,16 @@
+diff --git a/node_modules/vite/dist/node/chunks/dep-c9998dc6.js b/node_modules/vite/dist/node/chunks/dep-c9998dc6.js
+index 4da03ce..7461a32 100644
+--- a/node_modules/vite/dist/node/chunks/dep-c9998dc6.js
++++ b/node_modules/vite/dist/node/chunks/dep-c9998dc6.js
+@@ -20087,11 +20087,6 @@ function terserPlugin(config) {
+                 !outputOptions.__vite_force_terser__) {
+                 return null;
+             }
+-            // Do not minify ES lib output since that would remove pure annotations
+-            // and break tree-shaking.
+-            if (config.build.lib && outputOptions.format === 'es') {
+-                return null;
+-            }
+             // Lazy load worker.
+             worker || (worker = makeWorker());
+             const res = await worker.run(__dirname, code, {
