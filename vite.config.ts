@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2022 Ethaks <ethaks@pm.me>
-//
-// SPDX-License-Identifier: EUPL-1.2
-
 import { defineConfig } from "vite";
 import { visualizer } from "rollup-plugin-visualizer";
 import checker from "vite-plugin-checker";
@@ -30,10 +26,8 @@ const config = defineConfig({
       },
     },
   },
-  esbuild: {
-    minifySyntax: true,
-    minifyWhitespace: true,
-    keepNames: true,
+  css: {
+    devSourcemap: true,
   },
   build: {
     outDir: resolve("dist"),
