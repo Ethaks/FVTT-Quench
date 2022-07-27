@@ -17,7 +17,7 @@ const config = defineConfig({
   publicDir: resolve("public"),
   server: {
     port: 30_001,
-    open: true,
+    open: false,
     proxy: {
       "^(?!/modules/quench)": "http://localhost:30000/",
       "/socket.io": {
