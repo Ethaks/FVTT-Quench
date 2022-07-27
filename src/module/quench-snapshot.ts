@@ -24,9 +24,6 @@ declare global {
     }
     interface AssertionError {
       snapshotError?: boolean;
-
-      actual?: string;
-      expected?: string;
     }
   }
 }

@@ -242,12 +242,18 @@ export class QuenchResults extends Application {
     }
   }
 
-  private static _getErrorDiff(error: { actual: string; expected: string }): HTMLElement {
+  private static _getErrorDiff(error: { actual: unknown; expected: unknown }): HTMLElement {
     const diffNode = createNode("div", { attr: { class: "diff" } });
 
-    const diff = Diff.diffLines(error.expected, error.actual);
+    const expected =
+      typeof error.expected === "string"
+        ? error.expected
+        : JSON.stringify(error.expected, undefined, 2);
+    const actual =
+      typeof error.actual === "string" ? error.actual : JSON.stringify(error.actual, undefined, 2);
+    const diff = Diff.diffLines(expected, actual);
 
-    if (diff.length === 2) {
+    if (diff.length === 2 && diff.every((change) => change.count === 1)) {
       // Compact layout for single line values (e.g. comparing numbers)
       diffNode.insertAdjacentHTML(
         "beforeend",
@@ -277,6 +283,10 @@ export class QuenchResults extends Application {
             const startContext = index !== 0 ? part.value.split("\n").slice(0, 6) : [];
             const endContext = index === diff.length ? part.value.split("\n").slice(-6) : [];
             part.value = [...startContext, "...", ...endContext].join("\n");
+          }
+          // Add line break to single line parts without one
+          if (part.count !== undefined && part.count === 1 && !part.value.endsWith("\n")) {
+            part.value += "\n";
           }
 
           return createNode("span", {
@@ -391,15 +401,8 @@ export class QuenchResults extends Application {
     );
 
     // When possible, create a diff and render it into the error element
-    if (
-      "actual" in error &&
-      typeof error.actual === "string" &&
-      "expected" in error &&
-      typeof error.expected === "string"
-    ) {
-      const diff = QuenchResults._getErrorDiff(
-        error as Chai.AssertionError & Pick<Required<Chai.AssertionError>, "actual" | "expected">,
-      );
+    if ("showDiff" in error && error.showDiff && "expected" in error && "actual" in error) {
+      const diff = QuenchResults._getErrorDiff(error);
       errorElement.append(diff);
     }
 
