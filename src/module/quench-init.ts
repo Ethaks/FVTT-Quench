@@ -14,17 +14,18 @@ import { registerSettings } from "./settings";
 declare global {
   /**
    * The singleton instance of the {@link Quench} class, containing the primary public API.
-   * Initialized in the Quench module's {@link Hooks.StaticCallbacks.init|"init"} hook.
+   * Initialized in the Quench module's {@link Hooks.StaticCallbacks.init "init"} hook.
    */
-  /* eslint-disable-next-line no-var */ // Necessary for globalThis addition
-  var quench: "quench" extends keyof LenientGlobalVariableTypes ? Quench : Quench | undefined;
+  var quench: "quench" extends keyof LenientGlobalVariableTypes ? Quench : Quench | undefined; // eslint-disable-line no-var
   namespace Hooks {
     interface StaticCallbacks {
       /**
        * A hook event that fires when Quench is ready to register batches.
        *
-       * @param quench - The global {@link Quench} instance
+       * @group Initialization
+       * @see {@link quench!Quench#registerBatch quench.registerBatch}
        * @remarks This is called by {@link Hooks.callAll}
+       * @param quench - The global {@link Quench} instance
        */
       quenchReady: (quench: Quench) => void;
     }

@@ -1,3 +1,12 @@
+/**
+ * The general Quench API, including the global {@link Quench quench} hub.
+ *
+ * Interfaces and types exported by this module are safe to be used in TypeScript definitions.
+ * Types not exported from this module, but from files deeper in the module tree, are not considered
+ * part of the public API and might be changed without warning in future versions.
+ *
+ * @module quench
+ */
 import "mocha/mocha.js";
 import "chai";
 
