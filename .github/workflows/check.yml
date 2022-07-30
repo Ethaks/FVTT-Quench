@@ -31,5 +31,8 @@ jobs:
       - name: Install dependencies
         run: npm ci --cache .npm --prefer-offline
 
+      - name: Apply package patches
+        run: npm run apply-patches
+
       - name: Lint
         run: npm run lint
