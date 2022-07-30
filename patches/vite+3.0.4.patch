@@ -1,8 +1,8 @@
-diff --git a/node_modules/vite/dist/node/chunks/dep-c9998dc6.js b/node_modules/vite/dist/node/chunks/dep-c9998dc6.js
-index 4da03ce..7461a32 100644
---- a/node_modules/vite/dist/node/chunks/dep-c9998dc6.js
-+++ b/node_modules/vite/dist/node/chunks/dep-c9998dc6.js
-@@ -20087,11 +20087,6 @@ function terserPlugin(config) {
+diff --git a/node_modules/vite/dist/node/chunks/dep-71eb12cb.js b/node_modules/vite/dist/node/chunks/dep-71eb12cb.js
+index e4ef6ae..ff13668 100644
+--- a/node_modules/vite/dist/node/chunks/dep-71eb12cb.js
++++ b/node_modules/vite/dist/node/chunks/dep-71eb12cb.js
+@@ -13720,11 +13720,6 @@ function terserPlugin(config) {
                  !outputOptions.__vite_force_terser__) {
                  return null;
              }
@@ -13,4 +13,4 @@ index 4da03ce..7461a32 100644
 -            }
              // Lazy load worker.
              worker || (worker = makeWorker());
-             const res = await worker.run(__dirname, code, {
+             const terserPath = loadTerserPath(config.root);

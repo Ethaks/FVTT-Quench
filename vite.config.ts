@@ -29,6 +29,9 @@ const config = defineConfig({
   css: {
     devSourcemap: true,
   },
+  optimizeDeps: {
+    esbuildOptions: { target: "es2022" },
+  },
   build: {
     outDir: resolve("dist"),
     minify: "terser",
