@@ -20,8 +20,8 @@
     "AutoRunHint": "Will automatically run all preselected Quench test batches when the game is loaded or refreshed",
     "CollapseSuccessfulLabel": "Collapse Passing Suites",
     "CollapseSuccessfulHint": "When enabled, suites for which all children suites and tests are passing will be collapsed by default",
-    "PreselectedPackagesLabel": "Exclusively Preselected Packages",
-    "PreselectedPackagesHint": "If this list of comma-separated package IDs is not empty, only batches belonging to these packages will effectively be preselected",
+    "PreselectFiltersLabel": "Preselection Filters",
+    "PreselectFiltersHint": "Only batches matching this list of comma-separated filters will effectively be preselected when the world is loaded. Filters are case-insensitive and may contain wildcards (?, *, and **)",
 
     "UploadedSnapshots": "Updated {files} snapshot files for {batches} batches",
 

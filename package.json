@@ -55,7 +55,8 @@
     "@types/chai": "^4.2.22",
     "@types/diff": "^5.0.2",
     "@types/mocha": "^9.0.0",
-    "fast-check": "^2.20.0"
+    "fast-check": "^2.20.0",
+    "wildcard-match": "^5.1.2"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.0.0",

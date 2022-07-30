@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "es2022",
     "target": "es2022",
-    "types": ["@league-of-foundry-developers/foundry-vtt-types", "@types/mocha"],
+    "types": ["@league-of-foundry-developers/foundry-vtt-types", "@types/mocha", "vite/client"],
     "esModuleInterop": true,
     "moduleResolution": "node",
     "strictNullChecks": true,

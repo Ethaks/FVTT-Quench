@@ -1,5 +1,4 @@
 import type { Quench } from "../quench";
-import { getGame } from "../utils/quench-utils";
 
 /**
  * Registers all example tests, which also serves as a quick self-test.
@@ -14,6 +13,7 @@ export function registerExampleTests(quench: Quench) {
     registerOtherTestBatch,
     registerSnapshotTestBatch,
     registerPropertyTestBatch,
+    registerNonQuenchTestBatch,
   ]) {
     batchFunction(quench);
   }
@@ -153,8 +153,7 @@ function registerSnapshotTestBatch(quench: Quench) {
       const { describe, it, assert, expect } = context;
       describe("Snapshot Testing", function () {
         it("Passing Test using DOM element and expect", function () {
-          // @ts-expect-error Element is protected, but this is a quick test using some available element
-          expect(getGame().actors?.apps[0]._element).to.matchSnapshot();
+          expect(document.querySelector("section #actors")).to.matchSnapshot();
         });
         it("Passing Test using simple object and assert", function () {
           assert.matchSnapshot({ foo: "bar" });
@@ -223,4 +222,30 @@ function registerPropertyTestBatch(quench: Quench) {
     },
     { displayName: "QUENCH: Property Test" },
   );
+}
+
+// ============================ //
+// Additional Quench self tests //
+// ============================ //
+
+let registerNonQuenchTestBatch = (_quench: Quench): void => undefined;
+if (import.meta.env.DEV) {
+  registerNonQuenchTestBatch = (quench: Quench) => {
+    quench.registerBatch(
+      "not-quench.examples.basic", // should trigger an error notification due to non-package name
+      (context) => {
+        const { describe, it, assert } = context;
+
+        describe("Non-Quench Test", function () {
+          it("should pass", function () {
+            assert.ok(true);
+          });
+          it("should fail", function () {
+            assert.fail();
+          });
+        });
+      },
+      { displayName: "QUENCH: Non-Quench Test" },
+    );
+  };
 }

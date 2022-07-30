@@ -1,10 +1,11 @@
 import * as chai from "chai";
 import * as fc from "fast-check";
+import wcmatch from "wildcard-match";
 
 import { QuenchResults } from "./apps/quench-results";
 import { QuenchReporter } from "./quench-reporter";
 import { QuenchSnapshotManager } from "./quench-snapshot";
-import { getBatchNameParts, getGame, localize, MODULE_ID } from "./utils/quench-utils";
+import { getBatchNameParts, getFilterSetting, getGame, localize } from "./utils/quench-utils";
 import * as quenchUserUtils from "./utils/user-utils";
 
 declare global {
@@ -112,28 +113,43 @@ export class Quench {
   }
 
   /**
-   * Returns a list of batch keys that are effectively preselected {@link QuenchBatchData.preSelected} insofar as
-   * they are registered as `preSelected` *and* – if the user has entered a list of packages to be tested in
-   * {@link ClientSettings.Values["quench.preselectedPackages"]} – belong to a preselected package.
+   * Filters {@link _testBatches} according to a given filter using [wildcard-match](https://github.com/axtgr/wildcard-match).
    *
    * @internal
+   * @param pattern - The filter pattern
+   * @param preSelectedOnly - If true, only batches that are preselected will be included
+   * @returns A list of batch keys that match the filter
    */
-  get preSelectedBatches(): QuenchBatchKey[] {
-    const preselectedPackages = getGame().settings.get(MODULE_ID, "preselectedPackages");
-    const hasPreselectedPackages = preselectedPackages !== "";
-
-    return this._testBatches
-      .filter((batchData) => {
-        const [packageName] = getBatchNameParts(batchData.key);
-        const isPreselectedPackage = preselectedPackages
-          .split(",")
-          .map((p) => p.trim())
-          .includes(packageName);
-        return hasPreselectedPackages
-          ? isPreselectedPackage && batchData.preSelected
-          : batchData.preSelected;
-      })
-      .map(({ key }) => key);
+  _filterBatches(pattern: string | string[], { preSelectedOnly = false } = {}): QuenchBatchKey[] {
+    const isMatch = wcmatch(pattern, { separator: ".", flags: "i" });
+    const batches = this._testBatches.filter(({ key, preSelected }) => {
+      if (preSelectedOnly && !preSelected) return false;
+      return isMatch(key);
+    });
+    return batches.map(({ key }) => key);
+  }
+  /**
+   * A helper function adding a reference to a test's Quench Batch to a given Mocha function's result
+   *
+   * @internal
+   * @param fn - The Mocha function to add the batch to
+   * @param key - The key of the batch to add
+   * @returns The Mocha function with the batch reference added
+   */
+  protected static _quenchify<Fn extends Mocha.TestFunction | Mocha.SuiteFunction>(
+    fn: Fn,
+    key: string,
+  ): Fn {
+    const quenchFn = function quenchFn(...args: Parameters<Fn>) {
+      // @ts-expect-error Args are passed through as-is
+      const result = fn(...args);
+      result._quench_parentBatch = key;
+      return result;
+    };
+    quenchFn.only = fn.only;
+    quenchFn.skip = fn.skip;
+    if ("retries" in fn) quenchFn.retries = fn.retries;
+    return quenchFn as Fn;
   }
 
   /**
@@ -201,14 +217,16 @@ export class Quench {
    *
    * The contents of the test batches are registered with mocha when this function is executed.
    *
+   * @deprecated Use {@link runBatches} instead; this function will be removed in Quench 0.9
    * @param options - Additional options affecting this batch run
    * @returns Returns the mocha Runner object for this test run.
    */
   async runAllBatches(options: QuenchRunAllBatchesOptions = {}): Promise<Mocha.Runner> {
+    console.warn("quench.runAllBatches is deprecated; use quench.runBatches instead");
     const { preSelectedOnly = false, ...runOptions } = options;
-    const batches = preSelectedOnly
-      ? this.preSelectedBatches
-      : ([...this._testBatches.keys()] as QuenchBatchKey[]);
+    let filter = getFilterSetting();
+    if (filter.length === 0) filter = ["**"];
+    const batches = this._filterBatches(filter, { preSelectedOnly });
     return this.runBatches(batches, runOptions);
   }
 
@@ -217,15 +235,49 @@ export class Quench {
    *
    * The contents of the test batches are registered with mocha when this function is executed.
    *
-   * @param batchKeys - Array of keys for the test batches to be run.
-   * @param options - Additional options affecting this batch run
+   * @example Running all batches
+   * ```js
+   * quench.runBatches(); // or
+   * quench.runBatches("**"); // or
+   * quench.runBatches([]);
+   * ```
+   * @example Running a single batch
+   * ```js
+   * quench.runBatches("quench.examples.basic-pass");
+   * ```
+   * @example Running multiple batches
+   * ```js
+   * quench.runBatches(["quench.examples.basic-pass", "quench.examples.basic-fail"]);
+   * quench.runBatches("quench.examples.*"); // Will run "quench.examples.basic-pass", but not "quench.complex.basic-pass"
+   * ```
+   * @example Running all batches belonging to Quench
+   * ```js
+   * quench.runBatches("quench.**"); // or
+   * quench.runBatches(["quench.**"]);
+   * ```
+   * @param [keys] - A single batch key or an array of batch keys to run.
+   *
+   *   Simple wildcards are supported:
+   *   - `?` matches one arbitrary character, excluding the separator `.`
+   *   - `*` matches zero or more arbitrary characters, excluding the separator `.`
+   *   - `**` matches zero or more arbitrary characters, including the separator `.`
+   * @param [options] - Additional options affecting this batch run
    * @returns Returns the mocha Runner object for this test run.
    */
-  async runBatches(batchKeys: QuenchBatchKey[], options: QuenchRunBatchOptions = {}) {
+  async runBatches(keys: string | string[] = "**", options: QuenchRunBatchOptions = {}) {
     let { updateSnapshots } = options;
+    const { preSelectedOnly = false } = options;
+
+    // Default to running _all_ batches when called without any arguments
+    if (!Array.isArray(keys)) keys = [keys];
+    if (keys.length === 0) keys = ["**"];
+
+    // Array of batch keys included in this run
+    const batchKeys = this._filterBatches(keys, { preSelectedOnly });
+
     // Cleanup - create a new root suite and clear the state of the results application
     // @ts-expect-error Types are missing `isRoot` argument TODO: PR for DefinitelyTyped?
-    mocha.suite = new Mocha.Suite("__root", new Mocha.Context(), true);
+    this.mocha.suite = new Mocha.Suite("__root", new Mocha.Context(), true);
     await this.app.clear();
 
     // Initialize mocha with a QuenchReporter
@@ -261,8 +313,8 @@ export class Quench {
     for (const key of batchKeys) {
       const context: QuenchBatchContext = {
         ...baseContext,
-        describe: quenchify(describe, key),
-        it: quenchify(it, key),
+        describe: (this.constructor as typeof Quench)._quenchify(describe, key), // typecasting necessary, see #3841
+        it: (this.constructor as typeof Quench)._quenchify(it, key), // see above; check again ~2030
       };
 
       // Create a wrapper suite to contain this test batch
@@ -294,25 +346,6 @@ export class Quench {
     this._currentRunner?.abort();
   }
 }
-
-/**
- * A helper function adding a reference to a test's Quench Batch to a given Mocha function's result
- */
-const quenchify = <Fn extends Mocha.TestFunction | Mocha.SuiteFunction>(
-  fn: Fn,
-  key: string,
-): Fn => {
-  const quenchFn = function quenchFn(...args: Parameters<Fn>) {
-    // @ts-expect-error Args are passed through as-is
-    const result = fn(...args);
-    result._quench_parentBatch = key;
-    return result;
-  };
-  quenchFn.only = fn.only;
-  quenchFn.skip = fn.skip;
-  if ("retries" in fn) quenchFn.retries = fn.retries;
-  return quenchFn as Fn;
-};
 
 /**
  * Optional data used in the batch registration process
@@ -396,14 +429,7 @@ export interface QuenchRunBatchOptions {
    * @defaultValue `null`
    */
   updateSnapshots?: boolean | null;
-}
 
-/**
- * Options affecting the running of batches or criteria which batches are to be run
- *
- * @public
- */
-export interface QuenchRunAllBatchesOptions extends QuenchRunBatchOptions {
   /**
    * Whether only batches registered with {@link QuenchRegisterBatchOptions.preSelected}
    * set to `true` should be run.
@@ -412,6 +438,14 @@ export interface QuenchRunAllBatchesOptions extends QuenchRunBatchOptions {
    */
   preSelectedOnly?: boolean;
 }
+
+/**
+ * Options affecting the running of batches or criteria which batches are to be run
+ *
+ * @public
+ * @deprecated Use {@link QuenchRunBatchOptions} in {@link Quench.runBatches} instead
+ */
+export type QuenchRunAllBatchesOptions = QuenchRunBatchOptions;
 
 /**
  * The key by which a test batch is identified.

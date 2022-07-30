@@ -4,7 +4,7 @@ import { MissingSnapshotError } from "../utils/quench-snapshot-error";
 
 import type { Quench, QuenchBatchKey } from "../quench";
 import type { RUNNABLE_STATE } from "../utils/quench-utils";
-import { createNode } from "../utils/quench-utils";
+import { createNode, getFilterSetting } from "../utils/quench-utils";
 import {
   RUNNABLE_STATES,
   getTestState,
@@ -53,14 +53,16 @@ export class QuenchResults extends Application {
   }
 
   /** @inheritDoc */
-  override getData() {
+  override getData(): QuenchResultData {
+    const filterSetting = getFilterSetting();
+    const preselected = this.quench._filterBatches(filterSetting, { preSelectedOnly: true });
     return {
       anyBatches: this.quench._testBatches.size > 0,
       batches: this.quench._testBatches.map((batchData) => {
         return {
           name: batchData.key,
           displayName: batchData.displayName,
-          selected: this.quench.preSelectedBatches.includes(batchData.key),
+          selected: preselected.includes(batchData.key),
         };
       }),
     };
@@ -453,4 +455,9 @@ export class QuenchResults extends Application {
     this.element.find("#quench-abort").hide();
     if (this._enableSnapshotUpdates) this.element.find("#quench-update-snapshots").show();
   }
+}
+
+interface QuenchResultData {
+  anyBatches: boolean;
+  batches: { name: string; displayName: string; selected: boolean }[];
 }

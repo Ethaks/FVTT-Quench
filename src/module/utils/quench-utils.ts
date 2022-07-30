@@ -181,3 +181,15 @@ export function createNode(tag: string, options: CreateNodeOptions) {
 export function nonNullable<T>(value: T): value is NonNullable<T> {
   return value !== null && value !== undefined;
 }
+
+/**
+ * A utility function that retrieves Quench's `filter` setting
+ *
+ * @internal
+ * @see {@link ClientSettings.Values["quench.preselectFilters"]}
+ * @return An array of trimmed strings containing batch key filters
+ */
+export function getFilterSetting(): string[] {
+  const filterSetting = getGame().settings.get(MODULE_ID, "preselectFilters");
+  return filterSetting.split(",").map((s) => s.trim());
+}
