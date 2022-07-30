@@ -11,10 +11,13 @@ function resolve(relativePath: string) {
 
 const COPY_FILES = ["README.md", "LICENSE", "CREDITS.md"];
 
-const config = defineConfig({
+const config = defineConfig(({ mode }) => ({
   root: "src/",
   base: "/modules/quench/",
   publicDir: resolve("public"),
+  define: {
+    "process.env.NODE_ENV": JSON.stringify(mode),
+  },
   server: {
     port: 30_001,
     open: false,
@@ -65,6 +68,6 @@ const config = defineConfig({
     }),
     copy({ targets: [{ src: COPY_FILES, dest: resolve("dist") }], hook: "writeBundle" }),
   ],
-});
+}));
 
 export default config;
