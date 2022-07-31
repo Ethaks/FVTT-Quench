@@ -20,6 +20,8 @@ export type {
   QuenchRegisterBatchFunction,
   QuenchRunBatchOptions,
   QuenchRunAllBatchesOptions,
+  QuenchJsonReportOptions,
+  QuenchReports,
   QuenchBatchData,
   QuenchBatchKey,
 } from "./quench";
@@ -28,5 +30,5 @@ export type {
 export type { QuenchSnapshotManager } from "./quench-snapshot";
 export type { MissingSnapshotError } from "./utils/quench-snapshot-error";
 
-export type { QuenchReporter } from "./quench-reporter";
+export type { QuenchReporter, QuenchJsonReport, QuenchCleanedTestData } from "./quench-reporter";
 export type { QuenchResults } from "./apps/quench-results";

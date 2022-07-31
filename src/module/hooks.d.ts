@@ -10,3 +10,6 @@
 
 /** @inheritDoc */
 export declare const quenchReady: Hooks.StaticCallbacks["quenchReady"];
+
+/** @inheritDoc */
+export declare const quenchReports: Hooks.StaticCallbacks["quenchReports"];

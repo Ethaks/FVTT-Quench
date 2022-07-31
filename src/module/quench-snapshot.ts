@@ -1,7 +1,14 @@
 import fnv1a from "@sindresorhus/fnv1a";
 import { format as prettyFormat, plugins as formatPlugins } from "pretty-format";
 import { MissingSnapshotError } from "./utils/quench-snapshot-error";
-import { logPrefix, localize, getBatchNameParts, truncate, enforce } from "./utils/quench-utils";
+import {
+  logPrefix,
+  localize,
+  getBatchNameParts,
+  truncate,
+  enforce,
+  createDirectoryTree,
+} from "./utils/quench-utils";
 
 import type { Quench, QuenchBatchKey } from "./quench";
 
@@ -78,98 +85,6 @@ export class QuenchSnapshotManager {
   static getDefaultSnapDir(batchKey: QuenchBatchKey): string {
     const [packageName] = getBatchNameParts(batchKey);
     return `__snapshots__/${packageName}`;
-  }
-
-  /**
-   * Ensures a directory exists and optionally walks the full path,
-   * creating missing directories therein, to ensure a directory's existence.
-   *
-   * @param fullPath - The full path of the directory to be created
-   * @param options - Additional options affecting how a directory is created
-   * @returns Whether the directory exists now
-   */
-  static async createDirectory(
-    fullPath: string,
-    options: CreateDirectoryOptions = {},
-  ): Promise<boolean> {
-    /**
-     * Inner directory creation function; checks whether a directory exists
-     * and either confirms existence or tries to create the directory.
-     *
-     * @async
-     * @param path - The directory's full path
-     * @returns Whether the directory exists now
-     */
-    const _createDirectory = async (path: string): Promise<boolean> => {
-      let directoryExists = false;
-      try {
-        // Attempt directory creation
-        const resp = await FilePicker.createDirectory("data", path);
-        if (resp) directoryExists = true;
-      } catch (error) {
-        // Confirm directory existence with expected EEXIST error, throw unexpected errors
-        if (typeof error === "string" && error.startsWith("EEXIST")) {
-          directoryExists = true;
-        } else throw error;
-      }
-      return directoryExists;
-    };
-
-    const { recursive = true } = options;
-    if (recursive) {
-      // Split path into single directories to allow checking each of them
-      const directories = fullPath.split("/");
-      // Paths whose existence was already verified
-      const present: string[] = [];
-      for (const directory of directories) {
-        const currentDirectory = [...present, directory].join("/");
-        const directoryExists = await _createDirectory(currentDirectory);
-        // Either continue with directory creation, or return on error
-        if (directoryExists) present.push(directory);
-        else return false;
-      }
-      // Complete path's existence was confirmed
-      return true;
-    } else {
-      return _createDirectory(fullPath);
-    }
-  }
-
-  /**
-   * Creates a directory tree mirroring a given object's tree.
-   * Defined as function to enable recursive usage.
-   *
-   * @param obj - The object used as blueprint for the directory tree
-   * @param previous - String accumulator for already created directories, needed to get a full path
-   */
-  static async createDirectoryTree(obj: object, previous = "") {
-    // Create all dirs of current tree layer, don't need to await individual non-interfering requests
-    const currentLayerDirectories = await Promise.all(
-      Object.entries(obj).map(async ([directoryKey, valueObj]) => {
-        const directoryExists = await this.createDirectory(`${previous}${directoryKey}`, {
-          recursive: false,
-        });
-        // Return data necessary for the next level creation workflow
-        return [directoryExists, directoryKey, valueObj];
-      }),
-    );
-    // Only continue in directories that exists
-    const nextLayerPromises = currentLayerDirectories
-      .filter(([directoryExists]) => directoryExists)
-      // eslint-disable-next-line unicorn/no-array-reduce
-      .reduce((promises, [directoryExists, previousDirectory, newDirectoryObj]) => {
-        // Push next layer creation request
-        if (directoryExists)
-          promises.push(
-            this.createDirectoryTree(newDirectoryObj, `${previous}${previousDirectory}/`),
-          );
-        else {
-          console.error(`Could not create directory ${previous}${previousDirectory}`);
-        }
-        return promises;
-      }, []);
-    // Return Promise for next layer
-    return Promise.all(nextLayerPromises);
   }
 
   /**
@@ -358,7 +273,7 @@ export class QuenchSnapshotManager {
     }, {});
 
     // Ensure that all snapshot directories are created so that files can be stored
-    await QuenchSnapshotManager.createDirectoryTree(directoryTree);
+    await createDirectoryTree(directoryTree);
 
     // Temporarily patch `ui.notifications.info` to prevent every single upload generating a notification
     const _info = ui.notifications?.info;
@@ -436,15 +351,4 @@ interface SnapshotUpdateData {
   fullTitle: string;
   hash: string;
   data: string;
-}
-
-/**
- * Additional options affecting how directories are created
- */
-interface CreateDirectoryOptions {
-  /**
-   * Whether missing directories in the path should also be created
-   * @defaultValue true
-   */
-  recursive?: boolean;
 }
