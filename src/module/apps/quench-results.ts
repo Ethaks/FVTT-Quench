@@ -282,9 +282,24 @@ export class QuenchResults extends Application {
         .map((part, index) => {
           // Trim down large blocks of unchanged content
           if (part.count !== undefined && part.count > 14 && !(part.added || part.removed)) {
-            const startContext = index !== 0 ? part.value.split("\n").slice(0, 6) : [];
-            const endContext = index === diff.length ? part.value.split("\n").slice(-6) : [];
-            part.value = [...startContext, "...", ...endContext].join("\n");
+            const startContext =
+              index !== 0
+                ? part.value
+                    .split("\n")
+                    .slice(0, 6)
+                    .map((p) => p.trimEnd())
+                    .filter(Boolean)
+                : [];
+            const endContext =
+              index !== diff.length - 1
+                ? part.value
+                    .split("\n")
+                    .slice(-6)
+                    .map((p) => p.trimEnd())
+                    .filter(Boolean)
+                : [];
+            //const ellipse = startContext.length > 0 || endContext.length > 0 ? ["…\n"] : [];
+            part.value = [...startContext, "…", ...endContext, ""].join("\n");
           }
           // Add line break to single line parts without one
           if (part.count !== undefined && part.count === 1 && !part.value.endsWith("\n")) {
