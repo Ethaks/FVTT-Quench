@@ -1,10 +1,10 @@
-<h1 style="text-align: center">
+<h1 style="text-align: center" align="center">
     <img alt="Quench Logo" src="media/quench-logo.webp" width=256 height=256>
   <br>
   Quench
 </h1>
 
-<p style="text-align: center">
+<p style="text-align: center" align="center">
   <img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/Ethaks/FVTT-Quench/Checks?label=Checks&logo=github">
   <a href="https://github.com/Ethaks/FVTT-Quench/releases/latest">
     <img src="https://img.shields.io/github/downloads/Ethaks/FVTT-Quench/latest/module.zip" alt="Downloads" />
