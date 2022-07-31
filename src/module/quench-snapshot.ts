@@ -6,7 +6,6 @@ import { logPrefix, localize, getBatchNameParts, truncate, enforce } from "./uti
 import type { Quench, QuenchBatchKey } from "./quench";
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Chai {
     interface AssertStatic {
       /**

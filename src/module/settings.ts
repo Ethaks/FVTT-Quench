@@ -1,7 +1,6 @@
 import { getGame, MODULE_ID } from "./utils/quench-utils";
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace ClientSettings {
     interface Values {
       "quench.logTestDetails": boolean;

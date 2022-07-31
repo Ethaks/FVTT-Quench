@@ -21,6 +21,7 @@ module.exports = {
   plugins: ["@typescript-eslint", "unicorn"],
 
   rules: {
+    "@typescript-eslint/no-namespace": "off",
     "@typescript-eslint/no-explicit-any": ["error", { ignoreRestArgs: true }],
     "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
     "@typescript-eslint/consistent-type-imports": ["error"],

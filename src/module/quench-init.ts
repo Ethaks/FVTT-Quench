@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
 import "mocha/mocha.js";
 import * as chai from "chai";
 
