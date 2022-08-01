@@ -164,7 +164,7 @@ export class QuenchSnapshotManager {
   }
 
   /** Resets the current fileCache */
-  resetCache(): void {
+  private resetCache(): void {
     this.fileCache = {};
   }
 

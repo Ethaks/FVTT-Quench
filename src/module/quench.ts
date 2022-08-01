@@ -471,7 +471,7 @@ export interface QuenchJsonReportOptions {
   /**
    * The path to which the JSON report will be uploaded.
    *
-   * @defaultValue `Data/quench-report.json`
+   * @defaultValue `quench-report.json`
    */
   filename?: string;
 }
