@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.1](https://github.com/Ethaks/FVTT-Quench/compare/v0.8.0...v0.8.1) (2022-08-01)
+
+
+### Bug Fixes
+
+* only run all batches when no keys are provided at all ([e053a73](https://github.com/Ethaks/FVTT-Quench/commit/e053a73258e9d78e39dadf4c3adfda5515399c69))
+* prevent errors in diff generation when encountering `undefined` ([ed50c8a](https://github.com/Ethaks/FVTT-Quench/commit/ed50c8afaad6b54c482d41efbb8488f48e1c7152))
+
 ## [0.8.0](https://github.com/Ethaks/FVTT-Quench/compare/v0.7.0...v0.8.0) (2022-08-01)
 
 
