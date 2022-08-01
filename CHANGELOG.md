@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.8.0](https://github.com/Ethaks/FVTT-Quench/compare/v0.7.0...v0.8.0) (2022-08-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** bump fast-check from 2.25.0 to 3.1.1 (#156)
+* replace preselect packages with preselect filters
+* refactor `runSelectedBatches`, `_testBatches`, and utils
+
+### Features
+
+* add JSON report generation ([6c41d48](https://github.com/Ethaks/FVTT-Quench/commit/6c41d4820573f01c7a4f0e63630ebe47a6f2e316))
+* enable batch key filtering in settings and `quench.runBatches` ([397c8e3](https://github.com/Ethaks/FVTT-Quench/commit/397c8e3b9ff28871d73ca583610c6daf2336b3a1))
+* improve diff context trimming ([e84cbd4](https://github.com/Ethaks/FVTT-Quench/commit/e84cbd45a7d3b643d2bc6ebca7d3c913fc19b905))
+* improve diff readability ([4874eea](https://github.com/Ethaks/FVTT-Quench/commit/4874eeab5b7861ab5d67599a4e2d330e43364d35)), closes [#147](https://github.com/Ethaks/FVTT-Quench/issues/147)
+* improve error message spacing ([c064cb2](https://github.com/Ethaks/FVTT-Quench/commit/c064cb24844a8c8964c399111b895c248a9642df)), closes [#146](https://github.com/Ethaks/FVTT-Quench/issues/146)
+
+
+### Bug Fixes
+
+* improve diff detection and display ([353e1d4](https://github.com/Ethaks/FVTT-Quench/commit/353e1d4751faf0d1257a55fdf29f860063337eb1))
+
+
+* **deps:** bump fast-check from 2.25.0 to 3.1.1 ([#156](https://github.com/Ethaks/FVTT-Quench/issues/156)) ([dbbe6c7](https://github.com/Ethaks/FVTT-Quench/commit/dbbe6c767e53d0fbed62656f8d478d1e374f3c33))
+* refactor `runSelectedBatches`, `_testBatches`, and utils ([fb7f286](https://github.com/Ethaks/FVTT-Quench/commit/fb7f2865b0f5bc2af598f9f5bd8a70ccd51b9827))
+
 ## [0.7.0](https://github.com/Ethaks/FVTT-Quench/compare/v0.6.0...v0.7.0) (2022-05-26)
 
 
