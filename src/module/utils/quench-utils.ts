@@ -1,4 +1,5 @@
 import type { QuenchBatchKey } from "../quench";
+import { format as prettyFormat, plugins as formatPlugins } from "pretty-format";
 
 /**
  * Represents the state of a test or suite
@@ -293,4 +294,17 @@ export async function createDirectoryTree(obj: object, previous = "") {
     }, []);
   // Return Promise for next layer
   return Promise.all(nextLayerPromises);
+}
+
+/**
+ * Serializes a given data object using the "pretty-format" package.
+ *
+ * @internal
+ * @param data - Data to be serialized
+ * @returns Serialized data
+ */
+export function serialize(data: unknown): string {
+  return prettyFormat(data, {
+    plugins: [formatPlugins.DOMElement, formatPlugins.DOMCollection, formatPlugins.Immutable],
+  });
 }

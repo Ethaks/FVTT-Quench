@@ -4,7 +4,7 @@ import { MissingSnapshotError } from "../utils/quench-snapshot-error";
 
 import type { Quench, QuenchBatchKey } from "../quench";
 import type { RUNNABLE_STATE } from "../utils/quench-utils";
-import { createNode, getFilterSetting } from "../utils/quench-utils";
+import { createNode, getFilterSetting, serialize } from "../utils/quench-utils";
 import {
   RUNNABLE_STATES,
   getTestState,
@@ -248,11 +248,8 @@ export class QuenchResults extends Application {
     const diffNode = createNode("div", { attr: { class: "diff" } });
 
     const expected =
-      typeof error.expected === "string"
-        ? error.expected
-        : JSON.stringify(error.expected, undefined, 2);
-    const actual =
-      typeof error.actual === "string" ? error.actual : JSON.stringify(error.actual, undefined, 2);
+      typeof error.expected === "string" ? error.expected : serialize(error.expected);
+    const actual = typeof error.actual === "string" ? error.actual : serialize(error.actual);
     const diff = Diff.diffLines(expected, actual);
 
     if (diff.length === 2 && diff.every((change) => change.count === 1)) {

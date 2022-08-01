@@ -1,5 +1,4 @@
 import fnv1a from "@sindresorhus/fnv1a";
-import { format as prettyFormat, plugins as formatPlugins } from "pretty-format";
 import { MissingSnapshotError } from "./utils/quench-snapshot-error";
 import {
   logPrefix,
@@ -8,6 +7,7 @@ import {
   truncate,
   enforce,
   createDirectoryTree,
+  serialize,
 } from "./utils/quench-utils";
 
 import type { Quench, QuenchBatchKey } from "./quench";
@@ -65,18 +65,6 @@ export class QuenchSnapshotManager {
   enableUpdates: boolean | undefined = undefined;
 
   /**
-   * Serializes a given data object using the "pretty-format" package.
-   *
-   * @param data - Data to be serialized
-   * @returns Serialized data
-   */
-  static serialize(data: unknown): string {
-    return prettyFormat(data, {
-      plugins: [formatPlugins.DOMElement, formatPlugins.DOMCollection, formatPlugins.Immutable],
-    });
-  }
-
-  /**
    * Generates a string for a batch's default directory in which snapshots will be stored.
    *
    * @param batchKey - The batchKey from which a path will be generated
@@ -110,7 +98,7 @@ export class QuenchSnapshotManager {
       "matchSnapshot",
       function (this: Chai.AssertionPrototype): void {
         // Get flag for expect style, or paramter for assert style
-        const actual = QuenchSnapshotManager.serialize(utils.flag(this, "object"));
+        const actual = serialize(utils.flag(this, "object"));
         const updateSnapshot = quench.snapshots.enableUpdates;
         const currentRunnable = quench._currentRunner?.currentRunnable;
         if (!currentRunnable) throw new Error("No Runner found");

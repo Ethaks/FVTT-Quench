@@ -69,6 +69,16 @@ function registerBasicFailingTestBatch(quench: Quench) {
         it("A Failing Test Using Assert", function () {
           assert.ok(false);
         });
+        it("A Failing Test Comparing an Object to undefined", function () {
+          expect({ foo: "bar" }).to.equal(undefined);
+        });
+        it("A Failing Test Comparing an Object to a String", function () {
+          expect({ foo: "bar" }).to.equal("bar");
+        });
+        it("A Failing Test Comparing undefined to a String", function () {
+          // eslint-disable-next-line unicorn/no-useless-undefined -- intentional test
+          expect(undefined).to.equal("bar");
+        });
       });
     },
     { displayName: "QUENCH: Basic Failing Test" },
