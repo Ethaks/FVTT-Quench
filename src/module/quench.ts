@@ -245,7 +245,6 @@ export class Quench {
    * ```js
    * quench.runBatches(); // or
    * quench.runBatches("**"); // or
-   * quench.runBatches([]);
    * ```
    * @example Running a single batch
    * ```js
@@ -276,6 +275,8 @@ export class Quench {
 
     this.reports = {};
 
+    // If an empty array is passed, trigger an empty run
+    if (Array.isArray(keys) && keys.length === 0) keys = "";
     // Default to running _all_ batches when called without any arguments
     if (!Array.isArray(keys)) keys = [keys];
     if (keys.length === 0) keys = ["**"];
