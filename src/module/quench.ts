@@ -244,7 +244,7 @@ export class Quench {
    * @example Running all batches
    * ```js
    * quench.runBatches(); // or
-   * quench.runBatches("**"); // or
+   * quench.runBatches("**");
    * ```
    * @example Running a single batch
    * ```js
