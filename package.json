@@ -86,7 +86,7 @@
     "typedoc": "^0.23.7",
     "typescript": "^4.5.2",
     "vite": "^3.0.4",
-    "vite-plugin-checker": "^0.4.8"
+    "vite-plugin-checker": "^0.5.0"
   },
   "lint-staged": {
     "*.(ts|js)": "eslint --cache --fix",
