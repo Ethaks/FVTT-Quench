@@ -1,6 +1,7 @@
 {
   "QUENCH": {
     "Title": "QUENCH",
+    "Settings": "Settings",
     "Run": "Run",
     "Abort": "Abort",
     "UpdateSnapshots": "Update Snapshots",

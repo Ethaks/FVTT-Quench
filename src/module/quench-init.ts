@@ -1,6 +1,8 @@
 import "mocha/mocha.js";
 import * as chai from "chai";
 
+import type { QuenchResults } from "./apps/quench-results";
+
 import { QuenchSnapshotManager } from "./quench-snapshot";
 import { registerExampleTests } from "./quench-tests/nonsense-tests";
 import { Quench } from "./quench";
@@ -110,3 +112,20 @@ Hooks.on("ready", async () => {
     quench.runBatches(getFilterSetting(), { preSelectedOnly: true });
   }
 });
+
+Hooks.on(
+  "getQuenchResultsHeaderButtons",
+  (_app: QuenchResults, buttons: Record<string, unknown>[]) => {
+    buttons.unshift({
+      class: "quench-settings",
+      icon: "fas fa-cog",
+      label: "QUENCH.Settings",
+      onclick: () => {
+        const config = getGame().settings.sheet;
+        // @ts-expect-error No other way to render setting config with specific tab active
+        config._tabs[0].active = "quench";
+        config.render(true, { focus: true });
+      },
+    });
+  },
+);
