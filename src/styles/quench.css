@@ -84,20 +84,27 @@
   padding-right: 50px;
 }
 
+#quench-results .summary > .hook-error,
 #quench-results li > .summary > *:not(:first-child) {
   margin-left: 0.2rem;
   font-weight: bold;
+}
+
+#quench-results .expandable > .summary {
+  margin-left: 0.4rem;
 }
 
 #quench-results li > .summary > .status-icon:not(".fa-sync") {
   font-weight: normal;
 }
 
-#quench-results li > .expandable {
+#quench-results .expandable {
   white-space: normal;
+  transition: height 0.5s ease;
+  overflow: hidden;
 }
 
-#quench-results li > .expandable > .error {
+#quench-results .expandable > .error {
   margin: 0.4em;
   background-color: rgba(255, 190, 190, 0.25);
   padding: 10px;
@@ -163,9 +170,14 @@
   background: #00990033;
 }
 
-.quench-hidden {
+#quench-results .hidden {
   visibility: hidden;
 }
+
+#quench-results .disabled {
+  display: none;
+}
+
 #quench-results .summary > i.status-icon.fa-times-circle {
   color: #990000;
 }

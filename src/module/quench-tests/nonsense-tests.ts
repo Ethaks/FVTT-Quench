@@ -257,5 +257,41 @@ if (import.meta.env.DEV) {
       },
       { displayName: "QUENCH: Non-Quench Test" },
     );
+
+    quench.registerBatch(
+      "quench.examples.batch-hook-error",
+      (context) => {
+        const { describe, before, it } = context;
+        before(() => {
+          throw new Error("This is an error thrown in a batch's before hook");
+        });
+        describe("This test should not run", function () {
+          it("should not run", function () {
+            unreachable();
+          });
+        });
+      },
+      { displayName: "QUENCH: Batch Hook Error" },
+    );
+
+    quench.registerBatch(
+      "quench.examples.test-hook-error",
+      (context) => {
+        const { describe, it } = context;
+        describe("Suite failing due to hook", function () {
+          before(() => {
+            throw new Error("This is an error thrown in a suites's before hook");
+          });
+          it("should not run", function () {
+            unreachable();
+          });
+        });
+      },
+      { displayName: "QUENCH: Suite Hook Error" },
+    );
   };
+}
+
+function unreachable() {
+  throw new Error("This should not be reachable!");
 }

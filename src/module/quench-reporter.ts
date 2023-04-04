@@ -148,9 +148,16 @@ export class QuenchReporter extends Mocha.reporters.Base {
       .on(EVENT_TEST_PASS, (test) => {
         this.cache.passes.push(test);
       })
-      .on(EVENT_TEST_FAIL, (test, error) => {
-        this.cache.failures.push(test);
-        app.handleTestFail(test, error);
+      .on(EVENT_TEST_FAIL, (test: Mocha.Test | Mocha.Hook, error) => {
+        if (test.type === "hook") {
+          if (test.title.includes("before")) {
+            if (test.parent?._quench_batchRoot) app.handleBatchFail(test, error);
+            else app.handleTestFail(test, error);
+          }
+        } else {
+          this.cache.failures.push(test);
+          app.handleTestFail(test, error);
+        }
 
         if (QuenchReporter._shouldLogTestDetails()) {
           console.groupCollapsed(

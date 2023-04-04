@@ -4,7 +4,7 @@ import { MissingSnapshotError } from "../utils/quench-snapshot-error";
 
 import type { Quench, QuenchBatchKey } from "../quench";
 import type { RUNNABLE_STATE } from "../utils/quench-utils";
-import { createNode, getFilterSetting, serialize } from "../utils/quench-utils";
+import { createNode, getFilterSetting, serialize, enforce } from "../utils/quench-utils";
 import {
   RUNNABLE_STATES,
   getTestState,
@@ -99,6 +99,54 @@ export class QuenchResults extends Application {
     $html.find("#quench-update-snapshots").on("click", async () => {
       await this.quench.snapshots.updateSnapshots();
     });
+
+    $html[0].addEventListener("click", (event) => {
+      const expander = event.target as HTMLElement;
+      if (!expander.matches(".expander")) return;
+      event.preventDefault();
+      const expandable = expander
+        .closest(".summary")
+        ?.parentElement?.querySelector(".expandable") as HTMLElement | null;
+
+      enforce(expander && expandable, "Invalid expander element");
+
+      const expanded = !expandable.classList.contains("disabled");
+      const icons = { expanded: "fa-caret-down", collapsed: "fa-caret-right" };
+      if (expanded) expander.classList.replace(icons.expanded, icons.collapsed);
+      else expander.classList.replace(icons.collapsed, icons.expanded);
+
+      if (expanded) {
+        // Collapse
+        // Set height to current height to enable a transition, which requires a change from one value to another
+        expandable.style.height = expandable.clientHeight + "px";
+        setTimeout(() => {
+          expandable.style.height = "0px";
+        }, 0);
+        expandable.addEventListener(
+          "transitionend",
+          () => {
+            // Remove explicit height and rely on display property to hide the element
+            expandable.classList.add("disabled");
+            expandable.style.removeProperty("height");
+          },
+          { once: true },
+        );
+      } else {
+        // Expand
+        expandable.classList.remove("disabled");
+        // Briefly set height to auto to get the full height of the element, then set it to 0 to enable a transition,
+        // which requires a change from one value to another throughout cycles
+        expandable.style.height = "auto";
+        const height = expandable.clientHeight + "px";
+        expandable.style.height = "0px";
+        setTimeout(() => {
+          expandable.style.height = height;
+        }, 0);
+        expandable.addEventListener("transitionend", () => {
+          expandable.style.removeProperty("height");
+        });
+      }
+    });
   }
 
   /**
@@ -181,18 +229,8 @@ export class QuenchResults extends Application {
             </li>
         `);
 
-    const $expander = $li.find("> .summary > .expander");
     const $expandable = $li.find("> .expandable");
-    if (isTest) $expandable.hide();
-
-    $expander.on("click", () => {
-      $expander.removeClass("fa-caret-down");
-      $expander.removeClass("fa-caret-right");
-      const expanded = $expandable.is(":visible");
-      const newIcon = expanded ? "fa-caret-right" : "fa-caret-down";
-      $expander.addClass(newIcon);
-      $expandable.slideToggle(50);
-    });
+    if (isTest) $expandable[0].classList.add("disabled");
 
     this._updateLineItemStatus($li, RUNNABLE_STATES.IN_PROGRESS, isTest);
     return $li;
@@ -235,12 +273,25 @@ export class QuenchResults extends Application {
         .find("> .summary > .expander")
         .removeClass("fa-caret-down")
         .addClass("fa-caret-right");
-      $listElement.find("> .expandable").hide();
+      $listElement.find("> .expandable").addClass("disabled");
     }
 
     // Hide expander for tests with results without info that could be expanded
     if (isTest && (state === RUNNABLE_STATES.SUCCESS || state === RUNNABLE_STATES.PENDING)) {
-      $listElement.find("> .summary > .expander").addClass("quench-hidden");
+      $listElement.find("> .summary > .expander").addClass("hidden");
+    }
+
+    // Hide direct error message child for suites with hook errors
+    if ($listElement.hasClass("suite") && state === RUNNABLE_STATES.FAILURE) {
+      const hasError = $listElement.find("> .expandable > .error").length > 0;
+      const expandable = $listElement.children(".expandable");
+      if (hasError) {
+        expandable[0].classList.add("disabled");
+        $listElement
+          .find("> .summary > .expander")
+          .removeClass("fa-caret-down")
+          .addClass("fa-caret-right");
+      }
     }
   }
 
@@ -396,8 +447,12 @@ export class QuenchResults extends Application {
    * @param test - The failed test
    * @param error - The error thrown by the test
    */
-  handleTestFail(test: Mocha.Test, error: Chai.AssertionError | MissingSnapshotError) {
-    const $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
+  handleTestFail(test: Mocha.Test | Mocha.Hook, error: Chai.AssertionError | MissingSnapshotError) {
+    // Hooks failures are reported as test failures, but presented as suite failures in the UI
+    const isHookFail = test.type === "hook";
+    const $testLi = isHookFail
+      ? this.element.find(`li.suite[data-suite-id="${test.parent?.id}"]`)
+      : this.element.find(`li.test[data-test-id="${test.id}"]`);
     // Allow possibly long paths from `SnapshotError`s to be line wrapped sanely
     const errorElement = $testLi
       .find("> .expandable")
@@ -423,6 +478,35 @@ export class QuenchResults extends Application {
     this._updateLineItemStatus($testLi, RUNNABLE_STATES.FAILURE);
     if (("snapshotError" in error && error.snapshotError) || error instanceof MissingSnapshotError)
       this._enableSnapshotUpdates = true;
+  }
+
+  /**
+   * Called by {@link QuenchReporter} when a before hook for a whole batch fails,
+   * so that in lieu of failed tests or suites the whole batch can be marked as failed.
+   *
+   * @param hook - The failed hook
+   * @param error - The error thrown by the hook
+   */
+  handleBatchFail(hook: Mocha.Hook, error: Error) {
+    const batchKey = hook.parent?._quench_parentBatch;
+    const isBatchRoot = hook.parent?._quench_batchRoot === true;
+
+    if (!batchKey || !isBatchRoot) return;
+
+    const errorTitle = localize("ERROR.Hook", { hook: hook.title.replace("_root", "") });
+    // @ts-expect-error - Mocha.Hook has no id property, but it does exist
+    const hookId = hook.id as string;
+
+    const $batchLi = this.element.find(`li.test-batch[data-batch="${batchKey}"]`);
+    $batchLi.find("> .expandable").prepend(
+      `<span class="summary batch-hook">
+        <i class="expander fas fa-caret-right" data-expand-target="${hookId}"></i></button>
+        <i class="status-icon fas fa-times-circle"></i> <span class="hook-error"> ${errorTitle}</span>
+      </span>
+      <div class="expandable disabled" data-expand-id=${hookId}>
+        <div class="error"><span class="error-message">${error.message}</span></div>
+      </div>`,
+    );
   }
 
   /**
