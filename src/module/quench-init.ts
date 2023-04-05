@@ -1,5 +1,6 @@
 import "mocha/mocha.js";
 import * as chai from "chai";
+import chaiPromised from "chai-as-promised";
 
 import type { QuenchResults } from "./apps/quench-results";
 
@@ -43,6 +44,7 @@ globalThis.quench = new Quench();
 // @ts-expect-error Match runtime (ESM import) to types (declared global `chai`)
 globalThis.chai = chai;
 chai.use(QuenchSnapshotManager.enableSnapshots);
+chai.use(chaiPromised);
 
 // Allow re-running of tests
 mocha._cleanReferencesAfterRun = false;

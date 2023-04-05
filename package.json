@@ -55,6 +55,7 @@
   "dependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "^9.249.4",
     "@types/chai": "^4.2.22",
+    "@types/chai-as-promised": "^7.1.5",
     "@types/diff": "^5.0.2",
     "@types/mocha": "^9.0.0",
     "fast-check": "^3.1.1",
@@ -68,6 +69,7 @@
     "@typescript-eslint/eslint-plugin": "^5.3.1",
     "@typescript-eslint/parser": "^5.4.0",
     "chai": "^4.3.4",
+    "chai-as-promised": "^7.1.1",
     "diff": "^5.0.0",
     "eslint": "^8.3.0",
     "eslint-config-prettier": "^8.3.0",

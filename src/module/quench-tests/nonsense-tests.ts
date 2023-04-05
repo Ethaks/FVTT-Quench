@@ -13,6 +13,7 @@ export function registerExampleTests(quench: Quench) {
     registerOtherTestBatch,
     registerSnapshotTestBatch,
     registerPropertyTestBatch,
+    registerPromiseTestBatch,
     registerNonQuenchTestBatch,
   ]) {
     batchFunction(quench);
@@ -231,6 +232,34 @@ function registerPropertyTestBatch(quench: Quench) {
       });
     },
     { displayName: "QUENCH: Property Test" },
+  );
+}
+
+function registerPromiseTestBatch(quench: Quench) {
+  quench.registerBatch(
+    "quench.examples.promises",
+    (context) => {
+      const { describe, it, assert, expect } = context;
+
+      describe("Chai as Promised", function () {
+        it("should resolve basic Promise", function () {
+          return Promise.resolve(2 + 2).should.eventually.equal(4);
+        });
+        it("should resolve Promise with property", function () {
+          expect(Promise.resolve({ foo: "bar" })).to.eventually.have.property("foo");
+        });
+        it("should allow async functions", async function () {
+          await Promise.resolve(2 + 2).should.eventually.equal(4);
+        });
+        it("should handle assertions in async functions", async function () {
+          return assert.eventually.equal(Promise.resolve(2 + 2), 4);
+        });
+        it("should handle Promise rejection", async function () {
+          await Promise.reject(new Error("Promise rejected")).should.be.rejectedWith(Error);
+        });
+      });
+    },
+    { displayName: "QUENCH: Promises" },
   );
 }
 
