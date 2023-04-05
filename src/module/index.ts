@@ -20,7 +20,6 @@ export type {
   QuenchRegisterBatchOptions,
   QuenchRegisterBatchFunction,
   QuenchRunBatchOptions,
-  QuenchRunAllBatchesOptions,
   QuenchJsonReportOptions,
   QuenchReports,
   QuenchBatchData,
