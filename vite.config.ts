@@ -4,6 +4,7 @@ import checker from "vite-plugin-checker";
 import * as path from "node:path";
 import * as url from "node:url";
 import { copy } from "@guanghechen/rollup-plugin-copy";
+import terser from "@rollup/plugin-terser";
 
 function resolve(relativePath: string) {
   return path.resolve(url.fileURLToPath(new URL(".", import.meta.url)), relativePath);
@@ -37,18 +38,18 @@ const config = defineConfig(({ mode }) => ({
   },
   build: {
     outDir: resolve("dist"),
-    minify: "terser",
-    terserOptions: {
-      keep_fnames: true,
-      keep_classnames: true,
-    },
     emptyOutDir: true,
     sourcemap: true,
     target: "es2022",
     rollupOptions: {
       output: {
-        sourcemapPathTransform: (relative) => path.join("/modules/quench/src", relative),
+        sourcemapPathTransform: (relative) => {
+          // Relative paths start with a `../`, which moves the path out of the `systems/pf1` directory.
+          if (relative.startsWith("../")) relative = relative.replace("../", "");
+          return relative;
+        },
       },
+      plugins: [terser({ mangle: { keep_classnames: true, keep_fnames: true } })],
     },
     reportCompressedSize: true,
     lib: {
