@@ -8,8 +8,6 @@ declare global {
       "quench.collapseSuccessful": boolean;
       "quench.autoShowQuenchWindow": boolean;
       "quench.autoRun": boolean;
-      /** @deprecated */
-      "quench.preselectedPackages": string;
       "quench.preselectFilters": string;
     }
   }
@@ -67,16 +65,6 @@ export function registerSettings(): void {
     config: true,
     type: Boolean,
     default: false,
-  });
-
-  // Deprecated with Quench v0.8.0; config set to false for now
-  game.settings.register(MODULE_ID, "preselectedPackages", {
-    name: "QUENCH.PreselectedPackagesLabel",
-    hint: "QUENCH.PreselectedPackagesHint",
-    scope: "client",
-    config: false,
-    type: String,
-    default: "",
   });
 
   game.settings.register(MODULE_ID, "preselectFilters", {

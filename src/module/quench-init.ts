@@ -7,7 +7,7 @@ import type { QuenchResults } from "./apps/quench-results";
 import { QuenchSnapshotManager } from "./quench-snapshot";
 import { registerExampleTests } from "./quench-tests/nonsense-tests";
 import { Quench } from "./quench";
-import { enforce, getFilterSetting, getGame, localize, MODULE_ID } from "./utils/quench-utils";
+import { enforce, getFilterSetting, getGame, localize } from "./utils/quench-utils";
 import { pause } from "./utils/user-utils";
 import { registerSettings } from "./settings";
 
@@ -83,23 +83,6 @@ Hooks.on("renderSidebar", function (_sidebar: Application, html: JQuery<HTMLElem
  */
 Hooks.on("ready", async () => {
   enforce(quench);
-
-  // Handle migration from deprecated preselections to new filter settings; introduced in v0.8
-  const preselectedPackages = getGame().settings.get(MODULE_ID, "preselectedPackages");
-  const filter = getGame().settings.get(MODULE_ID, "preselectFilters");
-  if (preselectedPackages && !filter) {
-    await getGame().settings.set(
-      MODULE_ID,
-      "preselectFilters",
-      preselectedPackages
-        .split(",")
-        .map((key) => key.trim())
-        .filter(Boolean)
-        .map((key) => `${key}.**`)
-        .join(","),
-    );
-    await getGame().settings.set(MODULE_ID, "preselectedPackages", "");
-  }
 
   if (getGame().settings.get("quench", "exampleTests")) {
     registerExampleTests(quench);
