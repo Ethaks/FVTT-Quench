@@ -5,7 +5,7 @@ import wcmatch from "wildcard-match";
 import { QuenchResults } from "./apps/quench-results";
 import { QuenchReporter } from "./quench-reporter";
 import { QuenchSnapshotManager } from "./quench-snapshot";
-import { getBatchNameParts, getFilterSetting, getGame, localize } from "./utils/quench-utils";
+import { getBatchNameParts, getGame, localize } from "./utils/quench-utils";
 import * as quenchUserUtils from "./utils/user-utils";
 
 declare global {
@@ -218,24 +218,6 @@ export class Quench {
       preSelected: preSelected ?? true,
     });
     this.app.clear();
-  }
-
-  /**
-   * Runs all test batches.
-   *
-   * The contents of the test batches are registered with mocha when this function is executed.
-   *
-   * @deprecated Use {@link runBatches} instead; this function will be removed in Quench 0.9
-   * @param options - Additional options affecting this batch run
-   * @returns Returns the mocha Runner object for this test run.
-   */
-  async runAllBatches(options: QuenchRunAllBatchesOptions = {}): Promise<Mocha.Runner> {
-    console.warn("quench.runAllBatches is deprecated; use quench.runBatches instead");
-    const { preSelectedOnly = false, ...runOptions } = options;
-    let filter = getFilterSetting();
-    if (filter.length === 0) filter = ["**"];
-    const batches = this._filterBatches(filter, { preSelectedOnly });
-    return this.runBatches(batches, runOptions);
   }
 
   /**
@@ -478,14 +460,6 @@ export interface QuenchJsonReportOptions {
    */
   filename?: string;
 }
-
-/**
- * Options affecting the running of batches or criteria which batches are to be run
- *
- * @public
- * @deprecated Use {@link QuenchRunBatchOptions} in {@link Quench.runBatches} instead
- */
-export type QuenchRunAllBatchesOptions = QuenchRunBatchOptions;
 
 /**
  * The key by which a test batch is identified.
