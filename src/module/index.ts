@@ -9,6 +9,7 @@
  */
 import "mocha/mocha.js";
 import "chai";
+import "chai-as-promised";
 
 import "./quench-init";
 
