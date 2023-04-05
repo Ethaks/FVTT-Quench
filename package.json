@@ -19,7 +19,6 @@
     "format": "prettier --write \"./**/*.(js|mjs|ts|json|css|yml)\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky install",
-    "prebuild": "npm run apply-patches",
     "build": "vite build",
     "serve": "vite serve",
     "prerelease": "npm run build && npm run lint && npm run declaration",
@@ -27,8 +26,7 @@
     "declaration": "tsc --project tsconfig.declaration.json",
     "docs": "typedoc",
     "docs:watch": "typedoc --watch",
-    "prepack": "npm run declaration",
-    "apply-patches": "patch-package"
+    "prepack": "npm run declaration"
   },
   "repository": {
     "type": "git",
