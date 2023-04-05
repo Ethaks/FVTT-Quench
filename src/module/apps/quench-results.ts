@@ -165,12 +165,12 @@ export class QuenchResults extends Application {
         hasQuery ||= runnableHasQuery;
       }
 
-      if (!hasQuery) {
-        element.classList.add("disabled", "filtered");
-        return false;
-      } else {
+      if (hasQuery) {
         element.classList.remove("disabled", "filtered");
         return true;
+      } else {
+        element.classList.add("disabled", "filtered");
+        return false;
       }
     };
 
@@ -283,15 +283,18 @@ export class QuenchResults extends Application {
     let icon = "fa-sync";
     const style = "fas";
     switch (state) {
-      case RUNNABLE_STATES.PENDING:
+      case RUNNABLE_STATES.PENDING: {
         icon = "fa-minus-circle";
         break;
-      case RUNNABLE_STATES.SUCCESS:
+      }
+      case RUNNABLE_STATES.SUCCESS: {
         icon = "fa-check-circle";
         break;
-      case RUNNABLE_STATES.FAILURE:
+      }
+      case RUNNABLE_STATES.FAILURE: {
         icon = "fa-times-circle";
         break;
+      }
     }
     $icon.removeClass();
     $icon.addClass(`status-icon ${style} ${icon}`);
@@ -363,21 +366,21 @@ export class QuenchResults extends Application {
           // Trim down large blocks of unchanged content
           if (part.count !== undefined && part.count > 14 && !(part.added || part.removed)) {
             const startContext =
-              index !== 0
-                ? part.value
+              index === 0
+                ? []
+                : part.value
                     .split("\n")
                     .slice(0, 6)
                     .map((p) => p.trimEnd())
-                    .filter(Boolean)
-                : [];
+                    .filter(Boolean);
             const endContext =
-              index !== diff.length - 1
-                ? part.value
+              index === diff.length - 1
+                ? []
+                : part.value
                     .split("\n")
                     .slice(-6)
                     .map((p) => p.trimEnd())
-                    .filter(Boolean)
-                : [];
+                    .filter(Boolean);
             //const ellipse = startContext.length > 0 || endContext.length > 0 ? ["…\n"] : [];
             part.value = [...startContext, "…", ...endContext, ""].join("\n");
           }
@@ -497,7 +500,7 @@ export class QuenchResults extends Application {
 
     errorElement.append(
       `<span class="error-message">${
-        error.name !== "Error" ? "<strong>" + error.name + ": </strong>" : ""
+        error.name === "Error" ? "" : "<strong>" + error.name + ": </strong>"
       }${error.message}\n</span>`,
     );
 
@@ -526,7 +529,6 @@ export class QuenchResults extends Application {
     if (!batchKey || !isBatchRoot) return;
 
     const errorTitle = localize("ERROR.Hook", { hook: hook.title.replace("_root", "") });
-    // @ts-expect-error - Mocha.Hook has no id property, but it does exist
     const hookId = hook.id as string;
 
     const $batchLi = this.element.find(`li.test-batch[data-batch="${batchKey}"]`);

@@ -52,7 +52,9 @@ export class Quench {
   declare readonly fc: typeof fc;
 
   /** Various utility functions */
-  declare readonly utils: { [Util in keyof typeof quenchUserUtils]: typeof quenchUserUtils[Util] };
+  declare readonly utils: {
+    [Util in keyof typeof quenchUserUtils]: (typeof quenchUserUtils)[Util];
+  };
 
   /**
    * The singleton instance of {@link QuenchResults} that this `Quench` instance uses

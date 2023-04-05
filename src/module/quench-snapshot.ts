@@ -299,7 +299,7 @@ export class QuenchSnapshotManager {
         {},
       );
 
-      const numberOfBatches = [...new Set(responses.map((r) => r.batch))].length;
+      const numberOfBatches = new Set(responses.map((r) => r.batch)).size;
       const numberOfFiles = responses.filter((r) => r.status === "success").length;
 
       // Create detailed upload report in console

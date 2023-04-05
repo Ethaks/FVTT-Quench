@@ -128,17 +128,20 @@ export class QuenchReporter extends Mocha.reporters.Base {
         if (QuenchReporter._shouldLogTestDetails()) {
           let stateString, stateColor;
           switch (state) {
-            case RUNNABLE_STATES.PENDING:
+            case RUNNABLE_STATES.PENDING: {
               stateString = "PENDING";
               stateColor = CONSOLE_COLORS.pending;
               break;
-            case RUNNABLE_STATES.SUCCESS:
+            }
+            case RUNNABLE_STATES.SUCCESS: {
               stateString = "PASS";
               stateColor = CONSOLE_COLORS.pass;
               break;
-            default:
+            }
+            default: {
               stateString = "UNKNOWN";
               stateColor = "initial";
+            }
           }
           console.log(`%c(${stateString}) Test Complete: ${test.title}`, `color: ${stateColor}`, {
             test,
@@ -303,7 +306,7 @@ const CONSOLE_COLORS = {
 } as const;
 
 const CACHE_PROPERTIES = ["tests", "pending", "failures", "passes"] as const;
-type CacheProperty = typeof CACHE_PROPERTIES[number];
+type CacheProperty = (typeof CACHE_PROPERTIES)[number];
 
 /**
  * Data belonging to a {@link Mocha.Test}, cleaned to be JSON-serializable

@@ -14,7 +14,7 @@ export const RUNNABLE_STATES = {
   FAILURE: "failure",
 } as const;
 /** The current state of a runnable element */
-export type RUNNABLE_STATE = typeof RUNNABLE_STATES[keyof typeof RUNNABLE_STATES];
+export type RUNNABLE_STATE = (typeof RUNNABLE_STATES)[keyof typeof RUNNABLE_STATES];
 
 /**
  * Gets the STATE of a Test instance
