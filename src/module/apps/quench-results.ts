@@ -1,16 +1,19 @@
 import * as Diff from "diff";
 
-import { MissingSnapshotError } from "../utils/quench-snapshot-error";
-
 import type { Quench, QuenchBatchKey } from "../quench";
 import type { RUNNABLE_STATE } from "../utils/quench-utils";
-import { createNode, getFilterSetting, serialize, enforce } from "../utils/quench-utils";
+
+import { MissingSnapshotError } from "../utils/quench-snapshot-error";
 import {
-  RUNNABLE_STATES,
-  getTestState,
-  getSuiteState,
+  createNode,
+  enforce,
+  getFilterSetting,
   getGame,
+  getSuiteState,
+  getTestState,
   localize,
+  RUNNABLE_STATES,
+  serialize,
 } from "../utils/quench-utils";
 
 /**
