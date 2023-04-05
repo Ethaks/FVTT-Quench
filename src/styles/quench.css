@@ -38,6 +38,22 @@
   box-shadow: none;
 }
 
+#quench-results .filter {
+  flex: 0;
+  margin: 4px 0;
+  position: relative;
+}
+#quench-results .filter i {
+  position: absolute;
+  left: 4px;
+  top: calc(var(--line-height-12, 1.2rem) / 2);
+}
+#quench-results .filter input {
+  position: relative;
+  padding-left: 18px;
+  background: rgba(255, 255, 245, 0.8);
+}
+
 #quench-results .button-container {
   flex: 0;
   display: flex;

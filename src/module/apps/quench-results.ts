@@ -49,6 +49,7 @@ export class QuenchResults extends Application {
       left: window.innerWidth - width - sidebarWidth - margin * 2,
       resizable: true,
       template: "/modules/quench/templates/quench-results.hbs",
+      filters: [{ inputSelector: "input#quench-filter", contentSelector: "#quench-batches-list" }],
     });
   }
 
@@ -147,6 +148,34 @@ export class QuenchResults extends Application {
         });
       }
     });
+  }
+
+  /** @inheritDoc */
+  override _onSearchFilter(_event: Event, _query: string, rgx: RegExp, html: HTMLElement) {
+    const checkElement = (element: HTMLElement): boolean => {
+      let hasQuery = rgx.test(
+        SearchFilter.cleanQuery(element.querySelector(".runnable-title")?.textContent || ""),
+      );
+      const runnables = [...(element.querySelector(".runnable-list")?.children ?? [])];
+      for (const runnable of runnables) {
+        const runnableHasQuery = checkElement(runnable as HTMLElement);
+        hasQuery ||= runnableHasQuery;
+      }
+
+      if (!hasQuery) {
+        element.classList.add("disabled", "filtered");
+        return false;
+      } else {
+        element.classList.remove("disabled", "filtered");
+        return true;
+      }
+    };
+
+    for (const batchLi of html.children as HTMLCollection) {
+      for (const element of batchLi.querySelector(".runnable-list")?.children ?? []) {
+        checkElement(element as HTMLElement);
+      }
+    }
   }
 
   /**

@@ -8,7 +8,7 @@
     "strictNullChecks": true,
     "exactOptionalPropertyTypes": true,
     "strict": true,
-    "lib": ["DOM", "ES2021"],
+    "lib": ["DOM", "DOM.Iterable", "ES2021"],
     "noEmit": true
   },
   "exclude": ["dist", "foundry"],

@@ -2,6 +2,7 @@
   "QUENCH": {
     "Title": "QUENCH",
     "Settings": "Settings",
+    "Filter": "Filter",
     "Run": "Run",
     "Abort": "Abort",
     "UpdateSnapshots": "Update Snapshots",
