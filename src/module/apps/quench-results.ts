@@ -183,7 +183,14 @@ export class QuenchResults extends Application {
 
         // Ensure that a suite's children are not hidden if the suite or any of its children match the query
         // An element's parent matching the query is not sufficient to expand a suite's children
-        if (query && (hasQuery || runnableHasQuery) && element.classList.contains("suite")) {
+        // Error messages should not be expanded
+        const runnableList = element.querySelector(".runnable-list");
+        if (
+          query &&
+          (hasQuery || runnableHasQuery) &&
+          element.classList.contains("suite") &&
+          runnableList
+        ) {
           const expander = element.querySelector(".expander");
           if (expander) expander.classList.replace("fa-caret-right", "fa-caret-down");
           const expandable = element.querySelector(".expandable");
