@@ -104,53 +104,64 @@ export class QuenchResults extends Application {
       await this.quench.snapshots.updateSnapshots();
     });
 
+    // Handle clicking on expander via event delegation
     $html[0].addEventListener("click", (event) => {
-      const expander = event.target as HTMLElement;
-      if (!expander.matches(".expander")) return;
-      event.preventDefault();
-      const expandable = expander
-        .closest(".summary")
-        ?.parentElement?.querySelector(".expandable") as HTMLElement | null;
-
-      enforce(expander && expandable, "Invalid expander element");
-
-      const expanded = !expandable.classList.contains("disabled");
-      const icons = { expanded: "fa-caret-down", collapsed: "fa-caret-right" };
-      if (expanded) expander.classList.replace(icons.expanded, icons.collapsed);
-      else expander.classList.replace(icons.collapsed, icons.expanded);
-
-      if (expanded) {
-        // Collapse
-        // Set height to current height to enable a transition, which requires a change from one value to another
-        expandable.style.height = expandable.clientHeight + "px";
-        setTimeout(() => {
-          expandable.style.height = "0px";
-        }, 0);
-        expandable.addEventListener(
-          "transitionend",
-          () => {
-            // Remove explicit height and rely on display property to hide the element
-            expandable.classList.add("disabled");
-            expandable.style.removeProperty("height");
-          },
-          { once: true },
-        );
-      } else {
-        // Expand
-        expandable.classList.remove("disabled");
-        // Briefly set height to auto to get the full height of the element, then set it to 0 to enable a transition,
-        // which requires a change from one value to another throughout cycles
-        expandable.style.height = "auto";
-        const height = expandable.clientHeight + "px";
-        expandable.style.height = "0px";
-        setTimeout(() => {
-          expandable.style.height = height;
-        }, 0);
-        expandable.addEventListener("transitionend", () => {
-          expandable.style.removeProperty("height");
-        });
-      }
+      this._onExpanderClick(event);
     });
+  }
+
+  /**
+   * Handle clicking on an expander, either to expand or collapse a summary or list of tests.
+   *
+   * @internal
+   * @param event - The click event
+   */
+  private _onExpanderClick(event: Event) {
+    const expander = event.target as HTMLElement;
+    if (!expander.matches(".expander")) return;
+    event.preventDefault();
+    const expandable = expander
+      .closest(".summary")
+      ?.parentElement?.querySelector(".expandable") as HTMLElement | null;
+
+    enforce(expander && expandable, "Invalid expander element");
+
+    const expanded = !expandable.classList.contains("disabled");
+    const icons = { expanded: "fa-caret-down", collapsed: "fa-caret-right" };
+    if (expanded) expander.classList.replace(icons.expanded, icons.collapsed);
+    else expander.classList.replace(icons.collapsed, icons.expanded);
+
+    if (expanded) {
+      // Collapse
+      // Set height to current height to enable a transition, which requires a change from one value to another
+      expandable.style.height = expandable.clientHeight + "px";
+      setTimeout(() => {
+        expandable.style.height = "0px";
+      }, 0);
+      expandable.addEventListener(
+        "transitionend",
+        () => {
+          // Remove explicit height and rely on display property to hide the element
+          expandable.classList.add("disabled");
+          expandable.style.removeProperty("height");
+        },
+        { once: true },
+      );
+    } else {
+      // Expand
+      expandable.classList.remove("disabled");
+      // Briefly set height to auto to get the full height of the element, then set it to 0 to enable a transition,
+      // which requires a change from one value to another throughout cycles
+      expandable.style.height = "auto";
+      const height = expandable.clientHeight + "px";
+      expandable.style.height = "0px";
+      setTimeout(() => {
+        expandable.style.height = height;
+      }, 0);
+      expandable.addEventListener("transitionend", () => {
+        expandable.style.removeProperty("height");
+      });
+    }
   }
 
   /** @inheritDoc */
