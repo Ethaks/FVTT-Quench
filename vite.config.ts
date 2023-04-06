@@ -4,7 +4,7 @@ import checker from "vite-plugin-checker";
 import * as path from "node:path";
 import * as url from "node:url";
 import { copy } from "@guanghechen/rollup-plugin-copy";
-import terser from "@rollup/plugin-terser";
+import { forceMinifyEsm } from "./tools/minify.mjs";
 
 function resolve(relativePath: string) {
   return path.resolve(url.fileURLToPath(new URL(".", import.meta.url)), relativePath);
@@ -41,6 +41,7 @@ const config = defineConfig(({ mode }) => ({
     emptyOutDir: true,
     sourcemap: true,
     target: "es2022",
+    minify: false, // minifying is done via handrolled plugin
     rollupOptions: {
       output: {
         sourcemapPathTransform: (relative) => {
@@ -49,7 +50,6 @@ const config = defineConfig(({ mode }) => ({
           return relative;
         },
       },
-      plugins: [terser({ mangle: { keep_classnames: true, keep_fnames: true } })],
     },
     reportCompressedSize: true,
     lib: {
@@ -63,6 +63,7 @@ const config = defineConfig(({ mode }) => ({
     checker({
       typescript: true,
     }),
+    forceMinifyEsm(),
     visualizer({
       template: "treemap",
       sourcemap: true,
