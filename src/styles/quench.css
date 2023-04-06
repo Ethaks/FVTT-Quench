@@ -39,32 +39,37 @@
 }
 
 #quench-results .filter {
-  flex: 0;
-  margin: 4px 0;
+  flex: 1;
   position: relative;
+  transition: 0.5s ease;
+  margin: 0 2px 0 0;
+}
+#quench-results .filter:focus-within {
+  flex: 2;
 }
 #quench-results .filter i {
   position: absolute;
   left: 4px;
-  top: calc(var(--line-height-12, 1.2rem) / 2);
+  top: 0.5rem;
 }
 #quench-results .filter input {
   position: relative;
-  padding-left: 18px;
-  background: rgba(255, 255, 245, 0.8);
+  padding-left: 22px;
+  background: rgba(255, 255, 240, 0.8);
+  height: 2rem;
 }
 
-#quench-results .button-container {
+#quench-results .controls-container {
   flex: 0;
   display: flex;
   flex-direction: row;
 }
 
-#quench-results .button-container button {
+#quench-results .controls-container button {
   flex: 1;
 }
 
-#quench-results .button-container button#quench-run {
+#quench-results .controls-container button#quench-run {
   font-weight: bold;
 }
 

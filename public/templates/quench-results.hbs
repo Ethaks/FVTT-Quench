@@ -1,9 +1,9 @@
 <div class="flexcol">
-    <div class="filter formgroup flexrow">
-      <input type="search" id="quench-filter" placeholder="{{localize "QUENCH.Filter"}}" autocomplete="off" />
-      <i class="fas fa-search"></i>
-    </div>
-    <div id="select-buttons" class="button-container" {{#unless anyBatches}}style="display: none"{{/unless}}>
+    <div id="select-buttons" class="controls-container" {{#unless anyBatches}}style="display: none"{{/unless}}>
+      <div class="filter formgroup flexrow">
+        <input type="search" id="quench-filter" placeholder="{{localize "QUENCH.Filter"}}" autocomplete="off" />
+        <i class="fas fa-search"></i>
+      </div>
         <button id="quench-select-all">{{localize "QUENCH.SelectAll"}}</button>
         <button id="quench-select-none">{{localize "QUENCH.SelectNone"}}</button>
     </div>
@@ -18,7 +18,7 @@
         </ul>
     </div>
     <div id="quench-results-stats" style="display: none"></div>
-    <div class="button-container" >
+    <div class="controls-container" >
         <button id="quench-run">{{localize "QUENCH.Run"}}</button>
         <button style="display: none" id="quench-abort">{{localize "QUENCH.Abort"}}</button>
         <button style="display: none" id="quench-update-snapshots">{{localize "QUENCH.UpdateSnapshots"}}</button>
