@@ -154,19 +154,41 @@ export class QuenchResults extends Application {
   }
 
   /** @inheritDoc */
-  override _onSearchFilter(_event: Event, _query: string, rgx: RegExp, html: HTMLElement) {
-    const checkElement = (element: HTMLElement): boolean => {
-      let hasQuery = rgx.test(
+  override _onSearchFilter(_event: Event, query: string, rgx: RegExp, html: HTMLElement) {
+    /**
+     * Recursively check if an element should be displayed.
+     * An element should only be displayed if a parent's or child's title matches the query,
+     * or if the element itself matches the query.
+     *
+     * @param element - The element to check
+     * @param parentHasQuery - Whether any of the element's parents match the query
+     * @returns Whether the element or any of its children match the query
+     */
+    const checkElement = (element: HTMLElement, parentHasQuery = false): boolean => {
+      // Whether the element itself matches the query
+      const hasQuery = rgx.test(
         SearchFilter.cleanQuery(element.querySelector(".runnable-title")?.textContent || ""),
       );
       const runnables = [...(element.querySelector(".runnable-list")?.children ?? [])];
+      // Whether any of the element's children match the query
+      let runnableHasQuery = false;
       for (const runnable of runnables) {
-        const runnableHasQuery = checkElement(runnable as HTMLElement);
-        hasQuery ||= runnableHasQuery;
+        runnableHasQuery =
+          checkElement(runnable as HTMLElement, hasQuery || parentHasQuery) || runnableHasQuery;
       }
 
-      if (hasQuery) {
+      if (parentHasQuery || hasQuery || runnableHasQuery) {
+        // Ensure element itself is not hidden
         element.classList.remove("disabled", "filtered");
+
+        // Ensure that a suite's children are not hidden if the suite or any of its children match the query
+        // An element's parent matching the query is not sufficient to expand a suite's children
+        if (query && (hasQuery || runnableHasQuery) && element.classList.contains("suite")) {
+          const expander = element.querySelector(".expander");
+          if (expander) expander.classList.replace("fa-caret-right", "fa-caret-down");
+          const expandable = element.querySelector(".expandable");
+          if (expandable) expandable.classList.remove("disabled");
+        }
         return true;
       } else {
         element.classList.add("disabled", "filtered");
