@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.9.0](https://github.com/Ethaks/FVTT-Quench/compare/v0.8.1...v0.9.0) (2023-04-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove deprecated pre-selection setting
+* remove deprecated `Quench#runAllBatches` and its options
+
+### Features
+
+* add Chai as Promised ([584559a](https://github.com/Ethaks/FVTT-Quench/commit/584559ac70f76d6e03a237af9d00ed5fbc21a35c)), closes [#245](https://github.com/Ethaks/FVTT-Quench/issues/245)
+* add search filter to UI ([e2c04bf](https://github.com/Ethaks/FVTT-Quench/commit/e2c04bf4f025b5abbcaf3ad4356a785f2d4752c1)), closes [#261](https://github.com/Ethaks/FVTT-Quench/issues/261)
+* add setting shortcut to QuenchResults header buttons ([a57234c](https://github.com/Ethaks/FVTT-Quench/commit/a57234c2b51d08e92618d14c2b3afe5276222b1f)), closes [#256](https://github.com/Ethaks/FVTT-Quench/issues/256)
+* improve display of errors thrown in hooks ([ecda47c](https://github.com/Ethaks/FVTT-Quench/commit/ecda47c462801cb3515d684b412f65f16d0c3bb6))
+
+
+* remove deprecated `Quench#runAllBatches` and its options ([62a3595](https://github.com/Ethaks/FVTT-Quench/commit/62a359504a975e113193498f76d8034a697d142d))
+* remove deprecated pre-selection setting ([095fb60](https://github.com/Ethaks/FVTT-Quench/commit/095fb60a76199a9f4c82ce9ad29609d33a671b2f))
+
 ### [0.8.1](https://github.com/Ethaks/FVTT-Quench/compare/v0.8.0...v0.8.1) (2022-08-01)
 
 
