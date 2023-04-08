@@ -121,8 +121,11 @@
 
 #quench-results .expandable {
   white-space: normal;
-  transition: height 0.5s ease;
+  transition: height 0.4s ease-in-out;
   overflow: hidden;
+}
+#quench-results .expandable:not(.expanded) {
+  display: none;
 }
 
 #quench-results .expandable > .error {

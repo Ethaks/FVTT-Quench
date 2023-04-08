@@ -15,6 +15,7 @@ import {
   RUNNABLE_STATES,
   serialize,
 } from "../utils/quench-utils";
+import { pause } from "../utils/user-utils";
 
 /**
  * The visual UI for representing Quench test batches and the tests results thereof.
@@ -113,10 +114,13 @@ export class QuenchResults extends Application {
   /**
    * Handle clicking on an expander, either to expand or collapse a summary or list of tests.
    *
+   * @remarks For some reason, this convoluted handling including pauses/timeouts, listeners etc. is necessary
+   * to allow Firefox to properly transition the height of the expandable element without getting stuck,
+   * while at the same time allowing Chromium to transition without resorting to flickering.
    * @internal
    * @param event - The click event
    */
-  private _onExpanderClick(event: Event) {
+  private async _onExpanderClick(event: Event) {
     const expander = event.target as HTMLElement;
     if (!expander.matches(".expander")) return;
     event.preventDefault();
@@ -126,41 +130,53 @@ export class QuenchResults extends Application {
 
     enforce(expander && expandable, "Invalid expander element");
 
-    const expanded = !expandable.classList.contains("disabled");
+    const expanded = expandable.classList.contains("expanded");
     const icons = { expanded: "fa-caret-down", collapsed: "fa-caret-right" };
-    if (expanded) expander.classList.replace(icons.expanded, icons.collapsed);
-    else expander.classList.replace(icons.collapsed, icons.expanded);
 
     if (expanded) {
       // Collapse
-      // Set height to current height to enable a transition, which requires a change from one value to another
+      expander.classList.remove(icons.expanded);
+      expander.classList.add(icons.collapsed);
+      if (expandable.style.height === "0px") expandable.style.removeProperty("height");
       expandable.style.height = expandable.clientHeight + "px";
-      setTimeout(() => {
-        expandable.style.height = "0px";
-      }, 0);
+
       expandable.addEventListener(
         "transitionend",
         () => {
-          // Remove explicit height and rely on display property to hide the element
-          expandable.classList.add("disabled");
+          // Remove height property and instead rely on class to keep the element collapsed
           expandable.style.removeProperty("height");
+          expandable.classList.remove("expanded");
         },
-        { once: true },
+        {
+          once: true,
+        },
       );
+      // Wait a bit to allow Firefox to recognize the change in height
+      await pause(10);
+      expandable.style.height = "0px";
     } else {
       // Expand
-      expandable.classList.remove("disabled");
+      expander.classList.remove(icons.collapsed);
+      expander.classList.add(icons.expanded);
+      expandable.classList.add("expanded");
+
       // Briefly set height to auto to get the full height of the element, then set it to 0 to enable a transition,
       // which requires a change from one value to another throughout cycles
       expandable.style.height = "auto";
       const height = expandable.clientHeight + "px";
       expandable.style.height = "0px";
-      setTimeout(() => {
-        expandable.style.height = height;
-      }, 0);
-      expandable.addEventListener("transitionend", () => {
-        expandable.style.removeProperty("height");
-      });
+
+      expandable.addEventListener(
+        "transitionend",
+        () => {
+          // Remove height property to enable the element to react to changes to its contents
+          expandable.style.removeProperty("height");
+        },
+        { once: true },
+      );
+      // Wait a bit to allow Firefox to recognize the change in height
+      await pause(10);
+      expandable.style.height = height;
     }
   }
 
@@ -204,8 +220,11 @@ export class QuenchResults extends Application {
         ) {
           const expander = element.querySelector(".expander");
           if (expander) expander.classList.replace("fa-caret-right", "fa-caret-down");
-          const expandable = element.querySelector(".expandable");
-          if (expandable) expandable.classList.remove("disabled");
+          const expandable: HTMLElement | null = element.querySelector(".expandable");
+          if (expandable) {
+            expandable.classList.add("expanded");
+            expandable.style.removeProperty("height");
+          }
         }
         return true;
       } else {
@@ -297,12 +316,9 @@ export class QuenchResults extends Application {
                     <i class="type-icon fas ${typeIcon}"></i>
                     <span class="runnable-title">${title}</span>
                 </span>
-                <div class="expandable" data-expand-id="${id}"></div>
+                <div class="expandable ${isTest ? "" : "expanded"}" data-expand-id="${id}"></div>
             </li>
         `);
-
-    const $expandable = $li.find("> .expandable");
-    if (isTest) $expandable[0].classList.add("disabled");
 
     this._updateLineItemStatus($li, RUNNABLE_STATES.IN_PROGRESS, isTest);
     return $li;
@@ -348,7 +364,7 @@ export class QuenchResults extends Application {
         .find("> .summary > .expander")
         .removeClass("fa-caret-down")
         .addClass("fa-caret-right");
-      $listElement.find("> .expandable").addClass("disabled");
+      $listElement.find("> .expandable").removeClass("expanded");
     }
 
     // Hide expander for tests with results without info that could be expanded
@@ -361,7 +377,7 @@ export class QuenchResults extends Application {
       const hasError = $listElement.find("> .expandable > .error").length > 0;
       const expandable = $listElement.children(".expandable");
       if (hasError) {
-        expandable[0].classList.add("disabled");
+        expandable[0].classList.remove("expanded");
         $listElement
           .find("> .summary > .expander")
           .removeClass("fa-caret-down")
@@ -577,7 +593,7 @@ export class QuenchResults extends Application {
         <i class="expander fas fa-caret-right" data-expand-target="${hookId}"></i></button>
         <i class="status-icon fas fa-times-circle"></i> <span class="hook-error"> ${errorTitle}</span>
       </span>
-      <div class="expandable disabled" data-expand-id=${hookId}>
+      <div class="expandable" data-expand-id=${hookId}>
         <div class="error"><span class="error-message">${error.message}</span></div>
       </div>`,
     );
