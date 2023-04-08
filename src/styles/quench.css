@@ -194,7 +194,7 @@
   background: #00990033;
 }
 
-#quench-results .hidden {
+#quench-results .quench-hidden {
   visibility: hidden;
 }
 

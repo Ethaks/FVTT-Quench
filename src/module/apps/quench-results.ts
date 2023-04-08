@@ -369,7 +369,7 @@ export class QuenchResults extends Application {
 
     // Hide expander for tests with results without info that could be expanded
     if (isTest && (state === RUNNABLE_STATES.SUCCESS || state === RUNNABLE_STATES.PENDING)) {
-      $listElement.find("> .summary > .expander").addClass("hidden");
+      $listElement.find("> .summary > .expander").addClass("quench-hidden");
     }
 
     // Hide direct error message child for suites with hook errors
