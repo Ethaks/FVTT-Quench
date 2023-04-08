@@ -13,7 +13,7 @@
     <img src="https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Fquench&colorB=4aa94a" alt="Forge Install %" />
   </a>
   <a href="https://www.npmjs.com/package/@ethaks/fvtt-quench">
-    <img alt="npm (scoped)" src="https://img.shields.io/npm/v/@ethaks/fvtt-quench">
+    <img alt="npm (scoped)" src="https://img.shields.io/npm/v/@ethaks/fvtt-quench?color=g&logo=npm">
   </a>
   <br />
   <a href="https://www.foundryvtt-hub.com/package/quench/">
