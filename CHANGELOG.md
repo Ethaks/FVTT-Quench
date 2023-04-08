@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.1](https://github.com/Ethaks/FVTT-Quench/compare/v0.9.0...v0.9.1) (2023-04-08)
+
+
+### Bug Fixes
+
+* **UI:** prevent Firefox from getting stuck and hiding expanded elements ([1b3b273](https://github.com/Ethaks/FVTT-Quench/commit/1b3b273517eb07a9e295349869708e36d955261c))
+* **UI:** restore indentation of nested tests in UI ([6b12575](https://github.com/Ethaks/FVTT-Quench/commit/6b12575628b7020daf8749ec897e65c237b79a16))
+
 ## [0.9.0](https://github.com/Ethaks/FVTT-Quench/compare/v0.8.1...v0.9.0) (2023-04-07)
 
 
