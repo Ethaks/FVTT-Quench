@@ -46,8 +46,8 @@ export class Quench {
   /**
    * fast-check for property based testing
    *
-   * @see https://dubzzz.github.io/fast-check.github.com/
-   * @see https://dubzzz.github.io/fast-check/
+   * @see https://fast-check.dev/
+   * @see https://fast-check.dev/api-reference/index.html
    */
   declare readonly fc: typeof fc;
 
@@ -381,7 +381,7 @@ export type QuenchRegisterBatchFunction = (context: QuenchBatchContext) => void 
  *
  * @see https://mochajs.org/#bdd
  * @see https://www.chaijs.com/
- * @see https://dubzzz.github.io/fast-check.github.com/
+ * @see https://fast-check.dev/api-reference/index.html
  *
  * @public
  */
@@ -407,7 +407,7 @@ export interface QuenchBatchContext {
   /** @see https://mochajs.org/#bdd */
   it: Mocha.TestFunction;
 
-  /** @see https://dubzzz.github.io/fast-check/ */
+  /** @see https://fast-check.dev/api-reference/index.html */
   fc: typeof fc;
 }
 
