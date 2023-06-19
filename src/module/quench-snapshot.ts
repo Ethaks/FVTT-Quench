@@ -214,10 +214,12 @@ export class QuenchSnapshotManager {
         });
         const result = await Promise.all(filePromises);
         return result;
-      } catch (error) {
+      } catch (thrownError) {
         // Every batch without snapshots will throw an error due to a missing directory
+        // before v11, this is a string; as of 11.302, this is an actual Error
+        const error = thrownError instanceof Error ? thrownError : new Error(thrownError as string);
         if (
-          error !==
+          error.message !==
           `Directory ${snapDirectory} does not exist or is not accessible in this storage location`
         )
           throw error;

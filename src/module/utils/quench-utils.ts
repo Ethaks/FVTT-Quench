@@ -241,9 +241,11 @@ export async function createDirectory(
       // Attempt directory creation
       const resp = await FilePicker.createDirectory("data", path);
       if (resp) directoryExists = true;
-    } catch (error) {
+    } catch (thrownError) {
       // Confirm directory existence with expected EEXIST error, throw unexpected errors
-      if (typeof error === "string" && error.startsWith("EEXIST")) {
+      // before v11, the thrown error is a string; as of 11.302, this is an actual Error
+      const error = thrownError instanceof Error ? thrownError : new Error(thrownError as string);
+      if (error.message.startsWith("EEXIST")) {
         directoryExists = true;
       } else throw error;
     }
