@@ -17,7 +17,7 @@
   "esmodules": ["./quench.js"],
   "styles": ["style.css"],
   "minimumCoreVersion": "0.8.5",
-  "compatibleCoreVersion": "11.301",
+  "compatibleCoreVersion": "11.302",
   "allowBugReporter": true,
   "library": true,
   "url": "https://github.com/Ethaks/FVTT-Quench",
