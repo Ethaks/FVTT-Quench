@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.2](https://github.com/Ethaks/FVTT-Quench/compare/v0.9.1...v0.9.2) (2023-06-19)
+
+
+### Bug Fixes
+
+* adapt to FilePicker changes in v11 ([24cad29](https://github.com/Ethaks/FVTT-Quench/commit/24cad2982ecbc9cf1012af6d30794ff03aa213b3)), closes [#306](https://github.com/Ethaks/FVTT-Quench/issues/306)
+
 ### [0.9.1](https://github.com/Ethaks/FVTT-Quench/compare/v0.9.0...v0.9.1) (2023-04-08)
 
 
