@@ -64,7 +64,7 @@
     "@commitlint/config-conventional": "^17.4.4",
     "@guanghechen/rollup-plugin-copy": "^5.0.1",
     "@sindresorhus/fnv1a": "^3.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.57.1",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^5.57.1",
     "chai": "^4.3.7",
     "chai-as-promised": "^7.1.1",
