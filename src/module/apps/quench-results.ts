@@ -626,8 +626,8 @@ export class QuenchResults extends Application {
                   duration: stats.duration,
                 })}</div>
                 <div class="${style}">${localize("StatsResults", {
-      ...stats,
-    })}</div>
+                  ...stats,
+                })}</div>
             </div>
         `);
     const $container = this.element.find("#quench-results-stats");
