@@ -5,6 +5,7 @@ import * as path from "node:path";
 import * as url from "node:url";
 import { copy } from "@guanghechen/rollup-plugin-copy";
 import { forceMinifyEsm } from "./tools/minify.mjs";
+import { resolveUrl } from "./tools/foundry-config.mjs";
 
 function resolve(relativePath: string) {
   return path.resolve(url.fileURLToPath(new URL(".", import.meta.url)), relativePath);
@@ -14,7 +15,7 @@ const COPY_FILES = ["README.md", "LICENSE", "CREDITS.md"];
 
 const config = defineConfig(({ mode }) => ({
   root: "src/",
-  base: "/modules/quench/",
+  base: resolveUrl("modules/quench/"),
   publicDir: resolve("public"),
   define: {
     "process.env.NODE_ENV": JSON.stringify(mode),
@@ -23,8 +24,8 @@ const config = defineConfig(({ mode }) => ({
     port: 30_001,
     open: false,
     proxy: {
-      "^(?!/modules/quench)": "http://localhost:30000/",
-      "/socket.io": {
+      [`^(?!${resolveUrl("modules/quench")})`]: "http://localhost:30000/",
+      [resolveUrl("socket.io/")]: {
         target: "ws://localhost:30000",
         ws: true,
       },
