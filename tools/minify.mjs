@@ -19,7 +19,6 @@ export function forceMinifyEsm() {
       order: "post",
       async handler(code, chunk, outputOptions) {
         if (outputOptions.format === "es" && chunk.fileName === "quench.js") {
-          debugger;
           return await minify(code, {
             keep_classnames: true,
             ecma: 2020,
