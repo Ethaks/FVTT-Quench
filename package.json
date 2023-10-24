@@ -63,7 +63,7 @@
   },
   "devDependencies": {
     "@commitlint/cli": "^18.0.0",
-    "@commitlint/config-conventional": "^17.6.6",
+    "@commitlint/config-conventional": "^18.0.0",
     "@guanghechen/rollup-plugin-copy": "^5.0.2",
     "@sindresorhus/fnv1a": "^3.0.0",
     "@types/fs-extra": "^11.0.1",
