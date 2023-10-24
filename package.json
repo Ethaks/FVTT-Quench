@@ -62,7 +62,7 @@
     "@league-of-foundry-developers/foundry-vtt-types": "^9"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.6.6",
+    "@commitlint/cli": "^18.0.0",
     "@commitlint/config-conventional": "^17.6.6",
     "@guanghechen/rollup-plugin-copy": "^5.0.2",
     "@sindresorhus/fnv1a": "^3.0.0",
