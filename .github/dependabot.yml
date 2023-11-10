@@ -12,3 +12,6 @@ updates:
       typescript-eslint:
         patterns:
           - "@typescript-eslint/*"
+      commitlint:
+        patterns:
+          - "@commitlint/*"
