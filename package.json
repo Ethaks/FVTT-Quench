@@ -62,8 +62,8 @@
     "@league-of-foundry-developers/foundry-vtt-types": "^9"
   },
   "devDependencies": {
-    "@commitlint/cli": "^18.0.0",
-    "@commitlint/config-conventional": "^18.0.0",
+    "@commitlint/cli": "^19.2.1",
+    "@commitlint/config-conventional": "^19.1.0",
     "@guanghechen/rollup-plugin-copy": "^5.0.2",
     "@sindresorhus/fnv1a": "^3.0.0",
     "@types/fs-extra": "^11.0.1",
