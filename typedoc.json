@@ -1,7 +1,6 @@
 {
-  "out": "docs",
-  "excludeInternal": true,
-  "media": "media",
-  "name": "Quench",
-  "entryPoints": ["./src/module/index.ts", "./src/module/hooks.d.ts"]
+	"out": "docs",
+	"excludeInternal": true,
+	"name": "Quench",
+	"entryPoints": ["./src/module/index.ts", "./src/module/hooks.d.ts"]
 }

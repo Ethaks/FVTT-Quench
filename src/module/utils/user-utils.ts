@@ -5,7 +5,7 @@
  * @returns A `Promise` that is resolved when the given time passed
  */
 export async function pause(millis: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, millis));
+	return new Promise((resolve) => setTimeout(resolve, millis));
 }
 
 /**
@@ -14,12 +14,12 @@ export async function pause(millis: number): Promise<void> {
  * **WARNING: This will permanently delete every entity in your world (scenes, actors, items, macros, roll tables, journal entries, playlists, chat messages, folders, etc.)**
  */
 export async function clearWorld(): Promise<void> {
-  const exclude = new Set([User].map((element) => element.metadata.name));
-  for (const collection of Object.values(game)) {
-    if (!(collection instanceof DocumentCollection) || exclude.has(collection.documentName))
-      continue;
-    if (collection.size === 0) continue;
+	const exclude = new Set([User].map((element) => element.metadata.name));
+	for (const collection of Object.values(game)) {
+		if (!(collection instanceof DocumentCollection) || exclude.has(collection.documentName))
+			continue;
+		if (collection.size === 0) continue;
 
-    await collection.documentClass.deleteDocuments(collection.map((document_) => document_.id));
-  }
+		await collection.documentClass.deleteDocuments(collection.map((document_) => document_.id));
+	}
 }

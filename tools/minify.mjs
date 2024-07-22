@@ -13,22 +13,22 @@ import { minify } from "terser";
  * @returns {import("vite").Plugin)}
  */
 export function forceMinifyEsm() {
-  return {
-    name: "forceMinifyEsm",
-    renderChunk: {
-      order: "post",
-      async handler(code, chunk, outputOptions) {
-        if (outputOptions.format === "es" && chunk.fileName === "quench.js") {
-          return await minify(code, {
-            keep_classnames: true,
-            ecma: 2020,
-            module: true,
-            compress: { unsafe: true },
-            sourceMap: { content: chunk.map },
-          });
-        }
-        return { code, map: chunk.map };
-      },
-    },
-  };
+	return {
+		name: "forceMinifyEsm",
+		renderChunk: {
+			order: "post",
+			async handler(code, chunk, outputOptions) {
+				if (outputOptions.format === "es" && chunk.fileName === "quench.js") {
+					return await minify(code, {
+						keep_classnames: true,
+						ecma: 2020,
+						module: true,
+						compress: { unsafe: true },
+						sourceMap: { content: chunk.map },
+					});
+				}
+				return { code, map: chunk.map };
+			},
+		},
+	};
 }

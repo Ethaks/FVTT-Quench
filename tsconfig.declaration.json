@@ -1,9 +1,9 @@
 {
-  "extends": "./tsconfig",
-  "compilerOptions": {
-    "noEmit": false,
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "lib"
-  }
+	"extends": "./tsconfig",
+	"compilerOptions": {
+		"noEmit": false,
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"outDir": "lib"
+	}
 }

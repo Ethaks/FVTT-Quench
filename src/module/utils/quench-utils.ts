@@ -1,5 +1,5 @@
+import { plugins as formatPlugins, format as prettyFormat } from "pretty-format";
 import type { QuenchBatchKey } from "../quench";
-import { format as prettyFormat, plugins as formatPlugins } from "pretty-format";
 
 /**
  * Represents the state of a test or suite
@@ -171,7 +171,6 @@ export function createNode(tag: string, options: CreateNodeOptions) {
     for (const a in options.attr) element.setAttribute(a, options.attr[a]);
   if (options.html !== undefined) element.innerHTML = options.html;
   const children = Array.isArray(options.children) ? options.children : [options.children];
-  // eslint-disable-next-line unicorn/no-array-callback-reference
   for (const child of children.filter(nonNullable)) {
     element.append(typeof child === "string" ? document.createTextNode(child) : child);
   }

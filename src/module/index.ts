@@ -15,15 +15,15 @@ import "./quench-init";
 
 // Expected API
 export type {
-  Quench,
-  QuenchBatchContext,
-  QuenchRegisterBatchOptions,
-  QuenchRegisterBatchFunction,
-  QuenchRunBatchOptions,
-  QuenchJsonReportOptions,
-  QuenchReports,
-  QuenchBatchData,
-  QuenchBatchKey,
+	Quench,
+	QuenchBatchContext,
+	QuenchRegisterBatchOptions,
+	QuenchRegisterBatchFunction,
+	QuenchRunBatchOptions,
+	QuenchJsonReportOptions,
+	QuenchReports,
+	QuenchBatchData,
+	QuenchBatchKey,
 } from "./quench";
 
 // Snapshots

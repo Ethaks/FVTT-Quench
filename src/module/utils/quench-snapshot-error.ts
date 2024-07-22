@@ -7,11 +7,11 @@ import { enforce } from "./quench-utils";
  * @internal
  */
 export class MissingSnapshotError extends Error {
-  constructor(context: { batchKey: string; hash: string }) {
-    enforce(quench);
-    const { batchKey, hash } = context;
-    const message = `Snapshot not found: ${quench.snapshots.getSnapDir(batchKey)}/${hash}.snap.txt`;
-    super(message);
-    this.name = this.constructor.name;
-  }
+	constructor(context: { batchKey: string; hash: string }) {
+		enforce(quench);
+		const { batchKey, hash } = context;
+		const message = `Snapshot not found: ${quench.snapshots.getSnapDir(batchKey)}/${hash}.snap.txt`;
+		super(message);
+		this.name = this.constructor.name;
+	}
 }

@@ -1,38 +1,38 @@
 {
-  "QUENCH": {
-    "Title": "QUENCH",
-    "Settings": "Settings",
-    "Filter": "Filter",
-    "Run": "Run",
-    "Abort": "Abort",
-    "UpdateSnapshots": "Update Snapshots",
-    "SelectAll": "Select All",
-    "SelectNone": "Select None",
-    "StatsSummary": "Ran {quantity} tests in {duration}ms.",
-    "StatsResults": "{passes}/{tests} tests passing.",
-    "Actual": "actual",
-    "Expected": "expected",
-    "LogTestDetailsLabel": "Detailed Test Output",
-    "LogTestDetailsHint": "Print detailed test results in the console",
-    "ExampleTestsLabel": "Show Included Example Tests",
-    "ExampleTestsHint": "Show the included sample tests in the QUENCH window",
-    "AutoShowQuenchWindowLabel": "Show Quench Dialog on Startup",
-    "AutoShowQuenchWindowHint": "Will automatically render the Quench window when the game is loaded or refreshed",
-    "AutoRunLabel": "Run on Startup",
-    "AutoRunHint": "Will automatically run all preselected Quench test batches when the game is loaded or refreshed",
-    "CollapseSuccessfulLabel": "Collapse Passing Suites",
-    "CollapseSuccessfulHint": "When enabled, suites for which all children suites and tests are passing will be collapsed by default",
-    "PreselectFiltersLabel": "Preselection Filters",
-    "PreselectFiltersHint": "Only batches matching this list of comma-separated filters will effectively be preselected when the world is loaded. Filters are case-insensitive and may contain wildcards (?, *, and **)",
+	"QUENCH": {
+		"Title": "QUENCH",
+		"Settings": "Settings",
+		"Filter": "Filter",
+		"Run": "Run",
+		"Abort": "Abort",
+		"UpdateSnapshots": "Update Snapshots",
+		"SelectAll": "Select All",
+		"SelectNone": "Select None",
+		"StatsSummary": "Ran {quantity} tests in {duration}ms.",
+		"StatsResults": "{passes}/{tests} tests passing.",
+		"Actual": "actual",
+		"Expected": "expected",
+		"LogTestDetailsLabel": "Detailed Test Output",
+		"LogTestDetailsHint": "Print detailed test results in the console",
+		"ExampleTestsLabel": "Show Included Example Tests",
+		"ExampleTestsHint": "Show the included sample tests in the QUENCH window",
+		"AutoShowQuenchWindowLabel": "Show Quench Dialog on Startup",
+		"AutoShowQuenchWindowHint": "Will automatically render the Quench window when the game is loaded or refreshed",
+		"AutoRunLabel": "Run on Startup",
+		"AutoRunHint": "Will automatically run all preselected Quench test batches when the game is loaded or refreshed",
+		"CollapseSuccessfulLabel": "Collapse Passing Suites",
+		"CollapseSuccessfulHint": "When enabled, suites for which all children suites and tests are passing will be collapsed by default",
+		"PreselectFiltersLabel": "Preselection Filters",
+		"PreselectFiltersHint": "Only batches matching this list of comma-separated filters will effectively be preselected when the world is loaded. Filters are case-insensitive and may contain wildcards (?, *, and **)",
 
-    "UploadedSnapshots": "Updated {files} snapshot files for {batches} batches",
+		"UploadedSnapshots": "Updated {files} snapshot files for {batches} batches",
 
-    "WARN": {
-      "BatchAlreadyExists": "QUENCH: Test batch \"{key}\" already exists. Overwriting... "
-    },
-    "ERROR": {
-      "InvalidPackageName": "QUENCH: Test batch \"{key}\" uses invalid package ID \"{packageName}\". Batch names should begin with the registering package's ID!",
-      "Hook": "Error in the {hook}"
-    }
-  }
+		"WARN": {
+			"BatchAlreadyExists": "QUENCH: Test batch \"{key}\" already exists. Overwriting... "
+		},
+		"ERROR": {
+			"InvalidPackageName": "QUENCH: Test batch \"{key}\" uses invalid package ID \"{packageName}\". Batch names should begin with the registering package's ID!",
+			"Hook": "Error in the {hook}"
+		}
+	}
 }

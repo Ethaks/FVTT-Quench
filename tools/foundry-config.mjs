@@ -16,8 +16,8 @@ const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 /** @type {Partial<FoundryConfig>} */
 const rawFoundryConfig = await fs
-  .readJson(path.resolve(__dirname, "..", "foundryconfig.json"))
-  .catch(() => ({}));
+	.readJson(path.resolve(__dirname, "..", "foundryconfig.json"))
+	.catch(() => ({}));
 
 /**
  * An object containing various configuration values related to Foundry VTT and the system's build process.
@@ -25,11 +25,11 @@ const rawFoundryConfig = await fs
  * @type {FoundryConfig}
  */
 export const FOUNDRY_CONFIG = Object.freeze({
-  dataPath: undefined,
-  appPath: undefined,
-  routePrefix: undefined,
-  openBrowser: false,
-  ...rawFoundryConfig,
+	dataPath: undefined,
+	appPath: undefined,
+	routePrefix: undefined,
+	openBrowser: false,
+	...rawFoundryConfig,
 });
 
 /**
@@ -40,9 +40,9 @@ export const FOUNDRY_CONFIG = Object.freeze({
  * @returns {string} A URL including the configured route prefix
  */
 export function resolveUrl(relativePath, absolute = true) {
-  const routeStart = absolute ? "/" : "";
-  const routePrefix = FOUNDRY_CONFIG.routePrefix ? `${FOUNDRY_CONFIG.routePrefix}/` : "";
-  return `${routeStart}${routePrefix}${relativePath}`;
+	const routeStart = absolute ? "/" : "";
+	const routePrefix = FOUNDRY_CONFIG.routePrefix ? `${FOUNDRY_CONFIG.routePrefix}/` : "";
+	return `${routeStart}${routePrefix}${relativePath}`;
 }
 
 /**
@@ -52,6 +52,6 @@ export function resolveUrl(relativePath, absolute = true) {
  * @returns {string} A URL without the configured route prefix
  */
 export function removePrefix(prefixedUrl) {
-  const routePrefix = FOUNDRY_CONFIG.routePrefix ? `${FOUNDRY_CONFIG.routePrefix}/` : "";
-  return prefixedUrl.replace(routePrefix, "");
+	const routePrefix = FOUNDRY_CONFIG.routePrefix ? `${FOUNDRY_CONFIG.routePrefix}/` : "";
+	return prefixedUrl.replace(routePrefix, "");
 }
