@@ -20,12 +20,12 @@
 		"lint:staged": "biome check --error-on-warnings --no-errors-on-unmatched --staged ./",
 		"build": "vite build",
 		"serve": "vite serve",
-		"prerelease": "npm run build && npm run lint && npm run declaration",
+		"prerelease": "bun run build && bun run lint && bun run declaration",
 		"release": "standard-version",
 		"declaration": "tsc --project tsconfig.declaration.json",
 		"docs": "typedoc",
 		"docs:watch": "typedoc --watch",
-		"prepack": "npm run declaration"
+		"prepack": "bun run declaration"
 	},
 	"repository": {
 		"type": "git",
