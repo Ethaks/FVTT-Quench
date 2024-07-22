@@ -138,7 +138,7 @@ export class QuenchResults extends Application {
       expander.classList.remove(icons.expanded);
       expander.classList.add(icons.collapsed);
       if (expandable.style.height === "0px") expandable.style.removeProperty("height");
-      expandable.style.height = expandable.clientHeight + "px";
+      expandable.style.height = `${expandable.clientHeight}px`;
 
       expandable.addEventListener(
         "transitionend",
@@ -163,7 +163,7 @@ export class QuenchResults extends Application {
       // Briefly set height to auto to get the full height of the element, then set it to 0 to enable a transition,
       // which requires a change from one value to another throughout cycles
       expandable.style.height = "auto";
-      const height = expandable.clientHeight + "px";
+      const height = `${expandable.clientHeight}px`;
       expandable.style.height = "0px";
 
       expandable.addEventListener(
@@ -227,10 +227,10 @@ export class QuenchResults extends Application {
           }
         }
         return true;
-      } else {
-        element.classList.add("disabled", "filtered");
-        return false;
       }
+
+      element.classList.add("disabled", "filtered");
+      return false;
     };
 
     for (const batchLi of html.children as HTMLCollection) {
@@ -287,8 +287,8 @@ export class QuenchResults extends Application {
    * @returns The <ul> into which child runnables can be inserted.
    */
   private _findOrMakeChildList($parentListElement: JQuery<HTMLElement>): JQuery<HTMLElement> {
-    const $expandable = $parentListElement.find(`> div.expandable`);
-    let $childList = $expandable.find(`> ul.runnable-list`);
+    const $expandable = $parentListElement.find("> div.expandable");
+    let $childList = $expandable.find("> ul.runnable-list");
     if ($childList.length === 0) {
       $childList = $(`<ul class="runnable-list">`);
       $expandable.append($childList);
@@ -398,24 +398,26 @@ export class QuenchResults extends Application {
       // Compact layout for single line values (e.g. comparing numbers)
       diffNode.insertAdjacentHTML(
         "beforeend",
+        // biome-ignore lint/style/useTemplate: readability
         '<span class="expected">- ' +
-          localize("Expected") +
-          ": " +
-          diff.find((change) => change.removed)?.value +
-          '<br></span><span class="actual">+ ' +
-          localize("Actual") +
-          ": " +
-          diff.find((change) => change.added)?.value,
+        localize("Expected") +
+        ": " +
+        diff.find((change) => change.removed)?.value +
+        '<br></span><span class="actual">+ ' +
+        localize("Actual") +
+        ": " +
+        diff.find((change) => change.added)?.value,
       );
     } else {
       // Full diff layout for longer diffs
       diffNode.insertAdjacentHTML(
         "beforeend",
+        // biome-ignore lint/style/useTemplate: readability
         '<span class="expected">- ' +
-          localize("Expected") +
-          ' </span><span class="actual">+ ' +
-          localize("Actual") +
-          "</span><br>",
+        localize("Expected") +
+        ' </span><span class="actual">+ ' +
+        localize("Actual") +
+        "</span><br>",
       );
       const fragment = diff
         .map((part, index) => {
@@ -425,18 +427,18 @@ export class QuenchResults extends Application {
               index === 0
                 ? []
                 : part.value
-                    .split("\n")
-                    .slice(0, 6)
-                    .map((p) => p.trimEnd())
-                    .filter(Boolean);
+                  .split("\n")
+                  .slice(0, 6)
+                  .map((p) => p.trimEnd())
+                  .filter(Boolean);
             const endContext =
               index === diff.length - 1
                 ? []
                 : part.value
-                    .split("\n")
-                    .slice(-6)
-                    .map((p) => p.trimEnd())
-                    .filter(Boolean);
+                  .split("\n")
+                  .slice(-6)
+                  .map((p) => p.trimEnd())
+                  .filter(Boolean);
             //const ellipse = startContext.length > 0 || endContext.length > 0 ? ["…\n"] : [];
             part.value = [...startContext, "…", ...endContext, ""].join("\n");
           }
@@ -555,8 +557,7 @@ export class QuenchResults extends Application {
       errorElement.html(error.message.replaceAll("/", "/<wbr>"));
 
     errorElement.append(
-      `<span class="error-message">${
-        error.name === "Error" ? "" : "<strong>" + error.name + ": </strong>"
+      `<span class="error-message">${error.name === "Error" ? "" : `<strong>${error.name}: </strong>`
       }${error.message}\n</span>`,
     );
 
@@ -622,12 +623,12 @@ export class QuenchResults extends Application {
     const $stats = $(`
             <div class="stats">
                 <div>${localize("StatsSummary", {
-                  quantity: stats.tests,
-                  duration: stats.duration,
-                })}</div>
+      quantity: stats.tests,
+      duration: stats.duration,
+    })}</div>
                 <div class="${style}">${localize("StatsResults", {
-                  ...stats,
-                })}</div>
+      ...stats,
+    })}</div>
             </div>
         `);
     const $container = this.element.find("#quench-results-stats");

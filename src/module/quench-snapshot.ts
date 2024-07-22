@@ -16,6 +16,14 @@ declare global {
   namespace Chai {
     interface AssertStatic {
       /**
+       * Asserts that object is truthy.
+       *
+       * @param object   Object to test.
+       * @param message    Message to display on error.
+       */
+      ok(value: unknown, message?: string): void; // silence TypeScript 2775
+
+      /**
        * Asserts equality of serialised argument (actual) and previously stored snapshot (expected)
        *
        * @param obj - The actual value to be compared to the snapshot
@@ -88,6 +96,7 @@ export class QuenchSnapshotManager {
 
     // Enable `matchSnapshot` for assert style
     // Create a wrapper around `matchSnapshot`, providing the actual object
+    // biome-ignore lint/complexity/useArrowFunction: allow flexible use
     chai.assert.matchSnapshot = function (obj) {
       return new chai.Assertion(obj).matchSnapshot();
     };
@@ -119,9 +128,10 @@ export class QuenchSnapshotManager {
         // Use equal assertion to compare strings, throwing default chai error on mismatch
         try {
           this.assert(
+            // biome-ignore lint/suspicious/noDoubleEquals: use usual chai matching
             expected == actual,
-            "expected\n" + truncate(actual) + "\nto equal\n" + truncate(expected),
-            "expected\n" + truncate(actual) + "\nto not equal\n" + truncate(expected),
+            `expected\n${truncate(actual)}\nto equal\n${truncate(expected)}`,
+            `expected\n${truncate(actual)}\nto not equal\n${truncate(expected)}`,
             expected,
             actual,
             true,
@@ -163,7 +173,7 @@ export class QuenchSnapshotManager {
    * @returns The batch's snapshot directory
    */
   getSnapDir(batchKey: string): string {
-    return this.quench._testBatches.get(batchKey)?.snapBaseDir + `/${batchKey}`;
+    return `${this.quench._testBatches.get(batchKey)?.snapBaseDir}/${batchKey}`;
   }
 
   /**
@@ -208,9 +218,11 @@ export class QuenchSnapshotManager {
           if (response.status === 200) {
             const result = await response.text();
             // Store snapshot string after making sure the batch has an object in the cache
+            // biome-ignore lint/suspicious/noAssignInExpressions: avoid type error due to empty array
             (this.fileCache[batchKey] ?? (this.fileCache[batchKey] = {}))[baseName] = result;
             return result;
-          } else return false;
+          }
+          return false;
         });
         const result = await Promise.all(filePromises);
         return result;
@@ -257,6 +269,7 @@ export class QuenchSnapshotManager {
       let current = accumulator;
       for (const part of directory.split("/")) {
         // @ts-expect-error Evil accessing/setting of arbitrary keys to create tree
+        // biome-ignore lint/suspicious/noAssignInExpressions: avoid type error due to empty array
         current = current[part] ?? (current[part] = {});
       }
       return accumulator;
@@ -269,8 +282,8 @@ export class QuenchSnapshotManager {
     const _info = ui.notifications?.info;
     if (ui.notifications && _info)
       ui.notifications.info = function (...args) {
-        if (args[0]?.includes(".snap.txt saved to")) return;
-        else _info.call(this, ...args);
+        if (args[0]?.includes(".snap.txt saved to")) return 0;
+        return _info.call(this, ...args);
       };
 
     // Upload all snapshot strings into their respective files
@@ -295,6 +308,7 @@ export class QuenchSnapshotManager {
           accumulator: Record<string, { batch: string; file: string; status: string | number }[]>,
           resp,
         ) => {
+          // biome-ignore lint/suspicious/noAssignInExpressions: avoid type error due to empty array
           (accumulator[resp.batch] || (accumulator[resp.batch] = [])).push(resp);
           return accumulator;
         },

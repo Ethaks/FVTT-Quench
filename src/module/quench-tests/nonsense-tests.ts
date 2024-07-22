@@ -99,6 +99,7 @@ function registerNestedTestBatch(quench: Quench) {
           });
 
           it("fails A", async function () {
+            await quench.utils.pause(1);
             assert.equal(1, 2, "not equal");
           });
         });
@@ -175,7 +176,7 @@ function registerSnapshotTestBatch(quench: Quench) {
         it("Passing Test using temporary actor", function () {
           // @ts-expect-error documentTypes will exist come v9
           const types = game.system.entityTypes ?? game.system.documentTypes;
-          const actorType = types["Actor"][0];
+          const actorType = types.Actor[0];
           const actor = new Actor({ name: "Test Actor", type: actorType });
           expect(actor).to.matchSnapshot();
         });
@@ -252,7 +253,7 @@ function registerPromiseTestBatch(quench: Quench) {
           await Promise.resolve(2 + 2).should.eventually.equal(4);
         });
         it("should handle assertions in async functions", async function () {
-          return assert.eventually.equal(Promise.resolve(2 + 2), 4);
+          return await assert.eventually.equal(Promise.resolve(2 + 2), 4);
         });
         it("should handle Promise rejection", async function () {
           await Promise.reject(new Error("Promise rejected")).should.be.rejectedWith(Error);

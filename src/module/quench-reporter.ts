@@ -3,6 +3,7 @@ import {
   getGame,
   getTestState,
   logPrefix,
+  RUNNABLE_STATE,
   RUNNABLE_STATES,
 } from "./utils/quench-utils";
 import type {
@@ -29,6 +30,9 @@ declare global {
 
 /** The default file name of Quench JSON reports */
 const JSON_REPORT_FILENAME = "quench-report.json";
+
+const CACHE_PROPERTIES = ["tests", "pending", "failures", "passes"] as const;
+type CacheProperty = (typeof CACHE_PROPERTIES)[number];
 
 /**
  * Given a mocha Runner, reports test results to the singleton instance of {@link QuenchResults} and in the console if enabled
@@ -126,7 +130,8 @@ export class QuenchReporter extends Mocha.reporters.Base {
         app.handleTestEnd(test);
 
         if (QuenchReporter._shouldLogTestDetails()) {
-          let stateString, stateColor;
+          let stateString: string;
+          let stateColor: string;
           switch (state) {
             case RUNNABLE_STATES.PENDING: {
               stateString = "PENDING";
@@ -216,7 +221,7 @@ export class QuenchReporter extends Mocha.reporters.Base {
     options: QuenchJsonReportOptions,
   ): Promise<void> {
     let { filename = JSON_REPORT_FILENAME } = options;
-    let directory;
+    let directory: string | undefined;
     if (filename?.includes("/")) {
       const parts = filename?.split("/");
       filename = parts.pop() as string;
@@ -262,11 +267,11 @@ export class QuenchReporter extends Mocha.reporters.Base {
   private static cleanCycles(obj: unknown): unknown {
     const cache: unknown[] = [];
     return JSON.parse(
-      JSON.stringify(obj, function (key, value) {
+      JSON.stringify(obj, (_key, value) => {
         if (typeof value === "object" && value !== null) {
           if (cache.includes(value)) {
             // Instead of going in a circle, we'll print [object Object]
-            return "" + value;
+            return `${value}`;
           }
           cache.push(value);
         }
@@ -304,9 +309,6 @@ const CONSOLE_COLORS = {
   pass: "#55AA55",
   pending: "#8844FF",
 } as const;
-
-const CACHE_PROPERTIES = ["tests", "pending", "failures", "passes"] as const;
-type CacheProperty = (typeof CACHE_PROPERTIES)[number];
 
 /**
  * Data belonging to a {@link Mocha.Test}, cleaned to be JSON-serializable

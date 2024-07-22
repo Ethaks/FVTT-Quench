@@ -18,7 +18,7 @@ declare global {
    * The singleton instance of the {@link Quench} class, containing the primary public API.
    * Initialized in the Quench module's {@link Hooks.StaticCallbacks.init "init"} hook.
    */
-  var quench: "quench" extends keyof LenientGlobalVariableTypes ? Quench : Quench | undefined; // eslint-disable-line no-var
+  var quench: "quenchReady" extends keyof AssumeHookRan ? Quench : Quench | undefined; // eslint-disable-line no-var
   namespace Hooks {
     interface StaticCallbacks {
       /**
@@ -56,14 +56,14 @@ Hooks.on("init", function quenchInit() {
   registerSettings();
 });
 
-Hooks.on("setup", function () {
+Hooks.on("setup", () => {
   Hooks.callAll("quenchReady", quench);
 });
 
 /**
  * Inject QUENCH button in sidebar
  */
-Hooks.on("renderSidebar", function (_sidebar: Application, html: JQuery<HTMLElement>) {
+Hooks.on("renderSidebar", (_sidebar: Application, html: JQuery<HTMLElement>) => {
   const $quenchButton = $(
     `<button class="quench-button" data-tooltip="QUENCH.Title"><i class="fas fa-flask"></i><b class="button-text">${localize(
       "Title",

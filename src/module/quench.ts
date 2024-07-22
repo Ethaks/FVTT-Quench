@@ -117,7 +117,6 @@ export class Quench {
         value: new Collection(),
       },
     });
-    return this;
   }
 
   /**

@@ -2,16 +2,34 @@
   "compilerOptions": {
     "module": "es2022",
     "target": "es2022",
-    "types": ["@league-of-foundry-developers/foundry-vtt-types", "@types/mocha", "vite/client"],
+    "types": [
+      "@league-of-foundry-developers/foundry-vtt-types",
+      "@types/mocha",
+      "vite/client"
+    ],
     "esModuleInterop": true,
-    "moduleResolution": "node",
+    "moduleResolution": "Bundler",
     "strictNullChecks": true,
     "exactOptionalPropertyTypes": true,
     "strict": true,
-    "lib": ["DOM", "DOM.Iterable", "ES2021"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2023"
+    ],
     "skipLibCheck": true,
     "noEmit": true
   },
-  "exclude": ["dist", "foundry"],
-  "include": ["src/**/*.ts"]
+  "exclude": [
+    "dist",
+    "foundry"
+  ],
+  "include": [
+    "src/**/*.ts"
+  ],
+  "typeAcquisition": {
+    "include": [
+      "jquery"
+    ]
+  }
 }

@@ -26,13 +26,14 @@ export type RUNNABLE_STATE = (typeof RUNNABLE_STATES)[keyof typeof RUNNABLE_STAT
 export function getTestState(test: Mocha.Test): RUNNABLE_STATE {
   if (test.pending) {
     return RUNNABLE_STATES.PENDING;
-  } else if (test.state === undefined) {
-    return RUNNABLE_STATES.IN_PROGRESS;
-  } else if (test.state === "passed") {
-    return RUNNABLE_STATES.SUCCESS;
-  } else {
-    return RUNNABLE_STATES.FAILURE;
   }
+  if (test.state === undefined) {
+    return RUNNABLE_STATES.IN_PROGRESS;
+  }
+  if (test.state === "passed") {
+    return RUNNABLE_STATES.SUCCESS;
+  }
+  return RUNNABLE_STATES.FAILURE;
 }
 
 /**
@@ -92,9 +93,9 @@ export const logPrefix = "QUENCH | " as const;
 export const MODULE_ID = "quench" as const;
 
 /** Ensures {@link game} is initialized, either returning the {@link Game} instance or throwing an error. */
-export function getGame(): Game {
+export function getGame() {
   if (!(game instanceof Game)) throw new Error("Game is not initialized yet!");
-  return game;
+  return game as ReadyGame;
 }
 
 /**
@@ -267,9 +268,8 @@ export async function createDirectory(
     }
     // Complete path's existence was confirmed
     return true;
-  } else {
-    return _createDirectory(fullPath);
   }
+  return _createDirectory(fullPath);
 }
 /**
  * Creates a directory tree mirroring a given object's tree.
