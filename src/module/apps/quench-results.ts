@@ -452,7 +452,6 @@ export class QuenchResults extends Application {
 						children: part.value,
 					});
 				})
-				// eslint-disable-next-line unicorn/no-array-reduce -- "summing" of fragments as simple operation
 				.reduce((fragment, span) => {
 					fragment.append(span);
 					return fragment;

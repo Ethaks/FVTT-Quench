@@ -77,7 +77,6 @@ function registerBasicFailingTestBatch(quench: Quench) {
 					expect({ foo: "bar" }).to.equal("bar");
 				});
 				it("A Failing Test Comparing undefined to a String", function () {
-					// eslint-disable-next-line unicorn/no-useless-undefined -- intentional test
 					expect(undefined).to.equal("bar");
 				});
 			});
@@ -200,7 +199,6 @@ function registerPropertyTestBatch(quench: Quench) {
 			const { describe, it, fc, expect, assert } = context;
 
 			// Code under test
-			// eslint-disable-next-line unicorn/consistent-function-scoping -- keep test contents together
 			const contains = (text: string, pattern: string) => text.includes(pattern);
 
 			describe("Basic Property Based Test", function () {

@@ -18,7 +18,7 @@ declare global {
 	 * The singleton instance of the {@link Quench} class, containing the primary public API.
 	 * Initialized in the Quench module's {@link Hooks.StaticCallbacks.init "init"} hook.
 	 */
-	var quench: "quenchReady" extends keyof AssumeHookRan ? Quench : Quench | undefined; // eslint-disable-line no-var
+	var quench: "quenchReady" extends keyof AssumeHookRan ? Quench : Quench | undefined;
 	namespace Hooks {
 		interface StaticCallbacks {
 			/**

@@ -28,7 +28,6 @@ declare global {
 			 *
 			 * @param obj - The actual value to be compared to the snapshot
 			 */
-			/* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // This function is meant to consume anything
 			matchSnapshot: (obj: unknown) => void;
 		}
 
@@ -264,7 +263,6 @@ export class QuenchSnapshotManager {
 	async updateSnapshots(): Promise<{ batch: string; file: string; status: string | number }[]> {
 		// Get all snapshot directories
 		const snapDirectories = [...this.updateQueue].map(({ batchKey }) => this.getSnapDir(batchKey));
-		// eslint-disable-next-line unicorn/no-array-reduce, unicorn/prefer-object-from-entries
 		const directoryTree: object = snapDirectories.reduce((accumulator, directory) => {
 			let current = accumulator;
 			for (const part of directory.split("/")) {
@@ -302,7 +300,6 @@ export class QuenchSnapshotManager {
 				};
 			});
 			const responses = await Promise.all(uploadPromises);
-			// eslint-disable-next-line unicorn/prefer-object-from-entries, unicorn/no-array-reduce -- groupBy
 			const respData = responses.reduce(
 				(
 					accumulator: Record<string, { batch: string; file: string; status: string | number }[]>,
