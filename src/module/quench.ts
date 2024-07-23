@@ -175,7 +175,7 @@ export class Quench {
 	 *     If you register a test batch with a pre-existing key, it will overwrite the previous test batch.
 	 * @param fn - The function which will be called to register the suites and tests within your test batch.
 	 * @param context - Additional options affecting Quench's handling of this batch.
-	 * @example ```js
+	 * @example
 	 * quench.registerBatch(
 	 *  "quench.examples.basic-pass",
 	 *  (context) => {
@@ -193,7 +193,6 @@ export class Quench {
 	 *    snapBaseDir: "quench",
 	 *  },
 	 *);
-	 * ```
 	 */
 	registerBatch(
 		key: QuenchBatchKey,
