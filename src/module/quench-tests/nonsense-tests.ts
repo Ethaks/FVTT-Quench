@@ -173,10 +173,9 @@ function registerSnapshotTestBatch(quench: Quench) {
 					"Some Test ¯\\_(ツ)_/¯".should.matchSnapshot();
 				});
 				it("Passing Test using temporary actor", function () {
-					// @ts-expect-error documentTypes will exist come v9
-					const types = game.system.entityTypes ?? game.system.documentTypes;
-					const actorType = types.Actor[0];
-					const actor = new Actor({ name: "Test Actor", type: actorType });
+					const type = Object.keys(game.system?.documentTypes.Actor ?? { base: "" })[0];
+					// @ts-expect-error -- Some type has to exist
+					const actor = new Actor({ name: "Test Actor", type });
 					expect(actor).to.matchSnapshot();
 				});
 			});
