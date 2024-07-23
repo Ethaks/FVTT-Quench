@@ -18,6 +18,7 @@
 		"lint": "biome lint --diagnostic-level=error --no-errors-on-unmatched ./",
 		"lint:fix": "biome check --write --unsafe ./",
 		"lint:staged": "biome check --error-on-warnings --no-errors-on-unmatched --staged ./",
+		"types": "tsc",
 		"build": "vite build",
 		"serve": "vite serve",
 		"prerelease": "bun run build && bun run lint && bun run declaration",
