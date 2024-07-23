@@ -18,7 +18,13 @@ import {
 } from "../utils/quench-utils";
 import { pause } from "../utils/user-utils";
 
-const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+// HACK: Someone should be shot for this.
+import type ApplicationV2Type from "../../../node_modules/@league-of-foundry-developers/foundry-vtt-types/src/foundry/client-esm/applications/api/application.d.mts";
+const ApplicationV2: typeof ApplicationV2Type = foundry.applications.api.ApplicationV2;
+const HandlebarsApplicationMixin = foundry.applications.api.HandlebarsApplicationMixin;
+const HandlebarsClass = HandlebarsApplicationMixin(ApplicationV2) as typeof ApplicationV2 & {
+	PARTS: Record<string, unknown>;
+};
 
 /**
  * The visual UI for representing Quench test batches and the tests results thereof.
@@ -26,7 +32,7 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
  * @internal
  */
 // @ts-expect-error -- Types incorrectly require actions to be async
-export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2) {
+export class QuenchResults extends HandlebarsClass {
 	/** The `Quench` instance this `Application` is used by */
 	quench: Quench;
 
