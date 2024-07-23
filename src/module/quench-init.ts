@@ -8,7 +8,7 @@ import { Quench } from "./quench";
 import { QuenchSnapshotManager } from "./quench-snapshot";
 import { registerExampleTests } from "./quench-tests/nonsense-tests";
 import { registerSettings } from "./settings";
-import { enforce, getFilterSetting, getGame, localize } from "./utils/quench-utils";
+import { createNode, enforce, getFilterSetting, getGame, localize } from "./utils/quench-utils";
 import { pause } from "./utils/user-utils";
 
 import "../styles/quench.css";
@@ -64,18 +64,15 @@ Hooks.on("setup", () => {
  * Inject QUENCH button in sidebar
  */
 Hooks.on("renderSidebar", (_sidebar: Application, html: JQuery<HTMLElement>) => {
-	const $quenchButton = $(
-		`<button class="quench-button" data-tooltip="QUENCH.Title"><i class="fas fa-flask"></i><b class="button-text">${localize(
-			"Title",
-		)}</b></button>`,
-	);
-
-	$quenchButton.on("click", function onClick() {
+	const quenchButton = createNode("button");
+	quenchButton.classList.add("quench-button");
+	quenchButton.setAttribute("data-tooltip", "QUENCH.Title");
+	quenchButton.innerHTML = `<i class="fas fa-flask"></i><b class="button-text">${localize("Title")}</b>`;
+	quenchButton.addEventListener("click", () => {
 		enforce(quench);
 		quench.app.render(true);
 	});
-
-	html.append($quenchButton);
+	html[0].append(quenchButton);
 });
 
 /**
@@ -97,20 +94,3 @@ Hooks.on("ready", async () => {
 		quench.runBatches(getFilterSetting(), { preSelectedOnly: true });
 	}
 });
-
-Hooks.on(
-	"getQuenchResultsHeaderButtons",
-	(_app: QuenchResults, buttons: Record<string, unknown>[]) => {
-		buttons.unshift({
-			class: "quench-settings",
-			icon: "fas fa-cog",
-			label: "QUENCH.Settings",
-			onclick: () => {
-				const config = getGame().settings.sheet;
-				// @ts-expect-error No other way to render setting config with specific tab active
-				config._tabs[0].active = "quench";
-				config.render(true, { focus: true });
-			},
-		});
-	},
-);
