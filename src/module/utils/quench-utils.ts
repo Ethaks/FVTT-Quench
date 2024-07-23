@@ -165,7 +165,7 @@ interface CreateNodeOptions {
  * @param options - Additional options affecting the element's contents
  * @returns The created HTML element
  */
-export function createNode(tag: string, options: CreateNodeOptions) {
+export function createNode(tag: string, options: CreateNodeOptions = {}) {
 	const element = document.createElement(tag);
 	if (options.attr !== undefined)
 		for (const a in options.attr) element.setAttribute(a, options.attr[a]);
@@ -179,6 +179,24 @@ export function createNode(tag: string, options: CreateNodeOptions) {
 		options.baseNode.append(element);
 	}
 	return element;
+}
+
+export function toggleHidden(
+	element: HTMLElement | null,
+	state: boolean | undefined,
+): boolean | null {
+	if (!element) return null;
+	const isHidden = element.style.display === "none";
+
+	// Toggle state
+	if (state === undefined) {
+		element.style.display = isHidden ? "" : "none";
+		return !isHidden;
+	}
+
+	// Set state
+	element.style.display = state ? "none" : "";
+	return element.style.display === "none";
 }
 
 /**

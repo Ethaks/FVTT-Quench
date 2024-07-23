@@ -14,15 +14,19 @@ import {
 	getTestState,
 	localize,
 	serialize,
+	toggleHidden,
 } from "../utils/quench-utils";
 import { pause } from "../utils/user-utils";
+
+const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 /**
  * The visual UI for representing Quench test batches and the tests results thereof.
  *
  * @internal
  */
-export class QuenchResults extends Application {
+// @ts-expect-error -- Types incorrectly require actions to be async
+export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2) {
 	/** The `Quench` instance this `Application` is used by */
 	quench: Quench;
 
@@ -33,32 +37,63 @@ export class QuenchResults extends Application {
 	 * @param quench - The `Quench` instance this `Application` belongs to
 	 * @param options - Additional options
 	 */
-	constructor(quench: Quench, options?: ApplicationOptions) {
+	constructor(
+		quench: Quench,
+		options: Partial<foundry.applications.types.ApplicationConfiguration> = {},
+	) {
 		super(options);
 		this.quench = quench;
 	}
 
-	/** @inheritDoc */
-	static override get defaultOptions(): ApplicationOptions {
-		const width = 550;
-		const sidebarWidth = 300;
-		const margin = 10;
+	/**
+	 * The application's search filter, instantiated once when the app is created.
+	 */
+	#searchFilter = new SearchFilter({
+		inputSelector: "input#quench-filter",
+		contentSelector: "#quench-batches-list",
+		// @ts-expect-error Typing?
+		callback: this._onSearchFilter.bind(this),
+	});
 
-		return mergeObject(super.defaultOptions, {
+	/* -------------------------------------------- */
+	/*               Configuration                  */
+	/* -------------------------------------------- */
+
+	static override DEFAULT_OPTIONS = {
+		id: "quench-results",
+		position: {
+			width: 550,
+			height: window.innerHeight - 10 * 3,
+			top: 10,
+			left: window.innerWidth - 550 - 300 - 10 * 2,
+		},
+		window: {
 			title: "QUENCH.Title",
-			id: "quench-results",
-			width,
-			height: window.innerHeight - margin * 3,
-			top: margin,
-			left: window.innerWidth - width - sidebarWidth - margin * 2,
 			resizable: true,
-			template: "/modules/quench/templates/quench-results.hbs",
-			filters: [{ inputSelector: "input#quench-filter", contentSelector: "#quench-batches-list" }],
-		});
-	}
+			controls: [{ icon: "fas fa-gear", label: "Settings", action: "openSettings" }],
+		},
+		actions: {
+			select: this._onSelect,
+			run: this._onRun,
+			abort: this._onAbort,
+			updateSnapshots: this._onUpdateSnapshots,
+			expand: this._onExpander,
+			openSettings: this._onOpenSettings,
+		},
+	};
+
+	static override PARTS = {
+		main: {
+			template: "modules/quench/templates/quench-results.hbs",
+		},
+	};
+
+	/* -------------------------------------------- */
+	/*                 Rendering                    */
+	/* -------------------------------------------- */
 
 	/** @inheritDoc */
-	override getData(): QuenchResultData {
+	override async _prepareContext(): Promise<QuenchResultData> {
 		const filterSetting = getFilterSetting();
 		const preselected = this.quench._filterBatches(filterSetting, { preSelectedOnly: true });
 		return {
@@ -73,42 +108,64 @@ export class QuenchResults extends Application {
 		};
 	}
 
-	override activateListeners($html: JQuery) {
-		super.activateListeners($html);
+	/** @inheritDoc */
+	override _onRender(
+		context: QuenchResultData,
+		options: foundry.applications.types.ApplicationRenderOptions,
+	) {
+		super._onRender(context, options);
+		this.#searchFilter.bind(this.element);
+	}
 
-		// Select All Button
-		$html.find("#quench-select-all").on("click", () => {
-			this.element
-				.find(`#quench-batches-list .test-batch input[type="checkbox"]`)
-				.prop("checked", true);
-		});
+	/* -------------------------------------------- */
+	/*                  Actions                     */
+	/* -------------------------------------------- */
 
-		// Select None Button
-		$html.find("#quench-select-none").on("click", () => {
-			this.element
-				.find(`#quench-batches-list .test-batch input[type="checkbox"]`)
-				.prop("checked", false);
-		});
+	/**
+	 * Handle clicking on the "Select All" or "Select None" buttons
+	 */
+	static _onSelect(this: QuenchResults, _event: Event, target: HTMLElement): void {
+		const select = target.dataset.select || "";
+		if (["all", "none"].includes(select)) {
+			// Check all checkboxes if all, or uncheck if none
+			for (const element of this.element.querySelectorAll(
+				"#quench-batches-list .test-batch input[type=checkbox]",
+			)) {
+				(element as HTMLInputElement).checked = select === "all";
+			}
+		}
+	}
 
-		// Run Button
-		$html.find("#quench-run").on("click", async () => {
-			const enabledBatches: QuenchBatchKey[] = this._getCheckedBatches();
-			await this.quench.runBatches(enabledBatches);
-		});
+	/**
+	 * Handle clicking on the "Run" button
+	 */
+	static async _onRun(this: QuenchResults, _event: Event, _target: HTMLElement) {
+		const enabledBatches: QuenchBatchKey[] = this._getCheckedBatches();
+		await this.quench.runBatches(enabledBatches);
+	}
 
-		// Abort Button
-		$html.find("#quench-abort").on("click", () => {
-			this.quench.abort();
-		});
+	/**
+	 * Handle clicking on the "Abort" button
+	 */
+	static _onAbort(this: QuenchResults, _event: Event, _target: HTMLElement) {
+		return this.quench.abort();
+	}
 
-		$html.find("#quench-update-snapshots").on("click", async () => {
-			await this.quench.snapshots.updateSnapshots();
-		});
+	/**
+	 * Handle clicking on the "Update Snapshots" button
+	 */
+	static _onUpdateSnapshots(this: QuenchResults, _event: Event, _target: HTMLElement) {
+		return this.quench.snapshots.updateSnapshots();
+	}
 
-		// Handle clicking on expander via event delegation
-		$html[0].addEventListener("click", (event) => {
-			this._onExpanderClick(event);
-		});
+	/**
+	 * Handle clicking on the settings button, opening the settings configuration with the Quench tab activated.
+	 */
+	static _onOpenSettings(this: QuenchResults, _event: Event, _target: HTMLElement) {
+		const config = getGame().settings.sheet;
+		// @ts-expect-error No other way to render setting config with specific tab active
+		config._tabs[0].active = "quench";
+		config.render(true, { focus: true });
 	}
 
 	/**
@@ -120,8 +177,8 @@ export class QuenchResults extends Application {
 	 * @internal
 	 * @param event - The click event
 	 */
-	private async _onExpanderClick(event: Event) {
-		const expander = event.target as HTMLElement;
+	static async _onExpander(event: Event, target: HTMLElement) {
+		const expander = target;
 		if (!expander.matches(".expander")) return;
 		event.preventDefault();
 		const expandable = expander
@@ -180,8 +237,10 @@ export class QuenchResults extends Application {
 		}
 	}
 
-	/** @inheritDoc */
-	override _onSearchFilter(_event: Event, query: string, rgx: RegExp, html: HTMLElement) {
+	/**
+	 * Filter displayed test batches.
+	 */
+	private _onSearchFilter(_event: Event, query: string, rgx: RegExp, html: HTMLElement) {
 		/**
 		 * Recursively check if an element should be displayed.
 		 * An element should only be displayed if a parent's or child's title matches the query,
@@ -233,36 +292,34 @@ export class QuenchResults extends Application {
 			return false;
 		};
 
-		for (const batchLi of html.children as HTMLCollection) {
+		for (const batchLi of html.children) {
 			for (const element of batchLi.querySelector(".runnable-list")?.children ?? []) {
 				checkElement(element as HTMLElement);
 			}
 		}
 	}
 
+	/* -------------------------------------------- */
+	/*              HTML Utilities                  */
+	/* -------------------------------------------- */
+
 	/**
 	 * Clears the currently visible test results while maintaining currently selected test batches
 	 */
 	async clear() {
-		if (this._state !== Application.RENDER_STATES.RENDERED) return;
+		if (!this.rendered) return;
 
 		const checked = this._getCheckedBatches();
+		await this.render();
 
-		try {
-			await this._render(false);
-		} catch (error) {
-			if (error instanceof Error)
-				error.message = `An error occurred while rendering ${this.constructor.name} ${this.appId}: ${error.message}`;
-			console.error(error);
-			this._state = Application.RENDER_STATES.ERROR;
-		}
-
-		this.element.find("#quench-batches-list li.test-batch").each(function () {
-			const batchChecked = checked.includes(this.dataset.batch as QuenchBatchKey);
+		for (const element of this.element.querySelectorAll("#quench-batches-list li.test-batch")) {
+			const batchChecked = checked.includes(
+				(element as HTMLElement).dataset.batch as QuenchBatchKey,
+			);
 			if (batchChecked !== undefined) {
-				$(this).find("> label > input[type=checkbox]").prop("checked", batchChecked);
+				(element.querySelector("input[type=checkbox") as HTMLInputElement).checked = batchChecked;
 			}
-		});
+		}
 	}
 
 	/**
@@ -270,31 +327,34 @@ export class QuenchResults extends Application {
 	 * @returns An array of {@link QuenchBatchKey}s belonging to batches checked in the UI
 	 */
 	private _getCheckedBatches(): QuenchBatchKey[] {
-		const $batchEls = this.element.find("#quench-batches-list li");
-		return $batchEls
-			.map((_, element) => {
-				const enabled = !!$(element).find("input[type=checkbox]").prop("checked");
-				return { key: element.dataset.batch, enabled };
-			})
-			.get()
-			.filter((batch) => batch.key && batch.enabled)
-			.map(({ key }) => key as QuenchBatchKey);
+		const batchEls: NodeListOf<HTMLElement> =
+			this.element.querySelectorAll("#quench-batches-list li");
+		const batches: QuenchBatchKey[] = [];
+		for (const batchElement of batchEls) {
+			const enabled = (batchElement.querySelector("input[type=checkbox") as HTMLInputElement)
+				?.checked;
+			const key = batchElement.dataset.batch;
+			if (key && enabled) batches.push(key as QuenchBatchKey);
+		}
+		return batches;
 	}
 
 	/**
 	 * Finds or creates an unordered list to contain items for each child runnable (test or suite) of the given parent
-	 * @param $parentListElement - The <li> of the parent test batch or suite
+	 * @param parentListElement - The <li> of the parent test batch or suite
 	 * @returns The <ul> into which child runnables can be inserted.
 	 */
-	private _findOrMakeChildList($parentListElement: JQuery<HTMLElement>): JQuery<HTMLElement> {
-		const $expandable = $parentListElement.find("> div.expandable");
-		let $childList = $expandable.find("> ul.runnable-list");
-		if ($childList.length === 0) {
-			$childList = $(`<ul class="runnable-list">`);
-			$expandable.append($childList);
+	private _findOrMakeChildList(parentListElement: HTMLElement): HTMLElement {
+		const expandable = parentListElement.querySelector("div.expandable");
+		const childList = expandable?.querySelectorAll("ul.runnable-list");
+		if (childList?.length === 0) {
+			const newChildList = document.createElement("ul");
+			newChildList.classList.add("runnable-list");
+			expandable?.insertAdjacentElement("beforeend", newChildList);
+			return newChildList;
 		}
-
-		return $childList;
+		enforce(childList);
+		return childList[0] as HTMLUListElement;
 	}
 
 	/**
@@ -304,38 +364,39 @@ export class QuenchResults extends Application {
 	 * @param isTest - Whether this runnable is a test (or a suite, if false)
 	 * @returns The <li> element representing this runnable.
 	 */
-	private _makeRunnableLineItem(title: string, id: string, isTest: boolean): JQuery {
+	private _makeRunnableLineItem(title: string, id: string, isTest: boolean): HTMLLIElement {
 		const type = isTest ? "test" : "suite";
 		const typeIcon = isTest ? "fa-flask" : "fa-folder";
 		const expanderIcon = isTest ? "fa-caret-right" : "fa-caret-down";
-		const $li = $(`
-            <li class="${type}" data-${type}-id="${id}">
+		const li = document.createElement("li");
+		li.classList.add(type);
+		li.id = id;
+		li.dataset[`${type}Id`] = id;
+		li.innerHTML = `
                 <span class="summary">
-                    <i class="expander fas ${expanderIcon}" data-expand-target="${id}"></i></button>
+                    <i class="expander fas ${expanderIcon}" data-action="expand" data-expand-target="${id}"></i></button>
                     <i class="status-icon"></i>
                     <i class="type-icon fas ${typeIcon}"></i>
                     <span class="runnable-title">${title}</span>
                 </span>
-                <div class="expandable ${isTest ? "" : "expanded"}" data-expand-id="${id}"></div>
-            </li>
-        `);
-
-		this._updateLineItemStatus($li, RUNNABLE_STATES.IN_PROGRESS, isTest);
-		return $li;
+                <div class="expandable ${isTest ? "" : "expanded"}" data-expand-id="${id}"></div>`;
+		this._updateLineItemStatus(li, RUNNABLE_STATES.IN_PROGRESS, isTest);
+		return li;
 	}
 
 	/**
 	 * Updates the given existing <li> representing a runnable based on the given state
-	 * @param $listElement - The list element representing the runnable
+	 * @param listElement - The list element representing the runnable
 	 * @param state - the state of the runnable
 	 * @param isTest - whether the item is a test
 	 */
 	private _updateLineItemStatus(
-		$listElement: JQuery<HTMLElement>,
+		listElement: HTMLLIElement,
 		state: RUNNABLE_STATE,
 		isTest?: boolean,
 	) {
-		const $icon = $listElement.find("> .summary > i.status-icon");
+		const iconElement = listElement.querySelector(".summary > i.status-icon");
+		if (!iconElement) return;
 		let icon = "fa-sync";
 		const style = "fas";
 		switch (state) {
@@ -352,36 +413,34 @@ export class QuenchResults extends Application {
 				break;
 			}
 		}
-		$icon.removeClass();
-		$icon.addClass(`status-icon ${style} ${icon}`);
+		iconElement.classList.value = "";
+		iconElement.classList.value = `status-icon ${style} ${icon}`;
 
 		if (
 			getGame().settings.get("quench", "collapseSuccessful") &&
 			state === RUNNABLE_STATES.SUCCESS &&
 			!isTest
 		) {
-			$listElement
-				.find("> .summary > .expander")
-				.removeClass("fa-caret-down")
-				.addClass("fa-caret-right");
-			$listElement.find("> .expandable").removeClass("expanded");
+			listElement
+				.querySelector(".summary > .expander")
+				?.classList.replace("fa-caret-down", "fa-caret-right");
+			listElement.querySelector(".expandable")?.classList.remove("expanded");
 		}
 
 		// Hide expander for tests with results without info that could be expanded
 		if (isTest && (state === RUNNABLE_STATES.SUCCESS || state === RUNNABLE_STATES.PENDING)) {
-			$listElement.find("> .summary > .expander").addClass("quench-hidden");
+			listElement.querySelector(".summary > .expander")?.classList.add("quench-hidden");
 		}
 
 		// Hide direct error message child for suites with hook errors
-		if ($listElement.hasClass("suite") && state === RUNNABLE_STATES.FAILURE) {
-			const hasError = $listElement.find("> .expandable > .error").length > 0;
-			const expandable = $listElement.children(".expandable");
+		if (listElement.classList.contains("suite") && state === RUNNABLE_STATES.FAILURE) {
+			const hasError = listElement.querySelectorAll(":scope > .expandable > .error").length > 0;
+			const expandable = listElement.querySelectorAll(":scope > .expandable");
 			if (hasError) {
 				expandable[0].classList.remove("expanded");
-				$listElement
-					.find("> .summary > .expander")
-					.removeClass("fa-caret-down")
-					.addClass("fa-caret-right");
+				listElement
+					?.querySelector(".summary > .expander")
+					?.classList.replace("fa-caret-down", "fa-caret-right");
 			}
 		}
 	}
@@ -461,9 +520,14 @@ export class QuenchResults extends Application {
 		return diffNode;
 	}
 
-	/*--------------------------------*/
-	/* Handle incoming test reporting */
-	/*--------------------------------*/
+	private _setElementDisabled(selector: string, disabled = true) {
+		const element: HTMLButtonElement | null = this.element.querySelector(selector);
+		if (element) element.disabled = disabled;
+	}
+
+	/* -------------------------------------------- */
+	/*          Incoming Test Reports               */
+	/* -------------------------------------------- */
 
 	/**
 	 * Called by {@link QuenchReporter} when a mocha suite begins running
@@ -471,20 +535,26 @@ export class QuenchResults extends Application {
 	 */
 	handleSuiteBegin(suite: Mocha.Suite) {
 		const batchkey = suite._quench_parentBatch;
-		const isBatchRoot = suite._quench_batchRoot;
+		const isBatchRoot = suite._quench_batchRoot || suite.root;
 
 		// If this suite is the root of a test batch or does not belong to a test batch, don't show in the UI.
 		if (!batchkey || isBatchRoot) return;
 
 		// Get the li to add this test batch to
 		const parentId = suite.parent?.id;
-		const $batchLi = this.element.find(`li.test-batch[data-batch="${batchkey}"]`);
-		let $parentLi = $batchLi.find(`li.suite[data-suite-id="${parentId}"]`);
-		if ($parentLi.length === 0) $parentLi = $batchLi;
+		const batchLi: HTMLElement | null = this.element.querySelector(
+			`li.test-batch[data-batch="${batchkey}"]`,
+		);
+		const parentLi: HTMLElement | null =
+			batchLi?.querySelector(`li.suite[data-suite-id="${parentId}"]`) ?? batchLi;
+		enforce(parentLi);
 
 		// Add a li for this test batch
-		const $childSuiteList = this._findOrMakeChildList($parentLi);
-		$childSuiteList.append(this._makeRunnableLineItem(suite.title, suite.id, false));
+		const childSuiteList = this._findOrMakeChildList(parentLi);
+		childSuiteList.insertAdjacentElement(
+			"beforeend",
+			this._makeRunnableLineItem(suite.title, suite.id, false),
+		);
 	}
 
 	/**
@@ -492,11 +562,14 @@ export class QuenchResults extends Application {
 	 * @param suite - The finished Mocha suite
 	 */
 	handleSuiteEnd(suite: Mocha.Suite) {
-		const isBatchRoot = suite._quench_batchRoot;
+		const isBatchRoot = suite._quench_batchRoot || suite.root;
 		if (isBatchRoot) return;
 
-		const $suiteLi = this.element.find(`li.suite[data-suite-id="${suite.id}"]`);
-		this._updateLineItemStatus($suiteLi, getSuiteState(suite));
+		const suiteLi: HTMLLIElement | null = this.element.querySelector(
+			`li.suite[data-suite-id="${suite.id}"]`,
+		);
+		enforce(suiteLi);
+		this._updateLineItemStatus(suiteLi, getSuiteState(suite));
 	}
 
 	/**
@@ -507,12 +580,15 @@ export class QuenchResults extends Application {
 		const batchKey = test._quench_parentBatch;
 		const parentId = test.parent?.id;
 
-		const $batchLi = this.element.find(`li.test-batch[data-batch="${batchKey}"]`);
-		let $parentLi = $batchLi.find(`li.suite[data-suite-id="${parentId}"]`);
-		if ($parentLi.length === 0) $parentLi = $batchLi;
+		const batchLi: HTMLLIElement | null = this.element.querySelector(
+			`li.test-batch[data-batch="${batchKey}"]`,
+		);
+		const parentLi: HTMLLIElement | null =
+			batchLi?.querySelector(`li.suite[data-suite-id="${parentId}"]`) ?? batchLi;
+		enforce(parentLi);
 
-		const $childTestList = this._findOrMakeChildList($parentLi);
-		$childTestList.append(this._makeRunnableLineItem(test.title, test.id, true));
+		const childTestList = this._findOrMakeChildList(parentLi);
+		childTestList.append(this._makeRunnableLineItem(test.title, test.id, true));
 	}
 
 	/**
@@ -521,17 +597,20 @@ export class QuenchResults extends Application {
 	 * @param test - The finished test
 	 */
 	handleTestEnd(test: Mocha.Test) {
-		let $testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
+		let testLi: HTMLLIElement | null = this.element.querySelector(
+			`li.test[data-test-id="${test.id}"]`,
+		);
 
 		// If there is not already a list item for this test, create a new one. This is necessary because `handleTestBegin` is not called
 		// automatically for "pending" tests
-		if ($testLi.length === 0) {
+		if (!testLi) {
 			this.handleTestBegin(test);
-			$testLi = this.element.find(`li.test[data-test-id="${test.id}"]`);
+			testLi = this.element.querySelector(`li.test[data-test-id="${test.id}"]`);
 		}
 
 		const state = getTestState(test);
-		this._updateLineItemStatus($testLi, state, true);
+		enforce(testLi);
+		this._updateLineItemStatus(testLi, state, true);
 	}
 
 	/**
@@ -542,20 +621,23 @@ export class QuenchResults extends Application {
 	handleTestFail(test: Mocha.Test | Mocha.Hook, error: Chai.AssertionError | MissingSnapshotError) {
 		// Hooks failures are reported as test failures, but presented as suite failures in the UI
 		const isHookFail = test.type === "hook";
-		const $testLi = isHookFail
-			? this.element.find(`li.suite[data-suite-id="${test.parent?.id}"]`)
-			: this.element.find(`li.test[data-test-id="${test.id}"]`);
+		const testLi: HTMLLIElement | null = isHookFail
+			? this.element.querySelector(`li.suite[data-suite-id="${test.parent?.id}"]`)
+			: this.element.querySelector(`li.test[data-test-id="${test.id}"]`);
 		// Allow possibly long paths from `SnapshotError`s to be line wrapped sanely
-		const errorElement = $testLi
-			.find("> .expandable")
-			.append(`<div class="error"></div>`)
-			.children(".error");
+		enforce(testLi);
+		testLi
+			.querySelector(".expandable")
+			?.insertAdjacentHTML("beforeend", `<div class="error"></div>`);
+		const errorElement = testLi?.querySelector(".expandable > .error");
+		enforce(errorElement);
 
 		if (error instanceof MissingSnapshotError)
 			// Allow possibly long paths from `SnapshotError`s to be line wrapped sanely
-			errorElement.html(error.message.replaceAll("/", "/<wbr>"));
+			errorElement.innerHTML = error.message.replaceAll("/", "/<wbr>");
 
-		errorElement.append(
+		errorElement.insertAdjacentHTML(
+			"beforeend",
 			`<span class="error-message">${
 				error.name === "Error" ? "" : `<strong>${error.name}: </strong>`
 			}${error.message}\n</span>`,
@@ -567,7 +649,7 @@ export class QuenchResults extends Application {
 			errorElement.append(diff);
 		}
 
-		this._updateLineItemStatus($testLi, RUNNABLE_STATES.FAILURE);
+		this._updateLineItemStatus(testLi, RUNNABLE_STATES.FAILURE);
 		if (("snapshotError" in error && error.snapshotError) || error instanceof MissingSnapshotError)
 			this._enableSnapshotUpdates = true;
 	}
@@ -588,8 +670,9 @@ export class QuenchResults extends Application {
 		const errorTitle = localize("ERROR.Hook", { hook: hook.title.replace("_root", "") });
 		const hookId = hook.id as string;
 
-		const $batchLi = this.element.find(`li.test-batch[data-batch="${batchKey}"]`);
-		$batchLi.find("> .expandable").prepend(
+		const batchLi = this.element.querySelector(`li.test-batch[data-batch="${batchKey}"]`);
+		batchLi?.querySelector(".expandable")?.insertAdjacentHTML(
+			"beforebegin",
 			`<span class="summary batch-hook">
         <i class="expander fas fa-caret-right" data-expand-target="${hookId}"></i></button>
         <i class="status-icon fas fa-times-circle"></i> <span class="hook-error"> ${errorTitle}</span>
@@ -605,11 +688,11 @@ export class QuenchResults extends Application {
 	 */
 	handleRunBegin() {
 		// Enable/Hide buttons as necessary
-		this.element.find("#quench-select-all").prop("disabled", true);
-		this.element.find("#quench-select-none").prop("disabled", true);
-		this.element.find("#quench-run").prop("disabled", true);
-		this.element.find("#quench-abort").show();
-		this.element.find("#quench-update-snapshots").hide();
+		this._setElementDisabled("#quench-select-all");
+		this._setElementDisabled("#quench-select-none");
+		this._setElementDisabled("#quench-run");
+		toggleHidden(this.element.querySelector("#quench-abort"), false);
+		toggleHidden(this.element.querySelector("#quench-update-snapshots"), true);
 		this._enableSnapshotUpdates = false;
 	}
 
@@ -618,29 +701,37 @@ export class QuenchResults extends Application {
 	 * @param stats - Run statistics
 	 */
 	handleRunEnd(stats: Mocha.Stats) {
+		const failedPart = stats.failures ? localize("StatsFailed", { failed: stats.failures }) : "";
+		const passedPart = stats.passes ? localize("StatsPassed", { passed: stats.passes }) : "";
+		let statsHTML = "";
+		if (stats.failures) statsHTML += `<span class="stats-fail">${failedPart}</span>`;
+		if (stats.failures && stats.passes) statsHTML += `<span class="stats-info"> | </span>`;
+		if (stats.passes) statsHTML += `<span class="stats-pass">${passedPart}</span>`;
+		if (stats.failures && stats.passes)
+			statsHTML += `<span class="stats-info">(${stats.tests})</span>`;
 		// Add summary
 		const style = stats.failures ? "stats-fail" : "stats-pass";
-		const $stats = $(`
-            <div class="stats">
+		const statsElement = document.createElement("div");
+		statsElement.classList.add("stats");
+		statsElement.innerHTML = `
                 <div>${localize("StatsSummary", {
 									quantity: stats.tests,
 									duration: stats.duration,
 								})}</div>
-                <div class="${style}">${localize("StatsResults", {
-									...stats,
-								})}</div>
-            </div>
-        `);
-		const $container = this.element.find("#quench-results-stats");
-		$container.append($stats);
-		$container.show();
+                <div class="${style}">${statsHTML}</div>
+        `;
+		const container: HTMLElement | null = this.element.querySelector("#quench-results-stats");
+		container?.insertAdjacentElement("beforeend", statsElement);
+		toggleHidden(container, false);
 
 		// Enable/Hide buttons as necessary
-		this.element.find("#quench-select-all").prop("disabled", false);
-		this.element.find("#quench-select-none").prop("disabled", false);
-		this.element.find("#quench-run").prop("disabled", false);
-		this.element.find("#quench-abort").hide();
-		if (this._enableSnapshotUpdates) this.element.find("#quench-update-snapshots").show();
+		this._setElementDisabled("#quench-select-all", false);
+		this._setElementDisabled("#quench-select-none", false);
+		this._setElementDisabled("#quench-run", false);
+
+		toggleHidden(this.element.querySelector("#quench-abort"), true);
+		if (this._enableSnapshotUpdates)
+			toggleHidden(this.element.querySelector("#quench-update-snapshots"), false);
 	}
 }
 

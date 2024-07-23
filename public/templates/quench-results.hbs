@@ -1,11 +1,11 @@
-<div class="flexcol">
+<div class="flexcol" style="height: 100%">
     <div id="select-buttons" class="controls-container" {{#unless anyBatches}}style="display: none"{{/unless}}>
       <div class="filter formgroup flexrow">
         <input type="search" id="quench-filter" placeholder="{{localize "QUENCH.Filter"}}" autocomplete="off" />
         <i class="fas fa-search"></i>
       </div>
-        <button id="quench-select-all">{{localize "QUENCH.SelectAll"}}</button>
-        <button id="quench-select-none">{{localize "QUENCH.SelectNone"}}</button>
+        <button type="button" data-action="select" data-select="all">{{localize "QUENCH.SelectAll"}}</button>
+        <button type="button" data-action="select" data-select="none">{{localize "QUENCH.SelectNone"}}</button>
     </div>
     <div id="quench-batches">
         <ul id="quench-batches-list">
@@ -19,8 +19,8 @@
     </div>
     <div id="quench-results-stats" style="display: none"></div>
     <div class="controls-container" >
-        <button id="quench-run">{{localize "QUENCH.Run"}}</button>
-        <button style="display: none" id="quench-abort">{{localize "QUENCH.Abort"}}</button>
-        <button style="display: none" id="quench-update-snapshots">{{localize "QUENCH.UpdateSnapshots"}}</button>
+        <button id="quench-run" data-action="run">{{localize "QUENCH.Run"}}</button>
+        <button style="display: none" id="quench-abort" data-action="abort">{{localize "QUENCH.Abort"}}</button>
+        <button style="display: none" id="quench-update-snapshots" data-action="updateSnapshots">{{localize "QUENCH.UpdateSnapshots"}}</button>
     </div>
 </div>
