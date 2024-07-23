@@ -1,9 +1,8 @@
 {
-	"name": "quench",
+	"id": "quench",
 	"title": "Quench",
 	"description": "Harden your Foundry module or system code with end-to-end UI tests directly within Foundry. Powered by Mocha.",
 	"version": "0.9.2",
-	"author": "Ethaks",
 	"authors": [
 		{
 			"name": "Ethaks",
@@ -16,9 +15,10 @@
 	"languages": [{ "lang": "en", "name": "English", "path": "lang/en.json" }],
 	"esmodules": ["./quench.js"],
 	"styles": ["style.css"],
-	"minimumCoreVersion": "0.8.5",
-	"compatibleCoreVersion": "11.302",
-	"allowBugReporter": true,
+	"compatibility": {
+		"minimum": "12",
+		"verified": "12"
+	},
 	"library": true,
 	"url": "https://github.com/Ethaks/FVTT-Quench",
 	"manifest": "https://github.com/Ethaks/FVTT-Quench/releases/latest/download/module.json",
