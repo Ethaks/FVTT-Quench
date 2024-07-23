@@ -21,11 +21,16 @@
 		"build": "vite build",
 		"serve": "vite serve",
 		"prerelease": "bun run build && bun run lint && bun run declaration",
-		"release": "standard-version",
+		"release": "commit-and-tag-version",
 		"declaration": "tsc --project tsconfig.declaration.json",
 		"docs": "typedoc",
 		"docs:watch": "typedoc --watch",
 		"prepack": "bun run declaration"
+	},
+	"commit-and-tag-version": {
+		"scripts": {
+			"postbump": "bun run lint:fix"
+		}
 	},
 	"repository": {
 		"type": "git",
@@ -59,13 +64,13 @@
 		"@types/fs-extra": "^11.0.4",
 		"chai": "^5.1.1",
 		"chai-as-promised": "^8.0.0",
+		"commit-and-tag-version": "^12.4.1",
 		"diff": "^5.2.0",
 		"fs-extra": "^11.2.0",
 		"lefthook": "^1.7.5",
 		"mocha": "^10.7.0",
 		"pretty-format": "^29.7.0",
 		"rollup-plugin-visualizer": "^5.12.0",
-		"standard-version": "^9.5.0",
 		"terser": "^5.31.3",
 		"typedoc": "^0.26.5",
 		"typescript": "^5.5.3",
