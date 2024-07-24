@@ -54,7 +54,7 @@
 		"wildcard-match": "^5.1.3"
 	},
 	"peerDependencies": {
-		"@league-of-foundry-developers/foundry-vtt-types": "git@github.com:League-of-Foundry-Developers/foundry-vtt-types#85d0b187fe70ca6d80c8223925162df0de497ed7"
+		"@league-of-foundry-developers/foundry-vtt-types": "git@github.com:League-of-Foundry-Developers/foundry-vtt-types#v12/main"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.3",
