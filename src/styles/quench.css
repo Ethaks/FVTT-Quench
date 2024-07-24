@@ -2,9 +2,9 @@
   --label-border-color: var(--color-light-5);
   --label-background-color: var(--color-cool-5);
   --label-background-hover: #f0f0e0;
-  --error-background-color: var(--color-cool-5-90);
-  --color-red: rgb(239, 68, 68);
-  --color-green: rgb(34, 197, 94);
+  --error-background-color: var(--color-cool-5-75);
+  --color-red: #ef4444;
+  --color-green: #22c55e;
 }
 
 .theme-light #quench-results {
