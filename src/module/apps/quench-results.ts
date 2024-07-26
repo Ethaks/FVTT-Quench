@@ -18,21 +18,14 @@ import {
 } from "../utils/quench-utils";
 import { pause } from "../utils/user-utils";
 
-// HACK: Someone should be shot for this.
-import type ApplicationV2Type from "../../../node_modules/@league-of-foundry-developers/foundry-vtt-types/src/foundry/client-esm/applications/api/application.d.mts";
-const ApplicationV2: typeof ApplicationV2Type = foundry.applications.api.ApplicationV2;
-const HandlebarsApplicationMixin = foundry.applications.api.HandlebarsApplicationMixin;
-const HandlebarsClass = HandlebarsApplicationMixin(ApplicationV2) as typeof ApplicationV2 & {
-	PARTS: Record<string, unknown>;
-};
+const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
 /**
  * The visual UI for representing Quench test batches and the tests results thereof.
  *
  * @internal
  */
-// @ts-expect-error -- Types incorrectly require actions to be async
-export class QuenchResults extends HandlebarsClass {
+export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2) {
 	/** The `Quench` instance this `Application` is used by */
 	quench: Quench;
 
@@ -45,7 +38,7 @@ export class QuenchResults extends HandlebarsClass {
 	 */
 	constructor(
 		quench: Quench,
-		options: Partial<foundry.applications.types.ApplicationConfiguration> = {},
+		options: Partial<foundry.applications.api.ApplicationV2.Configuration> = {},
 	) {
 		super(options);
 		this.quench = quench;
@@ -76,7 +69,13 @@ export class QuenchResults extends HandlebarsClass {
 		window: {
 			title: "QUENCH.Title",
 			resizable: true,
-			controls: [{ icon: "fas fa-gear", label: "Settings", action: "openSettings" }],
+			controls: [
+				{
+					icon: "fas fa-gear",
+					label: "Settings",
+					action: "openSettings",
+				},
+			],
 		},
 		actions: {
 			select: this._onSelect,
@@ -130,7 +129,7 @@ export class QuenchResults extends HandlebarsClass {
 	/**
 	 * Handle clicking on the "Select All" or "Select None" buttons
 	 */
-	static _onSelect(this: QuenchResults, _event: Event, target: HTMLElement): void {
+	static _onSelect(this: QuenchResults, _event: Event, target: HTMLElement) {
 		const select = target.dataset.select || "";
 		if (["all", "none"].includes(select)) {
 			// Check all checkboxes if all, or uncheck if none
@@ -154,14 +153,14 @@ export class QuenchResults extends HandlebarsClass {
 	 * Handle clicking on the "Abort" button
 	 */
 	static _onAbort(this: QuenchResults, _event: Event, _target: HTMLElement) {
-		return this.quench.abort();
+		this.quench.abort();
 	}
 
 	/**
 	 * Handle clicking on the "Update Snapshots" button
 	 */
-	static _onUpdateSnapshots(this: QuenchResults, _event: Event, _target: HTMLElement) {
-		return this.quench.snapshots.updateSnapshots();
+	static async _onUpdateSnapshots(this: QuenchResults, _event: Event, _target: HTMLElement) {
+		await this.quench.snapshots.updateSnapshots();
 	}
 
 	/**
@@ -741,7 +740,7 @@ export class QuenchResults extends HandlebarsClass {
 	}
 }
 
-interface QuenchResultData {
+interface QuenchResultData extends foundry.applications.api.ApplicationV2.RenderContext {
 	anyBatches: boolean;
 	batches: { name: string; displayName: string; selected: boolean }[];
 }
