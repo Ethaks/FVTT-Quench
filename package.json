@@ -54,7 +54,7 @@
 		"wildcard-match": "^5.1.3"
 	},
 	"peerDependencies": {
-		"@league-of-foundry-developers/foundry-vtt-types": "git@github.com:League-of-Foundry-Developers/foundry-vtt-types#v12/main"
+		"@league-of-foundry-developers/foundry-vtt-types": "github:League-of-Foundry-Developers/foundry-vtt-types#e787013319b46f7465cce2c71263083abba70ce8"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.3",
@@ -68,14 +68,14 @@
 		"commit-and-tag-version": "^12.4.1",
 		"diff": "^5.2.0",
 		"fs-extra": "^11.2.0",
-		"lefthook": "^1.7.5",
+		"lefthook": "^1.7.9",
 		"mocha": "^10.7.0",
 		"pretty-format": "^29.7.0",
 		"rollup-plugin-visualizer": "^5.12.0",
 		"terser": "^5.31.3",
 		"typedoc": "^0.26.5",
-		"typescript": "^5.5.3",
-		"vite": "^5.3.4",
+		"typescript": "^5.5.4",
+		"vite": "^5.3.5",
 		"vite-plugin-checker": "^0.7.2"
 	},
 	"publishConfig": {
