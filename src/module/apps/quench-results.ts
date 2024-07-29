@@ -679,10 +679,10 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2) {
 		batchLi?.querySelector(".expandable")?.insertAdjacentHTML(
 			"beforebegin",
 			`<span class="summary batch-hook">
-        <i class="expander fas fa-caret-right" data-expand-target="${hookId}"></i></button>
+        <i class="expander fas fa-caret-right" data-action="expand" data-expand-target="${hookId}"></i></button>
         <i class="status-icon fas fa-times-circle"></i> <span class="hook-error"> ${errorTitle}</span>
       </span>
-      <div class="expandable" data-expand-id=${hookId}>
+      <div class="expandable" data-action="expand" data-expand-id=${hookId}>
         <div class="error"><span class="error-message">${error.message}</span></div>
       </div>`,
 		);
