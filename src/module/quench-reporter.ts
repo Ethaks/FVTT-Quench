@@ -8,6 +8,7 @@ import {
 	RUNNABLE_STATE,
 	RUNNABLE_STATES,
 	createDirectory,
+	getBatchKey,
 	getGame,
 	getTestState,
 	logPrefix,
@@ -98,7 +99,7 @@ export class QuenchReporter extends Mocha.reporters.Base {
 
 				// Log detailed results in console
 				if (QuenchReporter._shouldLogTestDetails() && !suite.root) {
-					const batchKey = suite._quench_parentBatch;
+					const batchKey = getBatchKey(suite);
 					const isBatchRoot = suite._quench_batchRoot;
 					if (isBatchRoot) {
 						console.group(quench._testBatches.get(batchKey)?.displayName);

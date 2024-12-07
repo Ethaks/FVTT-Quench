@@ -35,9 +35,7 @@ export function registerSettings(): void {
 		config: true,
 		type: Boolean,
 		default: false,
-		onChange: foundry.utils.debounce(() => {
-			location.reload();
-		}, 500),
+		requiresReload: true,
 	});
 
 	game.settings.register(MODULE_ID, "collapseSuccessful", {

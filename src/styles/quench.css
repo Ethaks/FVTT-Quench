@@ -145,6 +145,12 @@
   font-weight: bold;
 }
 
+#quench-results .summary .runnable-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 #quench-results .expandable>.summary {
   margin-left: 0.4rem;
 }

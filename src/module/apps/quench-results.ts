@@ -1,7 +1,7 @@
 import * as Diff from "diff";
 
 import type { Quench, QuenchBatchKey } from "../quench";
-import type { RUNNABLE_STATE } from "../utils/quench-utils";
+import { type RUNNABLE_STATE, getBatchKey } from "../utils/quench-utils";
 
 import { MissingSnapshotError } from "../utils/quench-snapshot-error";
 import {
@@ -18,7 +18,9 @@ import {
 } from "../utils/quench-utils";
 import { pause } from "../utils/user-utils";
 
-const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
+import ApplicationV2 = foundry.applications.api.ApplicationV2;
+import HandlebarsApplicationMixin = foundry.applications.api.HandlebarsApplicationMixin;
+// const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
 /**
  * The visual UI for representing Quench test batches and the tests results thereof.
@@ -36,10 +38,7 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2) {
 	 * @param quench - The `Quench` instance this `Application` belongs to
 	 * @param options - Additional options
 	 */
-	constructor(
-		quench: Quench,
-		options: Partial<foundry.applications.api.ApplicationV2.Configuration> = {},
-	) {
+	constructor(quench: Quench, options: Partial<ApplicationV2.Configuration> = {}) {
 		super(options);
 		this.quench = quench;
 	}
@@ -539,7 +538,7 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2) {
 	 * @param suite - The starting Mocha suite
 	 */
 	handleSuiteBegin(suite: Mocha.Suite) {
-		const batchkey = suite._quench_parentBatch;
+		const batchkey = getBatchKey(suite);
 		const isBatchRoot = suite._quench_batchRoot || suite.root;
 
 		// If this suite is the root of a test batch or does not belong to a test batch, don't show in the UI.
@@ -582,7 +581,7 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2) {
 	 * @param test - The starting test
 	 */
 	handleTestBegin(test: Mocha.Test) {
-		const batchKey = test._quench_parentBatch;
+		const batchKey = getBatchKey(test);
 		const parentId = test.parent?.id;
 
 		const batchLi: HTMLLIElement | null = this.element.querySelector(
@@ -667,7 +666,7 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2) {
 	 * @param error - The error thrown by the hook
 	 */
 	handleBatchFail(hook: Mocha.Hook, error: Error) {
-		const batchKey = hook.parent?._quench_parentBatch;
+		const batchKey = getBatchKey(hook);
 		const isBatchRoot = hook.parent?._quench_batchRoot === true;
 
 		if (!batchKey || !isBatchRoot) return;

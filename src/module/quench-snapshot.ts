@@ -3,6 +3,7 @@ import { MissingSnapshotError } from "./utils/quench-snapshot-error";
 import {
 	createDirectoryTree,
 	enforce,
+	getBatchKey,
 	getBatchNameParts,
 	localize,
 	logPrefix,
@@ -110,7 +111,7 @@ export class QuenchSnapshotManager {
 				const updateSnapshot = quench.snapshots.enableUpdates;
 				const currentRunnable = quench._currentRunner?.currentRunnable;
 				if (!currentRunnable) throw new Error("No Runner found");
-				const quenchBatch = currentRunnable._quench_parentBatch;
+				const quenchBatch = getBatchKey(currentRunnable);
 				const [, ...titleParts] = currentRunnable.titlePath();
 				// Slugify non-Quench batch test name (describe and it parts)
 				const fullTitle = titleParts.join("-").trim().slugify();

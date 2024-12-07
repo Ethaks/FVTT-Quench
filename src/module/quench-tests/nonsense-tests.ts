@@ -14,6 +14,7 @@ export function registerExampleTests(quench: Quench) {
 		registerSnapshotTestBatch,
 		registerPropertyTestBatch,
 		registerPromiseTestBatch,
+		registerAsyncDynamicTestBatch,
 		registerNonQuenchTestBatch,
 	]) {
 		batchFunction(quench);
@@ -258,6 +259,43 @@ function registerPromiseTestBatch(quench: Quench) {
 			});
 		},
 		{ displayName: "QUENCH: Promises" },
+	);
+}
+
+function registerAsyncDynamicTestBatch(quench: Quench) {
+	quench.registerBatch(
+		"quench.examples.dynamicasync",
+		async function (context) {
+			const { it, assert, expect, before } = context;
+
+			const addIt = (title: string, fn: Mocha.Func): void => {
+				const test = new (quench.mocha.constructor as typeof Mocha).Test(title, fn);
+				this.addTest(test);
+			};
+
+			before(async function () {
+				const tests: { args: number[]; expected: number }[] = await new Promise((resolve) => {
+					setTimeout(resolve, 1000, [
+						{ args: [1, 2], expected: 3 },
+						{ args: [1, 2, 3], expected: 6 },
+						{ args: [1, 2, 3, 4], expected: 10 },
+					]);
+				});
+
+				for (const { args, expected } of tests) {
+					addIt(`should equal ${expected}`, function () {
+						const sum = args.reduce((a, b) => a + b, 0);
+						expect(sum).to.equal(expected);
+					});
+				}
+			});
+
+			it("requires a single test to register as non-empty suite", function () {
+				assert.ok(true);
+			});
+		},
+
+		{ displayName: "QUENCH: Asynchronously Dynamically Generated Tests" },
 	);
 }
 

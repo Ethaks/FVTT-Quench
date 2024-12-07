@@ -66,6 +66,30 @@ export function getSuiteState(suite: Mocha.Suite): RUNNABLE_STATE {
 }
 
 /**
+ * Get the batch key for a test, suite, or hook.
+ *
+ * @param test - The test, suite, or hook to get the batch key for
+ * @returns The batch key, or "" if none was found.
+ */
+export function getBatchKey(runnable: Mocha.Runnable | Mocha.Test | Mocha.Suite | Mocha.Hook) {
+	// Given runnable already is the batch root providing the key
+	if (runnable._quench_parentBatch) return runnable._quench_parentBatch;
+
+	// Find key by traversing the parent chain
+	let key = "";
+	let parent: Mocha.Runnable | Mocha.Test | Mocha.Suite | Mocha.Hook | null = runnable;
+	let depth = 0;
+	do {
+		depth += 1;
+		if (parent.parent) parent = parent.parent;
+		else if (parent.ctx?.parent) parent = parent.ctx.parent;
+		else parent = null;
+		if (parent?._quench_parentBatch) key = parent._quench_parentBatch;
+	} while (depth < 30 && parent && !key);
+	return key as QuenchBatchKey;
+}
+
+/**
  * Returns a tuple containing the package name and the batch identifier
  *
  *

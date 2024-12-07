@@ -11,11 +11,11 @@ import * as quenchUserUtils from "./utils/user-utils";
 declare global {
 	namespace Mocha {
 		interface Runnable {
-			_quench_parentBatch: string;
+			_quench_parentBatch?: string;
 		}
 		interface Suite {
-			_quench_parentBatch: string;
-			_quench_batchRoot: boolean;
+			_quench_parentBatch?: string;
+			_quench_batchRoot?: boolean;
 			get id(): string;
 		}
 		interface Test {
@@ -134,29 +134,6 @@ export class Quench {
 			return isMatch(key);
 		});
 		return batches.map(({ key }) => key);
-	}
-	/**
-	 * A helper function adding a reference to a test's Quench Batch to a given Mocha function's result
-	 *
-	 * @internal
-	 * @param fn - The Mocha function to add the batch to
-	 * @param key - The key of the batch to add
-	 * @returns The Mocha function with the batch reference added
-	 */
-	protected static _quenchify<Fn extends Mocha.TestFunction | Mocha.SuiteFunction>(
-		fn: Fn,
-		key: string,
-	): Fn {
-		const quenchFn = function quenchFn(...args: Parameters<Fn>) {
-			// @ts-expect-error Args are passed through as-is
-			const result = fn(...args);
-			result._quench_parentBatch = key;
-			return result;
-		};
-		quenchFn.only = fn.only;
-		quenchFn.skip = fn.skip;
-		if ("retries" in fn) quenchFn.retries = fn.retries;
-		return quenchFn as Fn;
 	}
 
 	/**
@@ -284,11 +261,13 @@ export class Quench {
 		// Run should to patch object prototype
 		const should = this.chai.should();
 
-		const baseContext: Omit<QuenchBatchContext, "describe" | "it"> = {
+		const baseContext: QuenchBatchContext = {
 			after,
 			afterEach,
 			before,
 			beforeEach,
+			describe,
+			it,
 			utils,
 			assert,
 			expect,
@@ -303,18 +282,15 @@ export class Quench {
 
 		// Register suites and tests for provided batches
 		for (const key of batchKeys) {
-			const context: QuenchBatchContext = {
-				...baseContext,
-				describe: (this.constructor as typeof Quench)._quenchify(describe, key), // typecasting necessary, see #3841
-				it: (this.constructor as typeof Quench)._quenchify(it, key), // see above; check again ~2030
-			};
-
+			const context = { ...baseContext };
 			// Create a wrapper suite to contain this test batch
-			const testBatchRoot = context.describe(`${key}_root`, async () => {
+			const quench = this;
+			const testBatchRoot = context.describe(`${key}_root`, async function () {
 				// Call the batch's registration function
-				await this._testBatches.get(key)?.fn(context);
+				await quench._testBatches.get(key)?.fn.apply(this, [context]);
 			});
 			testBatchRoot._quench_batchRoot = true;
+			testBatchRoot._quench_parentBatch = key;
 		}
 
 		// Run the tests and hold on to the runner
@@ -370,7 +346,10 @@ export interface QuenchRegisterBatchOptions {
  * @public
  * @param context - Various Mocha and Chai functions
  */
-export type QuenchRegisterBatchFunction = (context: QuenchBatchContext) => void | Promise<void>;
+export type QuenchRegisterBatchFunction = (
+	this: Mocha.Suite,
+	context: QuenchBatchContext,
+) => void | Promise<void>;
 
 /**
  * A context object passed to batch registration functions, containing functions usually
