@@ -66,7 +66,9 @@ function registerBasicFailingTestBatch(quench: Quench) {
 					expect(1).to.equal(2);
 				});
 				it("Another Failing Test", function () {
-					expect({ foo: "bar", baz: "bam", kel: { tok: "zam" } }).to.equal({ foo: { bar: "baz" } });
+					expect({ foo: "bar", baz: "bam", kel: { tok: "zam" } }).to.equal({
+						foo: { bar: "baz" },
+					});
 				});
 				it("A Failing Test Using Assert", function () {
 					assert.ok(false);
@@ -174,7 +176,8 @@ function registerSnapshotTestBatch(quench: Quench) {
 					"Some Test ¯\\_(ツ)_/¯".should.matchSnapshot();
 				});
 				it("Passing Test using temporary actor", function () {
-					const type = Object.keys(game.system?.documentTypes.Actor ?? { base: "" })[0];
+					const type = Object.keys(Actor.TYPES[0] ?? { base: "" })[0];
+					if (!type) throw new Error("No type found");
 					// @ts-expect-error -- Some type has to exist
 					const actor = new Actor({ name: "Test Actor", type });
 					expect(actor).to.matchSnapshot();

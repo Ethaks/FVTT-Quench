@@ -1,5 +1,7 @@
 import * as Diff from "diff";
 
+import type { AnyObject } from "fvtt-types/utils";
+
 import type { Quench, QuenchBatchKey } from "../quench";
 import { type RUNNABLE_STATE, getBatchKey } from "../utils/quench-utils";
 
@@ -20,14 +22,13 @@ import { pause } from "../utils/user-utils";
 
 import ApplicationV2 = foundry.applications.api.ApplicationV2;
 import HandlebarsApplicationMixin = foundry.applications.api.HandlebarsApplicationMixin;
-// const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
 /**
  * The visual UI for representing Quench test batches and the tests results thereof.
  *
  * @internal
  */
-export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2) {
+export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2)<QuenchResultData> {
 	/** The `Quench` instance this `Application` is used by */
 	quench: Quench;
 
@@ -49,7 +50,6 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2) {
 	#searchFilter = new SearchFilter({
 		inputSelector: "input#quench-filter",
 		contentSelector: "#quench-batches-list",
-		// @ts-expect-error Typing?
 		callback: this._onSearchFilter.bind(this),
 	});
 
@@ -97,9 +97,11 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2) {
 	/* -------------------------------------------- */
 
 	/** @inheritDoc */
-	override async _prepareContext(): Promise<QuenchResultData> {
+	override async _prepareContext(_options: ApplicationV2.RenderOptions): Promise<QuenchResultData> {
 		const filterSetting = getFilterSetting();
-		const preselected = this.quench._filterBatches(filterSetting, { preSelectedOnly: true });
+		const preselected = this.quench._filterBatches(filterSetting, {
+			preSelectedOnly: true,
+		});
 		return {
 			anyBatches: this.quench._testBatches.size > 0,
 			batches: this.quench._testBatches.map((batchData) => {
@@ -113,10 +115,7 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2) {
 	}
 
 	/** @inheritDoc */
-	override _onRender(
-		context: QuenchResultData,
-		options: foundry.applications.types.ApplicationRenderOptions,
-	) {
+	override _onRender(context: QuenchResultData, options: ApplicationV2.RenderOptions) {
 		super._onRender(context, options);
 		this.#searchFilter.bind(this.element);
 	}
@@ -244,7 +243,7 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2) {
 	/**
 	 * Filter displayed test batches.
 	 */
-	private _onSearchFilter(_event: Event, query: string, rgx: RegExp, html: HTMLElement) {
+	private _onSearchFilter(_event: Event, query: string, rgx: RegExp, html: HTMLElement | null) {
 		/**
 		 * Recursively check if an element should be displayed.
 		 * An element should only be displayed if a parent's or child's title matches the query,
@@ -296,7 +295,7 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2) {
 			return false;
 		};
 
-		for (const batchLi of html.children) {
+		for (const batchLi of html?.children ?? []) {
 			for (const element of batchLi.querySelector(".runnable-list")?.children ?? []) {
 				checkElement(element as HTMLElement);
 			}
@@ -449,7 +448,10 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2) {
 		}
 	}
 
-	private static _getErrorDiff(error: { actual: unknown; expected: unknown }): HTMLElement {
+	private static _getErrorDiff(error: {
+		actual: unknown;
+		expected: unknown;
+	}): HTMLElement {
 		const diffNode = createNode("div", { attr: { class: "diff" } });
 
 		const expected =
@@ -511,7 +513,9 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2) {
 					}
 
 					return createNode("span", {
-						attr: { class: part.removed ? "expected" : part.added ? "actual" : "unchanged" },
+						attr: {
+							class: part.removed ? "expected" : part.added ? "actual" : "unchanged",
+						},
 						children: part.value,
 					});
 				})
@@ -671,7 +675,9 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2) {
 
 		if (!batchKey || !isBatchRoot) return;
 
-		const errorTitle = localize("ERROR.Hook", { hook: hook.title.replace("_root", "") });
+		const errorTitle = localize("ERROR.Hook", {
+			hook: hook.title.replace("_root", ""),
+		});
 		const hookId = hook.id as string;
 
 		const batchLi = this.element.querySelector(`li.test-batch[data-batch="${batchKey}"]`);
@@ -739,7 +745,7 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2) {
 	}
 }
 
-interface QuenchResultData extends foundry.applications.api.ApplicationV2.RenderContext {
+interface QuenchResultData extends AnyObject {
 	anyBatches: boolean;
 	batches: { name: string; displayName: string; selected: boolean }[];
 }

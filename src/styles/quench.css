@@ -155,7 +155,7 @@
   margin-left: 0.4rem;
 }
 
-#quench-results li>.summary>.status-icon:not(".fa-sync") {
+#quench-results li>.summary>.status-icon:not(.fa-sync) {
   font-weight: normal;
 }
 

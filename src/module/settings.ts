@@ -1,15 +1,13 @@
-import { MODULE_ID, getGame } from "./utils/quench-utils";
+import { MODULE_ID } from "./utils/quench-utils";
 
 declare global {
-	namespace ClientSettings {
-		interface Values {
-			"quench.logTestDetails": boolean;
-			"quench.exampleTests": boolean;
-			"quench.collapseSuccessful": boolean;
-			"quench.autoShowQuenchWindow": boolean;
-			"quench.autoRun": boolean;
-			"quench.preselectFilters": string;
-		}
+	interface SettingConfig {
+		"quench.logTestDetails": boolean;
+		"quench.exampleTests": boolean;
+		"quench.collapseSuccessful": boolean;
+		"quench.autoShowQuenchWindow": boolean;
+		"quench.autoRun": boolean;
+		"quench.preselectFilters": string;
 	}
 }
 
@@ -17,7 +15,7 @@ declare global {
  * Registers all settings
  */
 export function registerSettings(): void {
-	const game = getGame();
+	if (!(game instanceof Game)) throw new Error("Game is not initialized");
 
 	game.settings.register(MODULE_ID, "logTestDetails", {
 		name: "QUENCH.LogTestDetailsLabel",

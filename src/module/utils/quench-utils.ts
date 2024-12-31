@@ -119,7 +119,7 @@ export const MODULE_ID = "quench" as const;
 /** Ensures {@link game} is initialized, either returning the {@link Game} instance or throwing an error. */
 export function getGame() {
 	if (!(game instanceof Game)) throw new Error("Game is not initialized yet!");
-	return game as ReadyGame;
+	return game;
 }
 
 /**
@@ -152,7 +152,7 @@ export function enforce(value: unknown, message?: string | Error): asserts value
  * @returns The localized string
  */
 export function localize(key: string, data?: Record<string, unknown>): string {
-	return getGame().i18n.format(`QUENCH.${key}`, data);
+	return game.i18n?.format(`QUENCH.${key}`, data) ?? key;
 }
 
 /**
