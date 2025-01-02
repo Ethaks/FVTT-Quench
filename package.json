@@ -46,9 +46,9 @@
 	"files": ["lib"],
 	"homepage": "https://github.com/Ethaks/FVTT-Quench#readme",
 	"dependencies": {
-		"@types/chai": "^4.3.20",
-		"@types/chai-as-promised": "^7.1.8",
-		"@types/diff": "^5.2.3",
+		"@types/chai": "^5.0.1",
+		"@types/chai-as-promised": "^8.0.1",
+		"@types/diff": "^6.0.0",
 		"@types/mocha": "^10.0.10",
 		"fast-check": "^3.23.2",
 		"wildcard-match": "^5.1.4"
@@ -66,17 +66,17 @@
 		"chai": "^5.1.2",
 		"chai-as-promised": "^8.0.1",
 		"commit-and-tag-version": "^12.5.0",
-		"diff": "^5.2.0",
+		"diff": "^7.0.0",
 		"fs-extra": "^11.2.0",
 		"lefthook": "^1.10.1",
-		"mocha": "^10.8.2",
+		"mocha": "^11.0.1",
 		"pretty-format": "^29.7.0",
 		"rollup-plugin-visualizer": "^5.13.1",
 		"terser": "^5.37.0",
-		"typedoc": "^0.26.11",
+		"typedoc": "^0.27.6",
 		"typescript": "^5.7.2",
-		"vite": "^5.4.11",
-		"vite-plugin-checker": "^0.7.2"
+		"vite": "^6.0.6",
+		"vite-plugin-checker": "^0.8.0"
 	},
 	"publishConfig": {
 		"access": "public"
