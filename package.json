@@ -78,6 +78,9 @@
 		"vite": "^6.0.6",
 		"vite-plugin-checker": "^0.8.0"
 	},
+	"overrides": {
+		"@types/earcut": "github:LukeAbby/earcut-types#main"
+	},
 	"publishConfig": {
 		"access": "public"
 	},

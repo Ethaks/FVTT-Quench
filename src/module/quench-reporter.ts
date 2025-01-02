@@ -300,7 +300,7 @@ export class QuenchReporter extends Mocha.reporters.Base {
 	 * Determines whether the setting to show detailed log results is enabled
 	 */
 	private static _shouldLogTestDetails(): boolean {
-		return getGame().settings.get("quench", "logTestDetails");
+		return game.settings?.get("quench", "logTestDetails") ?? false;
 	}
 }
 

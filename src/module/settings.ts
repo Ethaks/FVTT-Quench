@@ -18,6 +18,7 @@ declare global {
 			required: true;
 			initial: "**";
 			blank: true;
+			nullable: false;
 		}>;
 	}
 }
@@ -77,6 +78,7 @@ export function registerSettings(): void {
 		type: new fields.StringField({
 			required: true,
 			initial: "**",
+			nullable: false,
 			blank: true,
 		}),
 	});

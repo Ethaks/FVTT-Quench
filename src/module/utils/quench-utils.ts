@@ -241,7 +241,7 @@ export function nonNullable<T>(value: T): value is NonNullable<T> {
  * @return An array of trimmed strings containing batch key filters
  */
 export function getFilterSetting(): string[] {
-	const filterSetting = getGame().settings.get(MODULE_ID, "preselectFilters");
+	const filterSetting = game.settings?.get(MODULE_ID, "preselectFilters") ?? "";
 	return filterSetting.split(",").map((s) => s.trim());
 }
 
