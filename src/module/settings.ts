@@ -1,13 +1,24 @@
 import { MODULE_ID } from "./utils/quench-utils";
 
+import fields = foundry.data.fields;
+
+type BooleanSetting<Initial extends boolean = false> = fields.BooleanField<{
+	required: true;
+	initial: Initial;
+}>;
+
 declare global {
 	interface SettingConfig {
-		"quench.logTestDetails": boolean;
-		"quench.exampleTests": boolean;
-		"quench.collapseSuccessful": boolean;
-		"quench.autoShowQuenchWindow": boolean;
-		"quench.autoRun": boolean;
-		"quench.preselectFilters": string;
+		"quench.logTestDetails": BooleanSetting<true>;
+		"quench.exampleTests": BooleanSetting<false>;
+		"quench.collapseSuccessful": BooleanSetting<false>;
+		"quench.autoShowQuenchWindow": BooleanSetting<false>;
+		"quench.autoRun": BooleanSetting<false>;
+		"quench.preselectFilters": fields.StringField<{
+			required: true;
+			initial: "**";
+			blank: true;
+		}>;
 	}
 }
 
@@ -22,8 +33,7 @@ export function registerSettings(): void {
 		hint: "QUENCH.LogTestDetailsHint",
 		scope: "client",
 		config: true,
-		type: Boolean,
-		default: true,
+		type: new fields.BooleanField({ required: true, initial: true }),
 	});
 
 	game.settings.register(MODULE_ID, "exampleTests", {
@@ -31,8 +41,7 @@ export function registerSettings(): void {
 		hint: "QUENCH.ExampleTestsHint",
 		scope: "client",
 		config: true,
-		type: Boolean,
-		default: false,
+		type: new fields.BooleanField({ required: true, initial: false }),
 		requiresReload: true,
 	});
 
@@ -41,8 +50,7 @@ export function registerSettings(): void {
 		hint: "QUENCH.CollapseSuccessfulHint",
 		scope: "client",
 		config: true,
-		type: Boolean,
-		default: false,
+		type: new fields.BooleanField({ required: true, initial: false }),
 	});
 
 	game.settings.register(MODULE_ID, "autoShowQuenchWindow", {
@@ -50,8 +58,7 @@ export function registerSettings(): void {
 		hint: "QUENCH.AutoShowQuenchWindowHint",
 		scope: "client",
 		config: true,
-		type: Boolean,
-		default: false,
+		type: new fields.BooleanField({ required: true, initial: false }),
 	});
 
 	game.settings.register(MODULE_ID, "autoRun", {
@@ -59,8 +66,7 @@ export function registerSettings(): void {
 		hint: "QUENCH.AutoRunHint",
 		scope: "client",
 		config: true,
-		type: Boolean,
-		default: false,
+		type: new fields.BooleanField({ required: true, initial: false }),
 	});
 
 	game.settings.register(MODULE_ID, "preselectFilters", {
@@ -68,7 +74,10 @@ export function registerSettings(): void {
 		hint: "QUENCH.PreselectFiltersHint",
 		scope: "client",
 		config: true,
-		type: String,
-		default: "**",
+		type: new fields.StringField({
+			required: true,
+			initial: "**",
+			blank: true,
+		}),
 	});
 }
