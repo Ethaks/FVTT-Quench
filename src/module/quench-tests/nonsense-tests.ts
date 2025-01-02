@@ -176,9 +176,7 @@ function registerSnapshotTestBatch(quench: Quench) {
 					"Some Test ¯\\_(ツ)_/¯".should.matchSnapshot();
 				});
 				it("Passing Test using temporary actor", function () {
-					const type = Object.keys(Actor.TYPES[0] ?? { base: "" })[0];
-					if (!type) throw new Error("No type found");
-					// @ts-expect-error -- Some type has to exist
+					const type = Actor.TYPES[0];
 					const actor = new Actor({ name: "Test Actor", type });
 					expect(actor).to.matchSnapshot();
 				});
