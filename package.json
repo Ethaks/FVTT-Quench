@@ -48,7 +48,7 @@
 	"dependencies": {
 		"@types/chai": "^5.0.1",
 		"@types/chai-as-promised": "^8.0.1",
-		"@types/diff": "^6.0.0",
+		"@types/diff": "^7.0.1",
 		"@types/mocha": "^10.0.10",
 		"fast-check": "^3.23.2",
 		"wildcard-match": "^5.1.4"
@@ -58,28 +58,28 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
-		"@commitlint/cli": "^19.6.1",
-		"@commitlint/config-conventional": "^19.6.0",
-		"@guanghechen/rollup-plugin-copy": "^6.0.2",
+		"@commitlint/cli": "^19.7.1",
+		"@commitlint/config-conventional": "^19.7.1",
+		"@guanghechen/rollup-plugin-copy": "^6.0.7",
 		"@sindresorhus/fnv1a": "^3.1.0",
 		"@types/fs-extra": "^11.0.4",
-		"chai": "^5.1.2",
+		"chai": "^5.2.0",
 		"chai-as-promised": "^8.0.1",
 		"commit-and-tag-version": "^12.5.0",
 		"diff": "^7.0.0",
-		"fs-extra": "^11.2.0",
-		"lefthook": "^1.10.1",
-		"mocha": "^11.0.1",
+		"fs-extra": "^11.3.0",
+		"lefthook": "^1.11.2",
+		"mocha": "^11.1.0",
 		"pretty-format": "^29.7.0",
-		"rollup-plugin-visualizer": "^5.13.1",
-		"terser": "^5.37.0",
-		"typedoc": "^0.27.6",
-		"typescript": "^5.7.2",
-		"vite": "^6.0.6",
-		"vite-plugin-checker": "^0.8.0"
+		"rollup-plugin-visualizer": "^5.14.0",
+		"terser": "^5.39.0",
+		"typedoc": "^0.27.9",
+		"typescript": "^5.7.3",
+		"vite": "^6.2.0",
+		"vite-plugin-checker": "^0.9.0"
 	},
 	"overrides": {
-		"@types/earcut": "github:LukeAbby/earcut-types#main"
+		"@types/earcut": "^3.0.0"
 	},
 	"publishConfig": {
 		"access": "public"

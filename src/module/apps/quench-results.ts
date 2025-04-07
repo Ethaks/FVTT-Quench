@@ -59,11 +59,12 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2)<Que
 
 	static override DEFAULT_OPTIONS = {
 		id: "quench-results",
+		tag: "form",
 		position: {
 			width: 550,
 			height: window.innerHeight - 10 * 3,
 			top: 10,
-			left: window.innerWidth - 550 - 300 - 10 * 2,
+			left: window.innerWidth - 550 - 350 - 10,
 		},
 		window: {
 			title: "QUENCH.Title",
@@ -71,7 +72,7 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2)<Que
 			controls: [
 				{
 					icon: "fas fa-gear",
-					label: "Settings",
+					label: "QUENCH.Settings",
 					action: "openSettings",
 				},
 			],
@@ -89,6 +90,7 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2)<Que
 	static override PARTS = {
 		main: {
 			template: "modules/quench/templates/quench-results.hbs",
+			root: true,
 		},
 	};
 
@@ -164,11 +166,11 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2)<Que
 	/**
 	 * Handle clicking on the settings button, opening the settings configuration with the Quench tab activated.
 	 */
-	static _onOpenSettings(this: QuenchResults, _event: Event, _target: HTMLElement) {
+	static async _onOpenSettings(this: QuenchResults, _event: Event, _target: HTMLElement) {
 		const config = getGame().settings.sheet;
-		// @ts-expect-error No other way to render setting config with specific tab active
-		config._tabs[0].active = "quench";
-		config.render(true, { focus: true });
+		await config.render(true, { focus: true });
+		// @ts-expect-error Application type not yet correct
+		config.changeTab("quench", "categories");
 	}
 
 	/**

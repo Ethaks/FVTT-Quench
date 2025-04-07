@@ -5,7 +5,7 @@ import wcmatch from "wildcard-match";
 import { QuenchResults } from "./apps/quench-results";
 import { QuenchReporter } from "./quench-reporter";
 import { QuenchSnapshotManager } from "./quench-snapshot";
-import { getBatchNameParts, getGame, localize } from "./utils/quench-utils";
+import { getBatchNameParts, localize } from "./utils/quench-utils";
 import * as quenchUserUtils from "./utils/user-utils";
 
 declare global {

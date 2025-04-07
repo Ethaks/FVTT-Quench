@@ -177,7 +177,7 @@ function registerSnapshotTestBatch(quench: Quench) {
 				});
 				it("Passing Test using temporary actor", function () {
 					const type = Actor.TYPES[0];
-					const actor = new Actor({ name: "Test Actor", type });
+					const actor = new Actor.implementation({ name: "Test Actor", type });
 					expect(actor).to.matchSnapshot();
 				});
 			});

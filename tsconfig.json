@@ -1,11 +1,14 @@
 {
 	"compilerOptions": {
-		"module": "es2022",
-		"target": "es2022",
+		"module": "ESNext",
+		"target": "ESNext",
 		"types": ["fvtt-types", "@types/mocha", "vite/client"],
 		"esModuleInterop": true,
-		"moduleResolution": "Bundler",
+		"moduleResolution": "bundler",
 		"strictNullChecks": true,
+		"resolveJsonModule": true,
+		"allowSyntheticDefaultImports": true,
+		"verbatimModuleSyntax": true,
 		"exactOptionalPropertyTypes": true,
 		"strict": true,
 		"lib": ["DOM", "DOM.Iterable", "ES2023"],

@@ -5,11 +5,9 @@ import type {
 	QuenchRunBatchOptions,
 } from "./quench";
 import {
-	RUNNABLE_STATE,
 	RUNNABLE_STATES,
 	createDirectory,
 	getBatchKey,
-	getGame,
 	getTestState,
 	logPrefix,
 } from "./utils/quench-utils";

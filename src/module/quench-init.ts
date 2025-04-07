@@ -2,8 +2,6 @@ import "mocha/mocha.js";
 import * as chai from "chai";
 import chaiPromised from "chai-as-promised";
 
-import type { QuenchResults } from "./apps/quench-results";
-
 import { Quench } from "./quench";
 import { QuenchSnapshotManager } from "./quench-snapshot";
 import { registerExampleTests } from "./quench-tests/nonsense-tests";
@@ -19,6 +17,7 @@ declare global {
 	 * Initialized in the Quench module's {@link Hooks.StaticCallbacks.init "init"} hook.
 	 */
 	var quench: "quenchReady" extends keyof AssumeHookRan ? Quench : Quench | undefined;
+
 	namespace Hooks {
 		interface StaticCallbacks {
 			/**
@@ -41,7 +40,7 @@ declare global {
 globalThis.quench = new Quench();
 
 // Initialize Chai and snapshots
-// @ts-expect-error Match runtime (ESM import) to types (declared global `chai`)
+// @ts-expect-error
 globalThis.chai = chai;
 chai.use(QuenchSnapshotManager.enableSnapshots);
 chai.use(chaiPromised);
@@ -63,16 +62,27 @@ Hooks.on("setup", () => {
 /**
  * Inject QUENCH button in sidebar
  */
-Hooks.on("renderSidebar", (_sidebar: Application, html: JQuery<HTMLElement>) => {
+Hooks.on("renderSidebar", (_sidebar: Application, html: HTMLElement) => {
 	const quenchButton = createNode("button");
-	quenchButton.classList.add("quench-button");
+	quenchButton.classList.add(
+		"ui-control",
+		"plain",
+		"icon",
+		"fa-solid",
+		"fa-flask",
+		"quench-button",
+	);
 	quenchButton.setAttribute("data-tooltip", "QUENCH.Title");
-	quenchButton.innerHTML = `<i class="fas fa-flask"></i><b class="button-text">${localize("Title")}</b>`;
 	quenchButton.addEventListener("click", () => {
 		enforce(quench);
-		quench.app.render(true);
+		quench.app.render({ force: true });
 	});
-	html[0].append(quenchButton);
+	const li = document.createElement("li");
+	li.insertAdjacentElement("afterbegin", quenchButton);
+
+	html
+		.querySelector("aside#sidebar .tabs.faded-ui menu li:has(button[data-action='toggleState'])")
+		?.insertAdjacentElement("beforebegin", li);
 });
 
 /**
@@ -86,7 +96,7 @@ Hooks.on("ready", async () => {
 	}
 
 	const shouldRender = getGame().settings.get("quench", "autoShowQuenchWindow");
-	if (shouldRender) quench.app.render(true);
+	if (shouldRender) quench.app.render({ force: true });
 
 	if (getGame().settings.get("quench", "autoRun")) {
 		if (shouldRender) await pause(1000);

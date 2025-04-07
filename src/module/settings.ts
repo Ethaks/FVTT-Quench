@@ -7,7 +7,7 @@ type BooleanSetting<Initial extends boolean = false> = fields.BooleanField<{
 	initial: Initial;
 }>;
 
-declare global {
+declare module "fvtt-types/configuration" {
 	interface SettingConfig {
 		"quench.logTestDetails": BooleanSetting<true>;
 		"quench.exampleTests": BooleanSetting<false>;

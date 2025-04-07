@@ -4,6 +4,7 @@ import { copy } from "@guanghechen/rollup-plugin-copy";
 import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig } from "vite";
 import checker from "vite-plugin-checker";
+import packageJSON from "./package.json" with { type: "json" };
 import { resolveUrl } from "./tools/foundry-config.mjs";
 import { forceMinifyEsm } from "./tools/minify.mjs";
 
@@ -58,6 +59,7 @@ const config = defineConfig(({ mode }) => ({
 			entry: resolve("src/module/quench-init.ts"),
 			formats: ["es"],
 			fileName: () => "quench.js",
+			cssFileName: "quench",
 		},
 	},
 	plugins: [
@@ -69,7 +71,10 @@ const config = defineConfig(({ mode }) => ({
 			template: "treemap",
 			sourcemap: true,
 		}),
-		copy({ targets: [{ src: COPY_FILES, dest: resolve("dist") }], hook: "writeBundle" }),
+		copy({
+			targets: [{ src: COPY_FILES, dest: resolve("dist") }],
+			hook: "writeBundle",
+		}),
 	],
 }));
 
