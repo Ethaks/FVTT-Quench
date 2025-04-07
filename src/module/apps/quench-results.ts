@@ -182,7 +182,7 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2)<Que
 	 * @internal
 	 * @param event - The click event
 	 */
-	static async _onExpander(event: Event, target: HTMLElement) {
+	static async _onExpander(this: QuenchResults, event: Event, target: HTMLElement) {
 		const expander = target;
 		if (!expander.matches(".expander")) return;
 		event.preventDefault();
@@ -298,8 +298,18 @@ export class QuenchResults extends HandlebarsApplicationMixin(ApplicationV2)<Que
 		};
 
 		for (const batchLi of html?.children ?? []) {
+			const batchLabel = batchLi.querySelector(".test-batch > label")?.textContent;
+			const batchMatchesQuery = batchLabel
+				? rgx.test(SearchFilter.cleanQuery(batchLabel))
+				: undefined;
+			let batchHasQuery = batchMatchesQuery || false;
 			for (const element of batchLi.querySelector(".runnable-list")?.children ?? []) {
-				checkElement(element as HTMLElement);
+				batchHasQuery = checkElement(element as HTMLElement, batchMatchesQuery) || batchHasQuery;
+			}
+			if (!batchHasQuery) {
+				batchLi.classList.add("disabled", "filtered");
+			} else {
+				batchLi.classList.remove("disabled", "filtered");
 			}
 		}
 	}
