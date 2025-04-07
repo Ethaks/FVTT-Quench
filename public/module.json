@@ -13,11 +13,11 @@
 		{ "name": "Cole Schultz", "discord": "cole#9640" }
 	],
 	"languages": [{ "lang": "en", "name": "English", "path": "lang/en.json" }],
-	"esmodules": ["./quench.js"],
-	"styles": ["style.css"],
+	"esmodules": ["quench.js"],
+	"styles": ["quench.css"],
 	"compatibility": {
-		"minimum": "12",
-		"verified": "12"
+		"minimum": "13.339",
+		"verified": "13"
 	},
 	"library": true,
 	"url": "https://github.com/Ethaks/FVTT-Quench",
