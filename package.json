@@ -70,7 +70,7 @@
 		"fs-extra": "^11.3.0",
 		"lefthook": "^1.11.12",
 		"mocha": "^11.1.0",
-		"pretty-format": "^29.7.0",
+		"pretty-format": "^30.0.1",
 		"rollup-plugin-visualizer": "^5.14.0",
 		"terser": "^5.39.0",
 		"typedoc": "^0.28.3",
